@@ -33,8 +33,8 @@ def read_img(_img_name):
   return img_RGB
 
 #img_in_RGB = read_img('images/noised_butai_600_340_RL10.jpg')
-#img_in_RGB = read_img('images/noised_butai_600_340_RL100.jpg')
-img_in_RGB = read_img('images/Lenna.jpg')
+img_in_RGB = read_img('images/noised_butai_600_340_RL100.jpg')
+#img_in_RGB = read_img('images/Lenna.jpg')
 print("Input image(RGB) : ", img_in_RGB.shape) # （height × width × 色数）
 print("\n")
 
@@ -94,7 +94,7 @@ def convert_color_tone(_hsv_img, _val_param, _sat_param, _hue_param):
 
   # 0°~180°の範囲に収める
   hue[hue < 0]   = 0
-  hue[179 < hue] = 179
+  hue[180 < hue] = 180
 
 
 
@@ -109,7 +109,7 @@ def convert_color_tone(_hsv_img, _val_param, _sat_param, _hue_param):
 # ===============================================
 #      It is required to adjust parameters.
 # ===============================================
-img_out_HSV = convert_color_tone(img_in_HSV, 25, 2, 0)
+img_out_HSV = convert_color_tone(img_in_HSV, 30, 2, 0)
 
 show_HSV_values(img_out_HSV, 
                 "Output image(HSV)", 
@@ -166,10 +166,10 @@ hist_img_out_hue, bins_out_hue = np.histogram(img_out_HSV[:,:,0].ravel(), 180, [
 
 # plot
 ax[2].set_title("Hue histogram")
-# ax[2].hist(img_in_HSV[:,:,0].ravel(),  bins=50, alpha=0.4, label=" Input Image")
-# ax[2].hist(img_out_HSV[:,:,0].ravel(), bins=50, alpha=0.4, label=" Output Image")
-ax[2].plot(hist_img_in_hue,  label="Input Image")
-ax[2].plot(hist_img_out_hue, label="Output Image")
+# ax[2].hist(img_in_HSV[:,:,0].ravel(),  bins=50, color='red',  alpha=0.4, label=" Input Image")
+# ax[2].hist(img_out_HSV[:,:,0].ravel(), bins=50, color='blue', alpha=0.4, label=" Output Image")
+ax[2].plot(hist_img_in_hue,  label="Input Image", color='red')
+ax[2].plot(hist_img_out_hue, label="Output Image", color='blue')
 ax[2].set_xlabel("Hue value")
 ax[2].set_ylabel("Frequency")
 ax[2].legend()
