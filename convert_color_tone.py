@@ -62,41 +62,16 @@ show_HSV_values(img_in_HSV,
 # ----- Convert Color Tone -----
 # ------------------------------
 def convert_color_tone(_hsv_img, _val_param, _sat_param, _hue_param):
-  # -----------------
-  # ----- Value -----
-  # -----------------
-  #_hsv_img[:, :, 2] = np.add(_hsv_img[:, :, 2], _val_param)
-  val = _hsv_img[:, :, 2]
-  val = np.add(val, _val_param)
+  # value
+  #val = np.add(_hsv_img[:, :, 2], _val_param)
+  val = cv2.add(_hsv_img[:, :, 2], _val_param)
 
-  # 0~255の範囲に収める
-  val[val < 0]   = 0
-  val[255 < val] = 255
+  # saturation
+  #sat = np.divide(_hsv_img[:, :, 1], _sat_param)
+  sat = cv2.divide(_hsv_img[:, :, 1], _sat_param)
 
-
-
-  # ----------------------
-  # ----- Saturation -----
-  # ----------------------
-  sat = _hsv_img[:, :, 1]
-  sat = np.divide(sat, _sat_param)
-
-  # 0~255の範囲に収める
-  sat[sat < 0]   = 0
-  sat[255 < sat] = 255
-
-
-
-  # ---------------
-  # ----- Hue -----
-  # ---------------
+  # hue
   hue = _hsv_img[:, :, 0]
-
-  # 0°~180°の範囲に収める
-  hue[hue < 0]   = 0
-  hue[180 < hue] = 180
-
-
 
   # Apply conversion
   img_HSV = np.empty((_hsv_img.shape[0], _hsv_img.shape[1], 3), dtype=np.uint8)
