@@ -27,7 +27,11 @@ ax[2] = plt.subplot2grid((2,2), (1,0), colspan=2)
 #image_name = 'images/noised_butai_600_340_RL10.jpg'
 #image_name = 'images/out_gaussian_RL100.jpg'
 #image_name = 'images/out_poisson_RL100.jpg'
-image_name = 'images/out_spike_RL100.jpg'
+#image_name = 'images/out_spike_RL100.jpg'
+#image_name = 'images/funehoko200.jpg'
+#image_name = 'images/funehoko200F.jpg'
+image_name = 'images/2018-10-03/plane_10M_RL100.jpg'
+#image_name = 'images/2018-10-03/plane_noised_10M_RL100.jpg'
 r_param, g_param, b_param = 2,2,2
 
 
