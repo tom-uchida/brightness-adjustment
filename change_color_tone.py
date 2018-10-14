@@ -30,9 +30,12 @@ ax[2] = plt.subplot2grid((2,2), (1,0), colspan=2)
 #image_name = 'images/out_spike_RL100.jpg'
 #image_name = 'images/funehoko200.jpg'
 #image_name = 'images/funehoko200F.jpg'
-image_name = 'images/2018-10-03/plane_10M_RL100.jpg'
+#image_name = 'images/2018-10-03/plane_10M_RL100.jpg'
 #image_name = 'images/2018-10-03/plane_noised_10M_RL100.jpg'
-r_param, g_param, b_param = 2,2,2
+image_name = 'images/2018-10-08/ボロブドゥール/RL500.bmp'
+
+# parameter
+r_param, g_param, b_param = 3,3,3
 
 
 
@@ -136,8 +139,9 @@ ax[2].hist(img_in_gray.ravel(),  bins=50, color='red',  alpha=0.4, label=" Input
 ax[2].hist(img_out_gray.ravel(), bins=50, color='blue', alpha=0.4, label=" Output Image")
 ax[2].set_xlabel("Pixel value", fontsize=12)
 ax[2].set_ylabel("Number of pixels", fontsize=12)
-ax[2].legend(fontsize=16)
-ax[2].set_ylim([0, 50000])
+ax[2].legend(fontsize=12)
+ax[2].set_xlim([-5, 260])
+ax[2].set_ylim([0, 15000])
 plt.show()
 
 
