@@ -27,12 +27,8 @@ ax[3] = plt.subplot2grid((2,2), (1,1))
 # -------------------------------
 # ----- Select input image  -----
 # -------------------------------
-image_name = 'images/2018-09-30/out_gaussian_RL100.jpg'
-#image_name = 'images/2018-09-30/out_poisson_RL100.jpg'
-#image_name = 'images/2018-09-30/out_spike_RL100.jpg'
-#image_name = 'images/2018-10-03/plane_10M_RL100.jpg'
-#image_name = 'images/2018-10-03/plane_noised_10M_RL100.jpg'
-r_param, g_param, b_param = 3,3,3
+image_name = 'images/2018-10-29/DATA/20160724_RL100.bmp'
+param = 2.46
 
 
 
@@ -56,15 +52,15 @@ print("Input image(RGB) : ", img_in_RGB.shape) # （height × width × 色数）
 # ------------------------------
 # ----- Change color tone -----
 # ------------------------------
-def change_color_tone(_rgb_img, _r_param, _g_param, _b_param):
+def change_color_tone(_rgb_img, _param):
   # Red
-  red   = cv2.multiply(_rgb_img[:, :, 0], _r_param)
+  red   = cv2.multiply(_rgb_img[:, :, 0], _param)
 
   # Green
-  green = cv2.multiply(_rgb_img[:, :, 1], _g_param)
+  green = cv2.multiply(_rgb_img[:, :, 1], _param)
 
   # Blue
-  blue  = cv2.multiply(_rgb_img[:, :, 2], _b_param)
+  blue  = cv2.multiply(_rgb_img[:, :, 2], _param)
 
   # Apply change
   revised_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
@@ -77,7 +73,7 @@ def change_color_tone(_rgb_img, _r_param, _g_param, _b_param):
 # ===============================================
 #      It is required to adjust parameters.
 # ===============================================
-img_out_RGB = change_color_tone(img_in_RGB, r_param, g_param, b_param)
+img_out_RGB = change_color_tone(img_in_RGB, param)
 print("\nOutput Image (RGB)")
 print('R Max:',np.max(img_out_RGB[:, :, 0]),' Min:',np.min(img_out_RGB[:, :, 0]))
 print('G Max:',np.max(img_out_RGB[:, :, 1]),' Min:',np.min(img_out_RGB[:, :, 1]))
