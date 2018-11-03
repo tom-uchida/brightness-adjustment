@@ -6,7 +6,7 @@ import sys
 args = sys.argv
 #print(len(args))
 if len(args) != 4:
-    raise Exception('\nUSAGE\n> $ tone_curve.py [p_init] [ratio] [p_update]\n\nFor example\n> $ tone_curve.py 2 0.005 0.01\n')
+    raise Exception('\nUSAGE\n> $ tone_curve.py [p_init] [ratio] [p_interval]\n\nFor example\n> $ tone_curve.py 2 0.005 0.01\n')
     sys.exit()
 
 #import seaborn as sns
@@ -27,10 +27,10 @@ plt.rc('lines', linewidth=2)
 print("\n===== Initial parameter =====")
 p_init      = float(args[1])    # 2
 ratio       = float(args[2])    # 0.005
-p_update    = float(args[3])    # 0.01
+p_interval    = float(args[3])    # 0.01
 print("p_init\n>",p_init,"(args[1])")
 print("\nratio\n>",ratio,"(args[2])")
-print("\np_update\n>",p_update,"(args[3])")
+print("\np_interval\n>",p_interval,"(args[3])")
 
 
 
@@ -183,7 +183,7 @@ while count_equal_255 < N_meet:
 
     # Count number of max pixel value(==255)
     count_equal_255 = np.sum(tmp_img_Gray == 255)
-    p_init += p_update
+    p_init += p_interval
 
 print("\n\n===== Result =====")
 # Decide parameter value that meet requirement
