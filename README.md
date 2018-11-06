@@ -1,3 +1,3 @@
 # Correct_Pixel_Value
 
-![demo](images/demo.gif)
+![demo](demo.gif)
