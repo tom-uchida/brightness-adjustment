@@ -5,13 +5,12 @@ import cv2
 import subprocess
 import sys
 args = sys.argv
-#print(len(args))
 if len(args) != 5:
     raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [p_init] [ratio] [p_interval]')
-    raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py input_image.jpg 2 0.005 0.01\n')
+    raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py input_image.jpg 2 0.001 0.01\n')
     sys.exit()
 
-#import seaborn as sns
+
 plt.style.use('seaborn-white')
 
 from matplotlib import cycler
@@ -28,9 +27,9 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 print("\n===== Initial parameter =====")
 input_image_data    = args[1]
-p_init              = float(args[2])    # 2
-ratio               = float(args[3])    # 0.005
-p_interval          = float(args[4])  # 0.01
+p_init              = float(args[2])
+ratio               = float(args[3])
+p_interval          = float(args[4])
 print("input_image_data\n>",input_image_data,"(args[1])")
 print("\np_init\n>",p_init,"(args[2])")
 print("\nratio\n>",ratio,"(args[3])")
@@ -41,39 +40,35 @@ print("\np_interval\n>",p_interval,"(args[4])")
 # -------------------------
 # ----- RGB histogram -----
 # -------------------------
-def rgb_hist(rgb_img, ax, ticks=None):
-    if ticks:
-        ax.set_xticks(ticks)
+def rgb_hist(_img_rgb, _ax):    
+    R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
+    G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
+    B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
+    _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
+    _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
+    _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
+    _ax.legend()
+
+    _ax.set_title('RGB histogram')
+    _ax.set_xlim([-5,260])
     
-    R_nonzero = rgb_img[:,:,0][rgb_img[:,:,0] > 0]
-    G_nonzero = rgb_img[:,:,1][rgb_img[:,:,1] > 0]
-    B_nonzero = rgb_img[:,:,2][rgb_img[:,:,2] > 0]
-    ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
-    ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
-    ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
-    ax.legend()
-
-    ax.set_title('RGB histogram')
-    ax.set_xlim([-5,260])
-    ax.set_ylim([0,30000])
-    
-    return ax
+    return _ax
 
 
 
-def plot_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
+def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     fig = plt.figure(figsize=(13,7))
     gs = gridspec.GridSpec(2,3)
     x = np.arange(256)
     
     # Tone curve
-    ax2 = fig.add_subplot(gs[:,1]) # 2列目
+    ax2 = fig.add_subplot(gs[:,1])
     ax2.set_title('Tone Curve (parameter='+str(p_final)+')')
     ax2.set_xlabel('Input pixel value')
     ax2.set_ylabel('Output pixel value')
     ax2.set_aspect('equal')
     ax2.plot(x, f(x, _p_final), color='black')
-     
+
     # Input image
     ax1 = fig.add_subplot(gs[0,0])
     ax1.set_title('Input image')
@@ -94,6 +89,13 @@ def plot_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     ax5 = fig.add_subplot(gs[1,2])
     ax5 = rgb_hist(_img_out_RGB, ax5)
 
+    # Unify ylim b/w input image and improved image
+    hist_in, bins_in = np.histogram(_img_in_RGB[_img_in_RGB>0], 50)
+    hist_out, bins_out = np.histogram(_img_out_RGB[_img_out_RGB>0], 50)
+    list_rgb_max = [max(hist_in), max(hist_out)]
+    ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
+    ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
+
 
 
 # -------------------------------
@@ -109,31 +111,25 @@ def tone_curve(_x, _param):
 # ----- Read Input Image -----
 # ----------------------------
 def read_img(_img_name):
-  # read input image
-  img_BGR = cv2.imread(_img_name)
+    # read input image
+    img_BGR = cv2.imread(_img_name)
 
-  # convert color (BGR → RGB)
-  img_RGB = cv2.cvtColor(img_BGR, cv2.COLOR_BGR2RGB)
+    # convert color (BGR → RGB)
+    img_RGB = cv2.cvtColor(img_BGR, cv2.COLOR_BGR2RGB)
 
-  return img_RGB
+    return img_RGB
 
-# Select input image
-# img_in_RGB = read_img("images/2018-09-30/out_gaussian_RL100.jpg")
-# img_in_RGB = read_img("images/2018-10-01/funehoko200.jpg")
-# img_in_RGB = read_img("images/2018-10-19/RL100_3072.bmp")
-# img_in_RGB = read_img("images/2018-10-29/DATA/20160724_RL10.bmp")
-# img_in_RGB = read_img("images/2018-10-29/DATA/nakajimake_RL100.bmp")
-# img_in_RGB = read_img("images/2018-10-29/DATA/zuiganzi_RL100.bmp")
+# Read input image
 img_in_RGB = read_img(input_image_data)
 
 print("\n\n===== Pre-Process =====")
-print("Input image(RGB)\n>", img_in_RGB.shape) # （height × width × 色数）
+print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
 
 # Calc number of pixels
 N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
 print("\nN_all\n>", N_all, "(pixels)")
 
-# Calc number of pixels(exclude backgroung color)
+# Calc number of pixels that exclude backgroung color
 img_in_Gray = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
 N_all_nonzero = np.sum(img_in_Gray > 0)
 print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
@@ -148,17 +144,17 @@ print("\nN_theor(",ratio*100,"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * "
 # -----  Correct pixel value -----
 # --------------------------------
 def correct_pixel_value(_rgb_img, _param):
-  red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
-  green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
-  blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
+    red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
+    green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
+    blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
 
-  # Apply change
-  changed_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
-  changed_img_RGB[:, :, 0] = red
-  changed_img_RGB[:, :, 1] = green
-  changed_img_RGB[:, :, 2] = blue
+    # Apply change
+    corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
+    corrected_img_RGB[:, :, 0] = red
+    corrected_img_RGB[:, :, 1] = green
+    corrected_img_RGB[:, :, 2] = blue
 
-  return changed_img_RGB
+    return corrected_img_RGB
 
 
 
@@ -177,9 +173,9 @@ while count_equal_255 < N_theor:
 print("\n\n===== Result =====")
 # Decide parameter value that meet requirement
 p_final = round(p_init, 2)
-print("p_final\n>", p_final)
+print("p_final\n>",p_final)
 print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
-print("\nThe ratio at which pixel value finally reached 255\n>",count_equal_255 / N_all_nonzero, "(%)")
+print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 2), "(%)")
 print("\n")
 
 # Make output image
@@ -187,9 +183,13 @@ img_out_RGB = correct_pixel_value(img_in_RGB, p_final)
 # print("\nOutput image(RGB)\n>", img_out_RGB.shape) # （height × width × 色数）
 # print("\n")
 
-# Execute
-plot_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
-    
+
+
+# -----------------------------------------
+# ----- Apply tone curve with p_final -----
+# -----------------------------------------
+plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
+
 
 
 # ----------------------------------
@@ -212,7 +212,8 @@ cv2.imwrite(output_img_name, img_out_BGR)
 # -------------------------
 # ----- Exec. command -----
 # -------------------------
-preview_command = ['open', fig_name, input_img_name, output_img_name]
+preview_command = ['code', fig_name, input_img_name, output_img_name]
+# preview_command = ['open', fig_name, input_img_name, output_img_name]
 try:
 	res = subprocess.check_call(preview_command)
 
