@@ -1,2 +1,5 @@
 images/
 *.md
+.vscode/
+tone_curve_copy.py
+wx_test.py
