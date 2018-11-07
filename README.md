@@ -17,4 +17,4 @@
 ![improved](resources/improved_2.06_0.001.jpg)
 
 # Figure
-![figure](resources/figure_2.06_0.001.jpg)
+![figure](resources/figure_2.06_0.001.png)
