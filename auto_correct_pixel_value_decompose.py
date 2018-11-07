@@ -123,7 +123,7 @@ def read_img(_img_name):
 img_in_RGB = read_img(input_image_data)
 
 print("\n\n===== Pre-processing =====")
-print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
+print("Input image(RGB)\n>", img_in_RGB.shape) # (height, width, channel)
 
 # Calc all number of pixels of the input image
 N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
@@ -137,6 +137,46 @@ print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 # Calc the theoretical number of pixels at which finally reach 255
 N_theor = int(N_all_nonzero * ratio)
 print("\nN_theor(",ratio*100,"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * ",ratio,")")
+
+# Calc mean pixel value of the input image
+img_in_Gray_nonzero = img_in_Gray[img_in_Gray > 0]
+mean = round(img_in_Gray_nonzero.mean(), 1)
+print("\nMean pixel value of the input image\n>",mean, "(pixel value)")
+
+
+
+# ---------------------------------------------------------
+# ----- Decompose the input image into two images 
+#           with the mean pixel value as the boundary -----
+# ---------------------------------------------------------
+low_num  = np.count_nonzero(img_in_Gray <= mean)
+high_num = np.count_nonzero(img_in_Gray >  mean)
+print("\nNumber of \"low\" pixel value\n>", low_num, "(pixels)")
+print("\nNumber of \"high\" pixel value\n>", high_num, "(pixels)")
+
+low_index_bool  = img_in_Gray <= mean # bool:True or False
+high_index_bool = img_in_Gray >  mean # bool:True or False
+
+# Decompose the input image into R,G,B channel
+img_in_R = img_in_RGB[:,:,0]
+img_in_G = img_in_RGB[:,:,1]
+img_in_B = img_in_RGB[:,:,2]
+
+# Apply decomposition
+low_R = np.where(low_index_bool, img_in_R, 0)
+low_G = np.where(low_index_bool, img_in_G, 0)
+low_B = np.where(low_index_bool, img_in_B, 0)
+high_R = np.where(high_index_bool, img_in_R, 0)
+high_G = np.where(high_index_bool, img_in_G, 0)
+high_B = np.where(high_index_bool, img_in_B, 0)
+
+low_img_in_RGB, high_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
+low_img_in_RGB[:,:,0]  = low_R
+low_img_in_RGB[:,:,1]  = low_G
+low_img_in_RGB[:,:,2]  = low_B
+high_img_in_RGB[:,:,0] = high_R
+high_img_in_RGB[:,:,1] = high_G
+high_img_in_RGB[:,:,2] = high_B
 
 
 
@@ -199,7 +239,7 @@ fig_name = "images/figure_"+str(p_final)+"_"+str(ratio)+".png"
 plt.savefig(fig_name)
 #plt.show()
 
-# convert color (RGB → BGR)
+# Convert color (RGB → BGR)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
@@ -207,15 +247,23 @@ output_img_name = "images/improved_"+str(p_final)+"_"+str(ratio)+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 
+# Save low and high images
+low_img_in_BGR = cv2.cvtColor(low_img_in_RGB, cv2.COLOR_RGB2BGR)
+high_img_in_BGR = cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2BGR)
+low_img_name = "images/low.jpg"
+high_img_name = "images/high.jpg"
+cv2.imwrite(low_img_name, low_img_in_BGR)
+cv2.imwrite(high_img_name, high_img_in_BGR)
+
 
 
 # -------------------------
 # ----- Exec. command -----
 # -------------------------
-preview_command = ['code', fig_name, input_img_name, output_img_name]
-# preview_command = ['open', fig_name, input_img_name, output_img_name]
-try:
-	res = subprocess.check_call(preview_command)
+# preview_command = ['code', fig_name, input_img_name, output_img_name]
+# # preview_command = ['open', fig_name, input_img_name, output_img_name]
+# try:
+# 	res = subprocess.check_call(preview_command)
 
-except:
-	print("ERROR")
+# except:
+# 	print("ERROR")
