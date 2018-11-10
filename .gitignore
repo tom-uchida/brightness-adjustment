@@ -1,4 +1,5 @@
 images/
+videos/
 *.md
 .vscode/
 tone_curve_copy.py

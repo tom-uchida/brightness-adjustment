@@ -6,7 +6,7 @@ import subprocess
 import sys
 args = sys.argv
 if len(args) != 5:
-    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [p_init] [ratio] [p_interval]')
+    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [ratio] [p_init] [p_interval]')
     raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py input_image.jpg 2 0.001 0.01\n')
     sys.exit()
 
@@ -27,12 +27,12 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 print("\n===== Initial parameter =====")
 input_image_data    = args[1]
-p_init              = float(args[2])
-ratio               = float(args[3])
+ratio               = float(args[2])
+p_init              = float(args[3])
 p_interval          = float(args[4])
 print("input_image_data\n>",input_image_data,"(args[1])")
-print("\np_init\n>",p_init,"(args[2])")
-print("\nratio\n>",ratio,"(args[3])")
+print("\nratio\n>",ratio,"(args[2])")
+print("\np_init\n>",p_init,"(args[3])")
 print("\np_interval\n>",p_interval,"(args[4])")
 
 
@@ -161,18 +161,19 @@ def correct_pixel_value(_rgb_img, _param):
 # --------------------------
 # ----- Calc parameter -----
 # --------------------------
+p = p_init
 count_equal_255 = 0
 while count_equal_255 < N_theor:
-    tmp_img_RGB = correct_pixel_value(img_in_RGB, p_init)
+    tmp_img_RGB = correct_pixel_value(img_in_RGB, p)
     tmp_img_Gray = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
 
     # Count number of max pixel value(==255)
     count_equal_255 = np.sum(tmp_img_Gray == 255)
-    p_init += p_interval
+    p += p_interval
 
 print("\n\n===== Result =====")
 # Decide parameter value that meet requirement
-p_final = round(p_init, 2)
+p_final = round(p, 2)
 print("p_final\n>",p_final)
 print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
 print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 2), "(%)")

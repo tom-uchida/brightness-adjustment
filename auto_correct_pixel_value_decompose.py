@@ -5,8 +5,8 @@ import cv2
 import subprocess
 import sys
 args = sys.argv
-if len(args) != 5:
-    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [p_init] [ratio] [p_interval]')
+if len(args) != 6:
+    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [ratio_for_low] [ratio_for_high] [p_init] [ratio_for_high] [p_interval]')
     raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py input_image.jpg 2 0.001 0.01\n')
     sys.exit()
 
@@ -27,13 +27,15 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 print("\n===== Initial parameter =====")
 input_image_data    = args[1]
-p_init              = float(args[2])
-ratio               = float(args[3])
-p_interval          = float(args[4])
+ratio_for_low       = float(args[2])
+ratio_for_high      = float(args[3])
+p_init              = float(args[4])
+p_interval          = float(args[5])
 print("input_image_data\n>",input_image_data,"(args[1])")
-print("\np_init\n>",p_init,"(args[2])")
-print("\nratio\n>",ratio,"(args[3])")
-print("\np_interval\n>",p_interval,"(args[4])")
+print("\nratio_for_low\n>",ratio_for_low,"(args[2])")
+print("\nratio_for_high\n>",ratio_for_high,"(args[3])")
+print("\np_init\n>",p_init,"(args[4])")
+print("\np_interval\n>",p_interval,"(args[5])")
 
 
 
@@ -63,7 +65,7 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     
     # Tone curve
     ax2 = fig.add_subplot(gs[:,1])
-    ax2.set_title('Tone Curve (parameter='+str(p_final)+')')
+    ax2.set_title('Tone Curve (parameter='+str(_p_final)+')')
     ax2.set_xlabel('Input pixel value')
     ax2.set_ylabel('Output pixel value')
     ax2.set_aspect('equal')
@@ -96,6 +98,9 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
     ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
 
+    fig_name = "images/figure_"+str(_p_final)+".png"
+    plt.savefig(fig_name)
+
 
 
 # -------------------------------
@@ -122,7 +127,7 @@ def read_img(_img_name):
 # Read input image
 img_in_RGB = read_img(input_image_data)
 
-print("\n\n===== Pre-processing =====")
+print("\n\n\n===== Pre-processing =====")
 print("Input image(RGB)\n>", img_in_RGB.shape) # (height, width, channel)
 
 # Calc all number of pixels of the input image
@@ -134,14 +139,14 @@ img_in_Gray = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
 N_all_nonzero = np.sum(img_in_Gray > 0)
 print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 
-# Calc the theoretical number of pixels at which finally reach 255
-N_theor = int(N_all_nonzero * ratio)
-print("\nN_theor(",ratio*100,"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * ",ratio,")")
-
 # Calc mean pixel value of the input image
 img_in_Gray_nonzero = img_in_Gray[img_in_Gray > 0]
 mean = round(img_in_Gray_nonzero.mean(), 1)
-print("\nMean pixel value of the input image\n>",mean, "(pixel value)")
+print("\nMean of pixel values of the input image\n>",mean, "(pixel value)")
+
+# Calc SD pixel value of the input image
+SD = round(img_in_Gray_nonzero.std(), 1)
+print("\nStandard Deviation of pixel values of the input image\n>",SD, "(pixel value)")
 
 
 
@@ -149,34 +154,41 @@ print("\nMean pixel value of the input image\n>",mean, "(pixel value)")
 # ----- Decompose the input image into two images 
 #           with the mean pixel value as the boundary -----
 # ---------------------------------------------------------
-low_num  = np.count_nonzero(img_in_Gray <= mean)
-high_num = np.count_nonzero(img_in_Gray >  mean)
-print("\nNumber of \"low\" pixel value\n>", low_num, "(pixels)")
-print("\nNumber of \"high\" pixel value\n>", high_num, "(pixels)")
+low_num_nonzero  = np.count_nonzero( (img_in_Gray <= mean) & (img_in_Gray > 0) )
+low_num  = np.count_nonzero(  img_in_Gray <= mean )
+high_num = np.count_nonzero(  img_in_Gray >  mean )
+print("\nNumber of \"low\" pixel value\n>", low_num_nonzero, "(pixels) out of", N_all_nonzero, "(pixels)")
+print(">", round(low_num_nonzero/N_all_nonzero*100,1), "(%)")
+print("\nNumber of \"high\" pixel value\n>", high_num, "(pixels) out of", N_all_nonzero, "(pixels)")
+print(">", round(high_num/N_all_nonzero*100,1), "(%)")
 
-low_index_bool  = img_in_Gray <= mean # bool:True or False
-high_index_bool = img_in_Gray >  mean # bool:True or False
+# ndarray dtype:bool
+#low_index_bool  = (img_in_Gray <= mean) & (img_in_Gray > 0) 
+low_index_bool  =  img_in_Gray <= mean
+#high_index_bool =  img_in_Gray >  mean
+high_index_bool =  ~low_index_bool
 
 # Decompose the input image into R,G,B channel
-img_in_R = img_in_RGB[:,:,0]
-img_in_G = img_in_RGB[:,:,1]
-img_in_B = img_in_RGB[:,:,2]
+img_in_R, img_in_G, img_in_B = img_in_RGB[:,:,0], img_in_RGB[:,:,1], img_in_RGB[:,:,2]
 
 # Apply decomposition
-low_R = np.where(low_index_bool, img_in_R, 0)
-low_G = np.where(low_index_bool, img_in_G, 0)
-low_B = np.where(low_index_bool, img_in_B, 0)
+low_R  = np.where(low_index_bool,  img_in_R, 0)
+low_G  = np.where(low_index_bool,  img_in_G, 0)
+low_B  = np.where(low_index_bool,  img_in_B, 0)
 high_R = np.where(high_index_bool, img_in_R, 0)
 high_G = np.where(high_index_bool, img_in_G, 0)
 high_B = np.where(high_index_bool, img_in_B, 0)
 
 low_img_in_RGB, high_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
-low_img_in_RGB[:,:,0]  = low_R
-low_img_in_RGB[:,:,1]  = low_G
-low_img_in_RGB[:,:,2]  = low_B
-high_img_in_RGB[:,:,0] = high_R
-high_img_in_RGB[:,:,1] = high_G
-high_img_in_RGB[:,:,2] = high_B
+low_img_in_RGB[:,:,0],  low_img_in_RGB[:,:,1],  low_img_in_RGB[:,:,2]  = low_R,  low_G,  low_B
+high_img_in_RGB[:,:,0], high_img_in_RGB[:,:,1], high_img_in_RGB[:,:,2] = high_R, high_G, high_B
+
+# Calc the theoretical number of pixels at which finally reach 255
+N_theor_low = int(low_num_nonzero * ratio_for_low)
+print("\nN_theor_low(",ratio_for_low*100,"%)\n>", N_theor_low, "(pixels) (=",low_num_nonzero," * ",ratio_for_low,")")
+
+N_theor_high = int(high_num * ratio_for_high)
+print("\nN_theor_high(",ratio_for_high*100,"%)\n>", N_theor_high, "(pixels) (=",high_num," * ",ratio_for_high,")")
 
 
 
@@ -198,53 +210,89 @@ def correct_pixel_value(_rgb_img, _param):
 
 
 
-# --------------------------
-# ----- Calc parameter -----
-# --------------------------
+# ----------------------------------
+# ----- Calc parameter for low -----
+# ----------------------------------
+p = p_init
 count_equal_255 = 0
-while count_equal_255 < N_theor:
-    tmp_img_RGB = correct_pixel_value(img_in_RGB, p_init)
+while count_equal_255 < N_theor_low:
+    tmp_img_RGB = correct_pixel_value(low_img_in_RGB, p)
+    tmp_img_Gray = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
+
+    # Count number of max pixel value(==255)
+    count_equal_255 = np.sum(tmp_img_Gray >= mean+SD)
+    p += p_interval
+
+print("\n\n\n===== Result for \"low pixel value image\" =====")
+# Decide parameter value that meet requirement
+p_final_low = round(p, 2)
+print("p_final_low\n>",p_final_low)
+print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
+print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / low_num_nonzero * 100, 2), "(%)")
+
+# Make low output image
+low_img_out_RGB = correct_pixel_value(low_img_in_RGB, p_final_low)
+
+
+
+# -----------------------------------
+# ----- Calc parameter for high -----
+# -----------------------------------
+p = p_init
+count_equal_255 = 0
+while count_equal_255 < N_theor_high:
+    tmp_img_RGB = correct_pixel_value(high_img_in_RGB, p)
     tmp_img_Gray = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
 
     # Count number of max pixel value(==255)
     count_equal_255 = np.sum(tmp_img_Gray == 255)
-    p_init += p_interval
+    p += p_interval
 
-print("\n\n===== Result =====")
+print("\n\n\n===== Result for \"high pixel value image\" =====")
 # Decide parameter value that meet requirement
-p_final = round(p_init, 2)
-print("p_final\n>",p_final)
+p_final_high = round(p, 2)
+print("p_final_high\n>",p_final_high)
 print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
-print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 2), "(%)")
+print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / high_num * 100, 2), "(%)")
 print("\n")
 
-# Make output image
-img_out_RGB = correct_pixel_value(img_in_RGB, p_final)
-# print("\nOutput image(RGB)\n>", img_out_RGB.shape) # （height × width × 色数）
-# print("\n")
+# Make high output image
+high_img_out_RGB = correct_pixel_value(high_img_in_RGB, p_final_high)
+
+
+
+# ------------------------------------------------------
+# ----- Synthesize low and high pixel value images -----
+# ------------------------------------------------------
+img_out_RGB = cv2.scaleAdd(low_img_out_RGB, 1.0, high_img_out_RGB)
 
 
 
 # -----------------------------------------
 # ----- Apply tone curve with p_final -----
 # -----------------------------------------
-plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
+plot_tone_curve_and_histogram(tone_curve, p_final_low, low_img_in_RGB, low_img_out_RGB)
+plot_tone_curve_and_histogram(tone_curve, p_final_high, high_img_in_RGB, high_img_out_RGB)
 
 
 
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(ratio)+".png"
-plt.savefig(fig_name)
 #plt.show()
 
 # Convert color (RGB → BGR)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
+img_out_BGR_low  = cv2.cvtColor(low_img_out_RGB, cv2.COLOR_RGB2BGR)
+img_out_BGR_high = cv2.cvtColor(high_img_out_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(ratio)+".jpg"
+low_output_img_name  = "images/low_improved_"+str(p_final_low)+"_"+str(ratio_for_low)+".jpg"
+high_output_img_name = "images/high_improved_"+str(p_final_high)+"_"+str(ratio_for_high)+".jpg"
+output_img_name = "images/improved_"+str(p_final_low)+"_"+str(p_final_high)+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
+cv2.imwrite(low_output_img_name, img_out_BGR_low)
+cv2.imwrite(high_output_img_name, img_out_BGR_high)
 cv2.imwrite(output_img_name, img_out_BGR)
 
 # Save low and high images
