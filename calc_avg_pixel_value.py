@@ -6,6 +6,8 @@
 import cv2, matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+args = sys.argv
 plt.style.use('seaborn-white')
 
 from matplotlib import cycler
@@ -43,7 +45,8 @@ def read_img(_img_name):
 # img_in_RGB = read_img('images/2018-10-29/DATA/20160724_RL100.bmp')
 # img_in_RGB = read_img('images/2018-10-29/DATA/nakajimake_RL100.bmp')
 # img_in_RGB = read_img('images/2018-10-29/DATA/zuiganzi_RL100.bmp')
-img_in_RGB = read_img('images/input.jpg')
+# img_in_RGB = read_img('images/input.jpg')
+img_in_RGB = read_img(args[1])
 # image information（height × width × 色数）
 print("img_in_RGB : ", img_in_RGB.shape)  
 print("\n")
@@ -80,24 +83,29 @@ print("\n")
 # ----- Get statistical data of pixel value -----
 # -----------------------------------------------
 def get_data_of_pixel_value(_img, _img_name):
-  print("===== Statistical Data of", _img_name, "(Gray) =====")
+  print("===== Statistical Data of", _img_name, " =====")
   print("Num of pixel values (== 255) :", np.sum(_img == 255))
-  print("Num of pixel values (<= 1) :", np.sum(_img <= 1))
+  #print("Num of pixel values (<= 1)   :", np.sum(_img <= 1))
   print("Num of pixel values (== 0)   :", np.sum(_img == 0) )
   print("\nMax :", np.max(_img))
   print("Min :", np.min(_img))
-  print("\nMean :", np.mean(_img))
-  print("SD  :", np.std(_img))
-  print("Median  :", np.median(_img))
+  # print("\nMean :", np.mean(_img))
+  # print("SD  :", np.std(_img))
+  print("Median :", np.median(_img))
   print("\nMean :", _img[_img != 0].mean())
-  print("SD  :", _img[_img != 0].std())
+  print("SD :", _img[_img != 0].std())
+
+  N_all_nonzero = np.sum(_img > 0)
+  print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
+  print("\nratio\n>", round(np.sum(_img == 255)/N_all_nonzero,2), "(%)")
+
   print("\n")
   
   return
   #return _img[_img != 0].mean()
 
-get_data_of_pixel_value(img_in_gray_nonzero, "Input image(Gray)")
-get_data_of_pixel_value(img_in_RGB, "Input image(RGB)")
+get_data_of_pixel_value(img_in_gray_nonzero, args[1])
+#get_data_of_pixel_value(img_in_RGB, args[1])
 # mean   = get_data_of_pixel_value(gray_img_origin_RL1,   "img_original_RL1")
 
 

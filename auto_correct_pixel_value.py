@@ -1,17 +1,15 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
+plt.style.use('seaborn-white')
 import cv2
 import subprocess
 import sys
 args = sys.argv
-if len(args) != 5:
-    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [ratio] [p_init] [p_interval]')
-    raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py input_image.jpg 2 0.001 0.01\n')
+if len(args) != 3:
+    raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [input_image_data(LR=1)]')
+    raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp]]\n')
     sys.exit()
-
-
-plt.style.use('seaborn-white')
 
 from matplotlib import cycler
 colors = cycler('color', ['#EE6666', '#3388BB', '#9988DD', '#EECC55', '#88BB44', '#FFBBBB'])
@@ -25,15 +23,13 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 # ----- Set initial parameter -----
 # ---------------------------------
+p_init = 1.0
+p_interval = 0.01
 print("\n===== Initial parameter =====")
-input_image_data    = args[1]
-ratio               = float(args[2])
-p_init              = float(args[3])
-p_interval          = float(args[4])
-print("input_image_data\n>",input_image_data,"(args[1])")
-print("\nratio\n>",ratio,"(args[2])")
-print("\np_init\n>",p_init,"(args[3])")
-print("\np_interval\n>",p_interval,"(args[4])")
+input_image_data = args[1]
+print("input_image_data\n>",    input_image_data, "(args[1])")
+print("\np_init\n>",            p_init)
+print("\np_interval\n>",        p_interval)
 
 
 
@@ -77,7 +73,7 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
 
     # Output image
     ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title('Output image')
+    ax3.set_title('Improved image')
     ax3.imshow(_img_out_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
     
@@ -120,7 +116,8 @@ def read_img(_img_name):
     return img_RGB
 
 # Read input image
-img_in_RGB = read_img(input_image_data)
+img_in_RGB      = read_img(input_image_data)
+img_in_LR1_RGB  = read_img(args[2])
 
 print("\n\n===== Pre-processing =====")
 print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
@@ -129,14 +126,22 @@ print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
 N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
 print("\nN_all\n>", N_all, "(pixels)")
 
-# Then, calc number of pixels that exclude backgroung color
+# Then, calc number of pixels that pixel value is 0
 img_in_Gray = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
 N_all_nonzero = np.sum(img_in_Gray > 0)
 print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 
-# Calc the theoretical number of pixels at which finally reach 255
-N_theor = int(N_all_nonzero * ratio)
-print("\nN_theor(",ratio*100,"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * ",ratio,")")
+# From the input image with LR = 1, 
+#   calc the ratio that the pixel is 255 after correction
+img_in_LR1_gray = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
+img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray>0]
+N_all_nonzero_LR1 = np.sum(img_in_LR1_gray_nonzero > 0)
+ratio_overexpose = round(np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1 * 0.01, 4)
+print("\nratio_overexpose\n>",  round(ratio_overexpose*100, 2), "(%)")
+
+# Calc the theoretical number of pixels that the pixel value is 255 after correction
+N_theor = int(N_all_nonzero * ratio_overexpose)
+print("\nN_theor(", round(ratio_overexpose*100, 2),"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * ",ratio_overexpose,")")
 
 
 
@@ -196,7 +201,7 @@ plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(ratio)+".png"
+fig_name = "images/figure_"+str(p_final)+"_"+str(round(ratio_overexpose*100,2))+".png"
 plt.savefig(fig_name)
 #plt.show()
 
@@ -204,7 +209,7 @@ plt.savefig(fig_name)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(ratio)+".jpg"
+output_img_name = "images/improved_"+str(p_final)+"_"+str(round(ratio_overexpose*100,2))+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 
