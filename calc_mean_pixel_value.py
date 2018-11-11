@@ -42,10 +42,6 @@ def read_img(_img_name):
 
   return img
 
-# img_in_RGB = read_img('images/2018-10-29/DATA/20160724_RL100.bmp')
-# img_in_RGB = read_img('images/2018-10-29/DATA/nakajimake_RL100.bmp')
-# img_in_RGB = read_img('images/2018-10-29/DATA/zuiganzi_RL100.bmp')
-# img_in_RGB = read_img('images/input.jpg')
 img_in_RGB = read_img(args[1])
 # image information（height × width × 色数）
 print("img_in_RGB : ", img_in_RGB.shape)  
@@ -65,7 +61,6 @@ def show_img(_i, _img, _img_name):
   return
 
 #show_img(0, img_in_RGB, "Input image")
-
 
 
 
@@ -97,7 +92,7 @@ def get_data_of_pixel_value(_img, _img_name):
 
   N_all_nonzero = np.sum(_img > 0)
   print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
-  print("\nratio\n>", round(np.sum(_img == 255)/N_all_nonzero,2), "(%)")
+  print("\nratio\n>", round(np.sum(_img == 255)/N_all_nonzero, 4), "(%)")
 
   print("\n")
   
