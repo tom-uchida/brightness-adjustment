@@ -26,8 +26,8 @@ plt.rc('lines', linewidth=2)
 p_init = 1.0
 p_interval = 0.01
 print("\n===== Initial parameter =====")
-input_image_data = args[1]
-print("input_image_data\n>",    input_image_data, "(args[1])")
+print("input_image_data\n>",    args[1], "(args[1])")
+print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
 print("\np_init\n>",            p_init)
 print("\np_interval\n>",        p_interval)
 
@@ -116,7 +116,7 @@ def read_img(_img_name):
     return img_RGB
 
 # Read input image
-img_in_RGB      = read_img(input_image_data)
+img_in_RGB      = read_img(args[1])
 img_in_LR1_RGB  = read_img(args[2])
 
 print("\n\n===== Pre-processing =====")
@@ -133,15 +133,23 @@ print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 
 # From the input image with LR = 1, 
 #   calc the ratio that the pixel is 255 after correction
-img_in_LR1_gray = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
+img_in_LR1_gray         = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
 img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray>0]
-N_all_nonzero_LR1 = np.sum(img_in_LR1_gray_nonzero > 0)
-ratio_overexpose = round(np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1 * 0.01, 4)
-print("\nratio_overexpose\n>",  round(ratio_overexpose*100, 2), "(%)")
+N_all_nonzero_LR1       = np.sum(img_in_LR1_gray_nonzero > 0)
+ratio_overexpose        = round(np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1 * 0.01, 4)
+
+if ratio_overexpose < 0.0001:
+    ratio_overexpose = 0.0001
+    print("\n** Note :")
+    print("** Set ratio_overexpose = 0.0001 (0.01%)")
+    print("**  because in the input image with LR = 1 (", args[2], "),")
+    print("**  the ratio of pixels that are overexposed is too small (< 0.01%).")
+
+print("\nratio_overexpose\n>",  round(ratio_overexpose*100, 4), "(%)")
 
 # Calc the theoretical number of pixels that the pixel value is 255 after correction
 N_theor = int(N_all_nonzero * ratio_overexpose)
-print("\nN_theor(", round(ratio_overexpose*100, 2),"%)\n>", N_theor, "(pixels) (=",N_all_nonzero," * ",ratio_overexpose,")")
+print("\nN_theor ( N_all_nonzero * ratio_overexpose )\n>", N_theor, "(pixels) ( =", N_all_nonzero, "*", ratio_overexpose, ")")
 
 
 
