@@ -134,18 +134,20 @@ print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 # From the input image with LR = 1, 
 #   calc the ratio that the pixel is 255 after correction
 img_in_LR1_gray         = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
-img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray>0]
+img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray > 0]
 N_all_nonzero_LR1       = np.sum(img_in_LR1_gray_nonzero > 0)
-ratio_overexpose        = round(np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1 * 0.01, 4)
+ratio_overexpose        = round( np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1, 5)
+ratio_overexpose_per    = ratio_overexpose * 100 
+#print("\nratio_overexpose_per\n>", ratio_overexpose_per, "(%)")
 
-if ratio_overexpose < 0.0001:
-    ratio_overexpose = 0.0001
+if ratio_overexpose_per < 0.01: # < 0.01(%)
+    ratio_overexpose = 0.01 * 0.01 # 1.0e-04
     print("\n** Note :")
     print("** Set ratio_overexpose = 0.0001 (0.01%)")
     print("**  because in the input image with LR = 1 (", args[2], "),")
     print("**  the ratio of pixels that are overexposed is too small (< 0.01%).")
 
-print("\nratio_overexpose\n>",  round(ratio_overexpose*100, 4), "(%)")
+print("\nratio_overexpose\n>", ratio_overexpose, " (", round(ratio_overexpose*100, 3), "(%) )")
 
 # Calc the theoretical number of pixels that the pixel value is 255 after correction
 N_theor = int(N_all_nonzero * ratio_overexpose)
@@ -189,7 +191,7 @@ print("\n\n===== Result =====")
 p_final = round(p, 2)
 print("p_final\n>",p_final)
 print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
-print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 2), "(%)")
+print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 3), "(%)")
 print("\n")
 
 # Make output image
