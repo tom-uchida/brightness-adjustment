@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as pat
 plt.style.use('seaborn-white')
 import cv2
 import subprocess
@@ -25,11 +26,13 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 p_init = 1.0
 p_interval = 0.01
+sampling_section_ratio = 0.05
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
 print("\np_init\n>",                    p_init)
 print("\np_interval\n>",                p_interval)
+print("\nsampling_section_ratio\n>",    sampling_section_ratio*100, "(%)")
 
 
 
@@ -89,8 +92,19 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     hist_in, bins_in = np.histogram(_img_in_RGB[_img_in_RGB>0], 50)
     hist_out, bins_out = np.histogram(_img_out_RGB[_img_out_RGB>0], 50)
     list_rgb_max = [max(hist_in), max(hist_out)]
-    ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
-    ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
+    ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
+    ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
+
+    # Draw line
+    #ax5.axvline(standard_pixel_value, color='black')
+    x_section   = standard_pixel_value/265
+    #x_text      = x_section + 0.5*(1.0-x_section+(10/265))
+    ax5.text(x_section, 0.7, str(standard_pixel_value) + " ~ " + str(np.max(img_out_Gray)), transform=ax5.transAxes, color='black')
+    ax5.text(x_section, 0.6, "→ " + str(sampling_section_ratio*100) + " (%)", transform=ax5.transAxes, color='black')
+
+    # Draw rectangle
+    rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax5.transAxes, fc='black', alpha=0.2)
+    ax5.add_patch(rect)
 
 
 
@@ -117,7 +131,7 @@ def read_img(_img_name):
 
 # Read input image
 img_in_RGB      = read_img(args[1])
-img_in_LR1_RGB  = read_img(args[2])
+img_in_RGB_LR1  = read_img(args[2])
 
 print("\n\n===== Pre-processing =====")
 print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
@@ -127,43 +141,52 @@ N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
 print("\nN_all\n>", N_all, "(pixels)")
 
 # Then, calc number of pixels that pixel value is 0
-img_in_Gray = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
-N_all_nonzero = np.sum(img_in_Gray > 0)
+img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
+N_all_nonzero   = np.sum(img_in_Gray > 0)
 print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 
-# From the input image with LR = 1, 
-#   calc the ratio that the pixel is 255 after correction
-img_in_LR1_gray         = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
-img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray > 0]
-N_all_nonzero_LR1       = np.sum(img_in_LR1_gray_nonzero > 0)
-ratio_overexpose        = round( np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1, 5)
-ratio_overexpose_per    = ratio_overexpose * 100 
-#print("\nratio_overexpose_per\n>", ratio_overexpose_per, "(%)")
-
-if ratio_overexpose_per < 0.01: # < 0.01(%)
-    ratio_overexpose = 0.01 * 0.01 # 1.0e-04
-    print("\n** Note :")
-    print("** Set ratio_overexpose = 0.0001 (0.01%)")
-    print("**  because in the input image with LR = 1 (", args[2], "),")
-    print("**  the ratio of pixels that are overexposed is too small (< 0.01%).")
-
-print("\nratio_overexpose\n>", ratio_overexpose, " (", round(ratio_overexpose*100, 3), "(%) )")
-
-# Calc the theoretical number of pixels that the pixel value is 255 after correction
-N_theor = int(N_all_nonzero * ratio_overexpose)
-print("\nN_theor ( N_all_nonzero * ratio_overexpose )\n>", N_theor, "(pixels) ( =", N_all_nonzero, "*", ratio_overexpose, ")")
+# Calc max pixel value of the input image(LR=1)
+img_in_Gray_LR1     = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+N_all_nonzero_LR1   = np.sum(img_in_Gray_LR1 > 0)
+max_pixel_value_LR1 = np.max(img_in_Gray_LR1)
+print("\nmax_pixel_value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
 
 
 
-# --------------------------------
-# -----  Correct pixel value -----
-# --------------------------------
+# -----------------------------------------------------------------------
+# ----- Search for pixel value that determines the sampling section -----
+# -----------------------------------------------------------------------
+target_pixel_value  = max_pixel_value_LR1
+tmp_ratio_LR1       = 0.0
+while tmp_ratio_LR1 < sampling_section_ratio:
+    tmp_sum_pixel_number = np.sum(img_in_Gray_LR1 >= target_pixel_value)
+
+    # Temporarily, calc sampling section ratio
+    tmp_ratio_LR1 = tmp_sum_pixel_number / N_all_nonzero_LR1
+
+    # Next pixel value
+    target_pixel_value -= 1
+
+print("\n\n** Sampling section was confirmed.")
+standard_pixel_value = target_pixel_value
+print("standard_pixel_value (LR=1)\n>", standard_pixel_value, "(pixel value)")
+
+sampling_section_ratio_LR1_final = tmp_ratio_LR1
+print("\nsampling_section_ratio_LR1_final (LR=1)\n>", round(sampling_section_ratio_LR1_final*100, 1), "(%) ( >=", standard_pixel_value, ")")
+
+# 区間内ヒストグラム&統計値を計算する場合はここ．
+
+
+
+# --------------------------------------------
+# ----- Correct pixel value for each RGB -----
+# --------------------------------------------
 def correct_pixel_value(_rgb_img, _param):
     red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
     green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
     blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
 
-    # Apply change
+    # Apply correction
     corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
     corrected_img_RGB[:, :, 0] = red
     corrected_img_RGB[:, :, 1] = green
@@ -173,31 +196,36 @@ def correct_pixel_value(_rgb_img, _param):
 
 
 
-# --------------------------
-# ----- Calc parameter -----
-# --------------------------
+# -------------------------------
+# ----- Determine parameter -----
+# -------------------------------
 p = p_init
-count_overexpose = 0
-while count_equal_255 < N_theor:
-    tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
-    tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
+tmp_ratio = 0.0
+while tmp_ratio < sampling_section_ratio:
+    tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
+    tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-    # Count number of max pixel value(==255)
-    count_equalcount_overexpose_255 = np.sum(tmp_corrected_img_Gray == 255)
+    # Temporarily, calc sampling section ratio (>= standard_pixel_value)
+    tmp_sum_pixel_number = np.sum(tmp_corrected_img_Gray >= standard_pixel_value)
+    tmp_ratio = tmp_sum_pixel_number / N_all_nonzero
+
+    # Update parameter
     p += p_interval
 
-print("\n\n===== Result =====")
-# Decide parameter value that meet requirement
-p_final = round(p, 2)
-print("p_final\n>",p_final)
-print("\nNumber of pixels that pixel value is 255\n>", count_overexpose, "(pixels)")
-print("\nThe ratio at which pixel value finally reached 255\n>", round(count_overexpose / N_all_nonzero * 100, 3), "(%)")
-print("\n")
-
 # Make output image
-img_out_RGB = correct_pixel_value(img_in_RGB, p_final)
+p_final = round(p, 2)
+img_out_RGB     = correct_pixel_value(img_in_RGB, p_final)
+img_out_Gray    = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
 # print("\nOutput image(RGB)\n>", img_out_RGB.shape) # （height × width × 色数）
 # print("\n")
+
+print("\n\n===== Result =====")
+print("p_final\n>",p_final)
+sampling_section_ratio_final = tmp_ratio
+print("\nsampling_section_ratio_final\n>", round(sampling_section_ratio_final*100, 1), "(%) ( >=", standard_pixel_value,")")
+#print("\nNumber of pixels that pixel value is 255\n>", np.sum(img_out_Gray==255), "(pixels)")
+print("\nThe ratio at which pixel value finally reached 255\n>", round(np.sum(img_out_Gray==255) / N_all_nonzero * 100, 2), "(%)")
+print("\n")
 
 
 
@@ -211,15 +239,15 @@ plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(round(ratio_overexpose*100, 3))+".png"
+fig_name = "images/figure_"+str(p_final)+"_"+str(round(sampling_section_ratio, 2))+".png"
 plt.savefig(fig_name)
-#plt.show()
+# plt.show()
 
 # convert color (RGB → BGR)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(round(ratio_overexpose*100, 3))+".jpg"
+output_img_name = "images/improved_"+str(p_final)+"_"+str(round(sampling_section_ratio, 2))+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 
@@ -228,10 +256,10 @@ cv2.imwrite(output_img_name, img_out_BGR)
 # -------------------------
 # ----- Exec. command -----
 # -------------------------
-preview_command = ['code', fig_name, input_img_name, output_img_name]
-# preview_command = ['open', fig_name, input_img_name, output_img_name]
-try:
-	res = subprocess.check_call(preview_command)
+# preview_command = ['code', fig_name, input_img_name, output_img_name]
+# # preview_command = ['open', fig_name, input_img_name, output_img_name]
+# try:
+# 	res = subprocess.check_call(preview_command)
 
-except:
-	print("ERROR")
+# except:
+# 	print("ERROR")
