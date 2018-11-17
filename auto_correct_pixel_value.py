@@ -26,10 +26,10 @@ plt.rc('lines', linewidth=2)
 p_init = 1.0
 p_interval = 0.01
 print("\n===== Initial parameter =====")
-print("input_image_data\n>",    args[1], "(args[1])")
+print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
-print("\np_init\n>",            p_init)
-print("\np_interval\n>",        p_interval)
+print("\np_init\n>",                    p_init)
+print("\np_interval\n>",                p_interval)
 
 
 
@@ -177,21 +177,21 @@ def correct_pixel_value(_rgb_img, _param):
 # ----- Calc parameter -----
 # --------------------------
 p = p_init
-count_equal_255 = 0
+count_overexpose = 0
 while count_equal_255 < N_theor:
-    tmp_img_RGB = correct_pixel_value(img_in_RGB, p)
-    tmp_img_Gray = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
+    tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
+    tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
     # Count number of max pixel value(==255)
-    count_equal_255 = np.sum(tmp_img_Gray == 255)
+    count_equalcount_overexpose_255 = np.sum(tmp_corrected_img_Gray == 255)
     p += p_interval
 
 print("\n\n===== Result =====")
 # Decide parameter value that meet requirement
 p_final = round(p, 2)
 print("p_final\n>",p_final)
-print("\nNumber of pixels that pixel value is 255\n>",count_equal_255, "(pixels)")
-print("\nThe ratio at which pixel value finally reached 255\n>",round(count_equal_255 / N_all_nonzero * 100, 3), "(%)")
+print("\nNumber of pixels that pixel value is 255\n>", count_overexpose, "(pixels)")
+print("\nThe ratio at which pixel value finally reached 255\n>", round(count_overexpose / N_all_nonzero * 100, 3), "(%)")
 print("\n")
 
 # Make output image
@@ -211,7 +211,7 @@ plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(round(ratio_overexpose*100,2))+".png"
+fig_name = "images/figure_"+str(p_final)+"_"+str(round(ratio_overexpose*100, 3))+".png"
 plt.savefig(fig_name)
 #plt.show()
 
@@ -219,7 +219,7 @@ plt.savefig(fig_name)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(round(ratio_overexpose*100,2))+".jpg"
+output_img_name = "images/improved_"+str(p_final)+"_"+str(round(ratio_overexpose*100, 3))+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 

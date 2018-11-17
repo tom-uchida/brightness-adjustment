@@ -31,11 +31,11 @@ ratio_for_low       = float(args[2])
 ratio_for_high      = float(args[3])
 p_init              = float(args[4])
 p_interval          = float(args[5])
-print("input_image_data\n>",input_image_data,"(args[1])")
-print("\nratio_for_low\n>",ratio_for_low,"(args[2])")
-print("\nratio_for_high\n>",ratio_for_high,"(args[3])")
-print("\np_init\n>",p_init,"(args[4])")
-print("\np_interval\n>",p_interval,"(args[5])")
+print("input_image_data\n>",    input_image_data,   "(args[1])")
+print("\nratio_for_low\n>",     ratio_for_low,      "(args[2])")
+print("\nratio_for_high\n>",    ratio_for_high,     "(args[3])")
+print("\np_init\n>",            p_init,             "(args[4])")
+print("\np_interval\n>",        p_interval,         "(args[5])")
 
 
 

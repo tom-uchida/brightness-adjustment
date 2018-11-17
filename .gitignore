@@ -1,6 +1,6 @@
 images/
 videos/
-*.md
+mean_pixel_value_list.md
 .vscode/
 tone_curve_copy.py
 wx_test.py
