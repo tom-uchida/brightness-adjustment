@@ -178,7 +178,7 @@ def correct_pixel_value(_rgb_img, _param):
 # --------------------------
 p = p_init
 count_overexpose = 0
-while count_equal_255 < N_theor:
+while count_overexpose < N_theor:
     tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
     tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
