@@ -62,7 +62,7 @@ def show_img(_i, _img, _img_name):
 
     return
 
-show_img(0, img_1,  "Original image")
+show_img(0, img_1,  "Input image (LR=1)")
 show_img(1, img_2,  "Improved image")
 
 
@@ -103,8 +103,8 @@ get_data_of_pixel_value(img_2_gray_nonzero)
 # ----------------------
 # ----- Matplotlib -----
 # ----------------------
-ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Original")
-ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Improved")
+ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image (LR=1)")
+ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
 # R_nonzero = img_2[:,:,0][img_2[:,:,0] > 0]
 # G_nonzero = img_2[:,:,1][img_2[:,:,1] > 0]
 # B_nonzero = img_2[:,:,2][img_2[:,:,2] > 0]
@@ -112,16 +112,26 @@ ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Imp
 # ax[2].hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
 # ax[2].hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
 
+# Draw line
+mean_1 = round(np.mean(img_1_gray_nonzero), 1)
+mean_2 = round(np.mean(img_2_gray_nonzero), 1)
+ax[2].axvline(np.mean(img_1_gray_nonzero), color='r')
+ax[2].text(mean_1/265, 0.7, "mean:"+str(mean_1), transform=ax[2].transAxes, color='r')
+ax[2].axvline(np.mean(img_2_gray_nonzero), color='b')
+ax[2].text(mean_2/265, 0.7, "mean:"+str(mean_2), transform=ax[2].transAxes, color='b')
 
-# ----- Text setting -----
-#props = dict(boxstyle='round', facecolor='red', alpha=0.5)
-# ax[2].text(0.82, 0.88, "mean:255", transform=ax[2].transAxes, fontsize=14, color='r')
-#ax[2].text(0.55, 0.4, "mean:164", transform=ax[2].transAxes, fontsize=14, color='r')
+# Draw rectangle
+x_section = 254/265 + (5/265)
+#ax[2].axvline(254, color='black')
+ax[2].text(x_section, 0.7, str(254) + " ~ " + str(np.max(img_1_gray_nonzero)), transform=ax[2].transAxes, color='black')
+ax[2].text(x_section, 0.6, "→ " + str(0.01*100) + " (%)", transform=ax[2].transAxes, color='black')
+rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax[2].transAxes, fc='black', alpha=0.3)
+ax[2].add_patch(rect)
 
 ax[2].set_title("Comparative histograms", fontsize=12)
 ax[2].set_xlabel("Pixel value", fontsize=12)
 ax[2].set_ylabel("Number of pixels", fontsize=12)
-ax[2].set_xlim([-10, 266])
+ax[2].set_xlim([-5, 260])
 #ax[2].set_ylim([0, 750000])
 #plt.grid()
 ax[2].legend(fontsize=12)

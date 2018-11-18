@@ -26,20 +26,26 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 p_init = 1.0
 p_interval = 0.01
-sampling_section_ratio = 0.05
+specified_section_ratio = 0.01
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
 print("\np_init\n>",                    p_init)
 print("\np_interval\n>",                p_interval)
-print("\nsampling_section_ratio\n>",    sampling_section_ratio*100, "(%)")
+print("\nspecified_section_ratio\n>",   specified_section_ratio*100, "(%)")
 
 
 
 # -------------------------
 # ----- RGB histogram -----
 # -------------------------
-def rgb_hist(_img_rgb, _ax):    
+def rgb_hist(_img_rgb, _ax):  
+    # Draw pixel value histogram
+    # _img_gray = cv2.cvtColor(_img_rgb, cv2.COLOR_RGB2GRAY)
+    # _img_gray_nonzero = _img_gray[img_in_Gray > 0]
+    # _ax.hist(_img_gray_nonzero.ravel(), bins=255, color='black', alpha=1.0, label="Pixel value")
+
+    # Draw RGB histogram
     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
@@ -56,7 +62,7 @@ def rgb_hist(_img_rgb, _ax):
 
 
 def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
-    fig = plt.figure(figsize=(13,7))
+    fig = plt.figure(figsize=(13, 7))
     gs = gridspec.GridSpec(2,3)
     x = np.arange(256)
     
@@ -97,10 +103,10 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
 
     # Draw line
     #ax5.axvline(standard_pixel_value, color='black')
-    x_section   = standard_pixel_value/265
+    x_section = standard_pixel_value/265 + (5/265)
     #x_text      = x_section + 0.5*(1.0-x_section+(10/265))
     ax5.text(x_section, 0.7, str(standard_pixel_value) + " ~ " + str(np.max(img_out_Gray)), transform=ax5.transAxes, color='black')
-    ax5.text(x_section, 0.6, "→ " + str(sampling_section_ratio*100) + " (%)", transform=ax5.transAxes, color='black')
+    ax5.text(x_section, 0.6, "→ " + str(specified_section_ratio*100) + " (%)", transform=ax5.transAxes, color='black')
 
     # Draw rectangle
     rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax5.transAxes, fc='black', alpha=0.2)
@@ -154,25 +160,25 @@ print("\nmax_pixel_value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
 
 
 # -----------------------------------------------------------------------
-# ----- Search for pixel value that determines the sampling section -----
+# ----- Search for pixel value that determines the specified section -----
 # -----------------------------------------------------------------------
 target_pixel_value  = max_pixel_value_LR1
 tmp_ratio_LR1       = 0.0
-while tmp_ratio_LR1 < sampling_section_ratio:
+while tmp_ratio_LR1 < specified_section_ratio:
     tmp_sum_pixel_number = np.sum(img_in_Gray_LR1 >= target_pixel_value)
 
-    # Temporarily, calc sampling section ratio
+    # Temporarily, calc specified section ratio
     tmp_ratio_LR1 = tmp_sum_pixel_number / N_all_nonzero_LR1
 
     # Next pixel value
     target_pixel_value -= 1
 
-print("\n\n** Sampling section was confirmed.")
+print("\n\n** Specified section was confirmed.")
 standard_pixel_value = target_pixel_value
 print("standard_pixel_value (LR=1)\n>", standard_pixel_value, "(pixel value)")
 
-sampling_section_ratio_LR1_final = tmp_ratio_LR1
-print("\nsampling_section_ratio_LR1_final (LR=1)\n>", round(sampling_section_ratio_LR1_final*100, 1), "(%) ( >=", standard_pixel_value, ")")
+specified_section_ratio_LR1_final = tmp_ratio_LR1
+print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_ratio_LR1_final*100, 1), "(%) ( >=", standard_pixel_value, ")")
 
 # 区間内ヒストグラム&統計値を計算する場合はここ．
 
@@ -201,11 +207,11 @@ def correct_pixel_value(_rgb_img, _param):
 # -------------------------------
 p = p_init
 tmp_ratio = 0.0
-while tmp_ratio < sampling_section_ratio:
+while tmp_ratio < specified_section_ratio:
     tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
     tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-    # Temporarily, calc sampling section ratio (>= standard_pixel_value)
+    # Temporarily, calc specified section ratio (>= standard_pixel_value)
     tmp_sum_pixel_number = np.sum(tmp_corrected_img_Gray >= standard_pixel_value)
     tmp_ratio = tmp_sum_pixel_number / N_all_nonzero
 
@@ -221,8 +227,8 @@ img_out_Gray    = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
 
 print("\n\n===== Result =====")
 print("p_final\n>",p_final)
-sampling_section_ratio_final = tmp_ratio
-print("\nsampling_section_ratio_final\n>", round(sampling_section_ratio_final*100, 1), "(%) ( >=", standard_pixel_value,")")
+specified_section_ratio_final = tmp_ratio
+print("\nspecified_section_ratio_final\n>", round(specified_section_ratio_final*100, 1), "(%) ( >=", standard_pixel_value,")")
 #print("\nNumber of pixels that pixel value is 255\n>", np.sum(img_out_Gray==255), "(pixels)")
 print("\nThe ratio at which pixel value finally reached 255\n>", round(np.sum(img_out_Gray==255) / N_all_nonzero * 100, 2), "(%)")
 print("\n")
@@ -239,7 +245,7 @@ plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(round(sampling_section_ratio, 2))+".png"
+fig_name = "images/figure_"+str(p_final)+"_"+str(round(specified_section_ratio, 2))+".png"
 plt.savefig(fig_name)
 # plt.show()
 
@@ -247,7 +253,7 @@ plt.savefig(fig_name)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(round(sampling_section_ratio, 2))+".jpg"
+output_img_name = "images/improved_"+str(p_final)+"_"+str(round(specified_section_ratio, 2))+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 
