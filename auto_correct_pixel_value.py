@@ -89,8 +89,8 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     hist_in, bins_in = np.histogram(_img_in_RGB[_img_in_RGB>0], 50)
     hist_out, bins_out = np.histogram(_img_out_RGB[_img_out_RGB>0], 50)
     list_rgb_max = [max(hist_in), max(hist_out)]
-    ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
-    ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/3])
+    ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
+    ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
 
 
 
