@@ -26,7 +26,7 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 p_init = 1.0
 p_interval = 0.01
-specified_section_ratio = 0.01
+specified_section_ratio = 0.9
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
@@ -188,9 +188,15 @@ print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_r
 # ----- Correct pixel value for each RGB -----
 # --------------------------------------------
 def correct_pixel_value(_rgb_img, _param):
+    # Multiply
     red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
     green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
     blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
+
+    # Add
+    # red   = cv2.add(_rgb_img[:, :, 0], _param) # R
+    # green = cv2.add(_rgb_img[:, :, 1], _param) # G
+    # blue  = cv2.add(_rgb_img[:, :, 2], _param) # B
 
     # Apply correction
     corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
@@ -218,12 +224,13 @@ while tmp_ratio < specified_section_ratio:
     # Update parameter
     p += p_interval
 
-# Make output image
 p_final = round(p, 2)
+
+# Make output image
 img_out_RGB     = correct_pixel_value(img_in_RGB, p_final)
 img_out_Gray    = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
-# print("\nOutput image(RGB)\n>", img_out_RGB.shape) # （height × width × 色数）
-# print("\n")
+# out_N_all_nonzero   = np.sum(img_out_Gray > 0)
+# print("\nout_N_all_nonzero\n>", out_N_all_nonzero, "(pixels)")
 
 print("\n\n===== Result =====")
 print("p_final\n>",p_final)
