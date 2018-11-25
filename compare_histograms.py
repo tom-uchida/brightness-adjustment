@@ -62,8 +62,8 @@ def show_img(_i, _img, _img_name):
 
     return
 
-show_img(0, img_1,  "Input image (LR=1)")
-show_img(1, img_2,  "Improved image")
+show_img(0, img_1,  "Input image")
+show_img(1, img_2,  "Input image (LR=1)")
 
 
 
@@ -103,8 +103,12 @@ get_data_of_pixel_value(img_2_gray_nonzero)
 # ----------------------
 # ----- Matplotlib -----
 # ----------------------
-ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image (LR=1)")
-ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
+ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image")
+ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Input image (LR=1)")
+# ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image (LR=1)")
+# ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
+# ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple version")
+# ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition version")
 # R_nonzero = img_2[:,:,0][img_2[:,:,0] > 0]
 # G_nonzero = img_2[:,:,1][img_2[:,:,1] > 0]
 # B_nonzero = img_2[:,:,2][img_2[:,:,2] > 0]
@@ -113,20 +117,20 @@ ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Im
 # ax[2].hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
 
 # Draw line
-mean_1 = round(np.mean(img_1_gray_nonzero), 1)
-mean_2 = round(np.mean(img_2_gray_nonzero), 1)
-ax[2].axvline(np.mean(img_1_gray_nonzero), color='r')
-ax[2].text(mean_1/265, 0.7, "mean:"+str(mean_1), transform=ax[2].transAxes, color='r')
-ax[2].axvline(np.mean(img_2_gray_nonzero), color='b')
-ax[2].text(mean_2/265, 0.7, "mean:"+str(mean_2), transform=ax[2].transAxes, color='b')
+# mean_1 = round(np.mean(img_1_gray_nonzero), 1)
+# mean_2 = round(np.mean(img_2_gray_nonzero), 1)
+# ax[2].axvline(np.mean(img_1_gray_nonzero), color='r')
+# ax[2].text(mean_1/265, 0.7, "mean:"+str(mean_1), transform=ax[2].transAxes, color='r')
+# ax[2].axvline(np.mean(img_2_gray_nonzero), color='b')
+# ax[2].text(mean_2/265, 0.7, "mean:"+str(mean_2), transform=ax[2].transAxes, color='b')
 
-# Draw rectangle
-x_section = 254/265 + (5/265)
-#ax[2].axvline(254, color='black')
-ax[2].text(x_section, 0.7, str(254) + " ~ " + str(np.max(img_1_gray_nonzero)), transform=ax[2].transAxes, color='black')
-ax[2].text(x_section, 0.6, "→ " + str(0.01*100) + " (%)", transform=ax[2].transAxes, color='black')
-rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax[2].transAxes, fc='black', alpha=0.3)
-ax[2].add_patch(rect)
+# # Draw rectangle
+# x_section = 254/265 + (5/265)
+# #ax[2].axvline(254, color='black')
+# ax[2].text(x_section, 0.7, str(254) + " ~ " + str(np.max(img_1_gray_nonzero)), transform=ax[2].transAxes, color='black')
+# ax[2].text(x_section, 0.6, "→ " + str(0.01*100) + " (%)", transform=ax[2].transAxes, color='black')
+# rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax[2].transAxes, fc='black', alpha=0.3)
+# ax[2].add_patch(rect)
 
 ax[2].set_title("Comparative histograms", fontsize=12)
 ax[2].set_xlabel("Pixel value", fontsize=12)

@@ -165,7 +165,8 @@ print("\nmax_pixel_value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
 target_pixel_value  = max_pixel_value_LR1
 tmp_ratio_LR1       = 0.0
 while tmp_ratio_LR1 < specified_section_ratio:
-    tmp_sum_pixel_number = np.sum(img_in_Gray_LR1 >= target_pixel_value)
+    tmp_sum_pixel_number = np.sum( target_pixel_value <= img_in_Gray_LR1 )
+    # tmp_sum_pixel_number = np.sum( (target_pixel_value <= img_in_Gray_LR1) & (img_in_Gray_LR1 < 255) )
 
     # Temporarily, calc specified section ratio
     tmp_ratio_LR1 = tmp_sum_pixel_number / N_all_nonzero_LR1
@@ -218,7 +219,8 @@ while tmp_ratio < specified_section_ratio:
     tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
     # Temporarily, calc specified section ratio (>= standard_pixel_value)
-    tmp_sum_pixel_number = np.sum(tmp_corrected_img_Gray >= standard_pixel_value)
+    tmp_sum_pixel_number = np.sum( standard_pixel_value <= tmp_corrected_img_Gray )
+    # tmp_sum_pixel_number = np.sum( (standard_pixel_value <= tmp_corrected_img_Gray) & (tmp_corrected_img_Gray < 255) )
     tmp_ratio = tmp_sum_pixel_number / N_all_nonzero
 
     # Update parameter
