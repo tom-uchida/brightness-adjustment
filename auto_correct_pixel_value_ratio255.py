@@ -137,8 +137,7 @@ img_in_LR1_gray         = cv2.cvtColor(img_in_LR1_RGB, cv2.COLOR_RGB2GRAY)
 img_in_LR1_gray_nonzero = img_in_LR1_gray[img_in_LR1_gray > 0]
 N_all_nonzero_LR1       = np.sum(img_in_LR1_gray_nonzero > 0)
 ratio_overexpose        = round( np.sum(img_in_LR1_gray == 255) / N_all_nonzero_LR1, 5)
-ratio_overexpose_per    = ratio_overexpose * 100 
-#print("\nratio_overexpose_per\n>", ratio_overexpose_per, "(%)")
+ratio_overexpose_per    = ratio_overexpose * 100
 
 if ratio_overexpose_per < 0.01: # < 0.01(%)
     ratio_overexpose = 0.01 * 0.01 # 1.0e-04

@@ -80,7 +80,6 @@ print("\n")
 def get_data_of_pixel_value(_img, _img_name):
   print("===== Statistical Data of", _img_name, " =====")
   print("Num of pixel values (== 255) :", np.sum(_img == 255))
-  #print("Num of pixel values (<= 1)   :", np.sum(_img <= 1))
   print("Num of pixel values (== 0)   :", np.sum(_img == 0) )
   print("\nMax :", np.max(_img))
   print("Min :", np.min(_img))
@@ -92,7 +91,17 @@ def get_data_of_pixel_value(_img, _img_name):
 
   N_all_nonzero = np.sum(_img > 0)
   print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
-  print("\nratio\n>", round(np.sum(_img == 255)/N_all_nonzero, 4), "(%)")
+
+  _img_nonzero = _img[_img > 0]
+  bincount = np.bincount(_img_nonzero)
+  mode = np.argmax( bincount )
+  print("\nMost frequent pixel value\n>", mode)
+
+  ratio_255 = round(np.sum(_img == 255)/N_all_nonzero, 4)
+  print("\nratio\n>", ratio_255, " (", round(ratio_255*100, 3), "(%)")
+
+  ratio_254 = round(np.sum(_img == 254)/N_all_nonzero, 4)
+  print("\nratio\n>", ratio_254, " (", round(ratio_254*100, 3), "(%)")
 
   print("\n")
   

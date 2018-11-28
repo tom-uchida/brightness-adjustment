@@ -1,18 +1,21 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import cycler
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as pat
-plt.style.use('seaborn-white')
 import cv2
 import subprocess
 import sys
+import statistics
+
+plt.style.use('seaborn-white')
+
 args = sys.argv
 if len(args) != 3:
     raise Exception('\nUSAGE\n> $ python auto_correct_pixel_value.py [input_image_data] [input_image_data(LR=1)]')
     raise Exception('\n\nFor example\n> $ python auto_correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp]]\n')
     sys.exit()
 
-from matplotlib import cycler
 colors = cycler('color', ['#EE6666', '#3388BB', '#9988DD', '#EECC55', '#88BB44', '#FFBBBB'])
 plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
 plt.rc('grid', color='w', linestyle='solid')
@@ -26,7 +29,7 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 p_init = 1.0
 p_interval = 0.01
-specified_section_ratio = 0.9
+specified_section_ratio = 0.1
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
@@ -105,7 +108,7 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     #ax5.axvline(standard_pixel_value, color='black')
     x_section = standard_pixel_value/265 + (5/265)
     #x_text      = x_section + 0.5*(1.0-x_section+(10/265))
-    ax5.text(x_section, 0.7, str(standard_pixel_value) + " ~ " + str(np.max(img_out_Gray)), transform=ax5.transAxes, color='black')
+    ax5.text(x_section, 0.7, str(standard_pixel_value) + " ~ " + str(max_pixel_value_LR1), transform=ax5.transAxes, color='black')
     ax5.text(x_section, 0.6, "→ " + str(specified_section_ratio*100) + " (%)", transform=ax5.transAxes, color='black')
 
     # Draw rectangle
@@ -155,7 +158,18 @@ print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 img_in_Gray_LR1     = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
 N_all_nonzero_LR1   = np.sum(img_in_Gray_LR1 > 0)
 max_pixel_value_LR1 = np.max(img_in_Gray_LR1)
-print("\nmax_pixel_value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
+print("\nMax pixel value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
+
+if max_pixel_value_LR1 == 255:
+    # Calc most frequent pixel value of the input image(LR=1)
+    img_in_Gray_nonzero_LR1         = img_in_Gray_LR1[img_in_Gray_LR1 > 0]
+    bincount = np.bincount(img_in_Gray_nonzero_LR1)
+    most_frequent_pixel_value_LR1   = np.argmax( bincount )
+    print("\nMost frequent pixel value (LR=1)\n>", most_frequent_pixel_value_LR1)
+
+    if most_frequent_pixel_value_LR1 == 255:
+        print("** There is a possibility that pixel value \"255\" is too much in the input image(LR=1).")
+        max_pixel_value_LR1 = 254
 
 
 
@@ -179,7 +193,7 @@ standard_pixel_value = target_pixel_value
 print("standard_pixel_value (LR=1)\n>", standard_pixel_value, "(pixel value)")
 
 specified_section_ratio_LR1_final = tmp_ratio_LR1
-print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_ratio_LR1_final*100, 1), "(%) ( >=", standard_pixel_value, ")")
+print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_ratio_LR1_final*100, 1), "(%) (", standard_pixel_value, "~", max_pixel_value_LR1, ")")
 
 # 区間内ヒストグラム&統計値を計算する場合はここ．
 
@@ -237,7 +251,7 @@ img_out_Gray    = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
 print("\n\n===== Result =====")
 print("p_final\n>",p_final)
 specified_section_ratio_final = tmp_ratio
-print("\nspecified_section_ratio_final\n>", round(specified_section_ratio_final*100, 1), "(%) ( >=", standard_pixel_value,")")
+print("\nspecified_section_ratio_final\n>", round(specified_section_ratio_final*100, 1), "(%) (", standard_pixel_value, "~", max_pixel_value_LR1, ")")
 #print("\nNumber of pixels that pixel value is 255\n>", np.sum(img_out_Gray==255), "(pixels)")
 print("\nThe ratio at which pixel value finally reached 255\n>", round(np.sum(img_out_Gray==255) / N_all_nonzero * 100, 2), "(%)")
 print("\n")
