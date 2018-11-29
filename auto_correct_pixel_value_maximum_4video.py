@@ -59,33 +59,53 @@ def write_img(_img_name, _i):
 args = sys.argv
 img_in_RGB_LR1 = read_img(args[1])
 
-# Initialize section ratio
-specified_section_ratio = 0.01 # 1%
-
 # Calc max pixel value of the input image(LR=1)
 img_in_Gray_LR1     = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
 N_all_nonzero_LR1   = np.sum(img_in_Gray_LR1 > 0)
 max_pixel_value_LR1 = np.max(img_in_Gray_LR1)
-print("\nmax_pixel_value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
+print("\n-----", args[1], "-----")
+print("Max pixel value\n>", max_pixel_value_LR1, "(pixel value)")
 
-# Search for pixel value that determines the specified section 
-target_pixel_value  = max_pixel_value_LR1
-tmp_ratio_LR1       = 0.0
-while tmp_ratio_LR1 < specified_section_ratio:
-    tmp_sum_pixel_number = np.sum( target_pixel_value <= img_in_Gray_LR1 )
+# Calc the ratio of the maximum pixel value
+ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == max_pixel_value_LR1) / N_all_nonzero_LR1
+ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+print("\nRatio of the max pixel value\n>", ratio_max_pixel_value, " (", round(ratio_max_pixel_value*100, 2), "(%) )")
 
-    # Temporarily, calc specified section ratio
-    tmp_ratio_LR1 = tmp_sum_pixel_number / N_all_nonzero_LR1
+# Check whether the maximum pixel value is 255 in the input image(LR=1)
+if max_pixel_value_LR1 == 255:
+    # Calc most frequent pixel value
+    img_in_Gray_nonzero_LR1         = img_in_Gray_LR1[img_in_Gray_LR1 > 0]
+    bincount = np.bincount(img_in_Gray_nonzero_LR1)
+    most_frequent_pixel_value_LR1   = np.argmax( bincount )
+    print("\nMost frequent pixel value\n>", most_frequent_pixel_value_LR1, "(pixel value)")
 
-    # Next pixel value
-    target_pixel_value -= 1
+    # Check whether the most frequent pixel value is 255 in the input image(LR=1)
+    if most_frequent_pixel_value_LR1 == 255:
+        print("\n========================================================================================")
+        print("** There is a possibility that pixel value \"255\" is too much in the input image(LR=1).")
 
-print("\n\n** Specified section was confirmed.")
-standard_pixel_value = target_pixel_value
-print("standard_pixel_value (LR=1)\n>", standard_pixel_value, "(pixel value)")
+        # Calc mean pixel value
+        mean_LR1 = round(img_in_Gray_nonzero_LR1.mean(), 1)
+        print("\n** Mean pixel value (LR=1)")
+        print("** >", mean_LR1, "(pixel value)")
 
-specified_section_ratio_LR1_final = tmp_ratio_LR1
-print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_ratio_LR1_final*100, 1), "(%) ( >=", standard_pixel_value, ")")
+        # Calc median pixel value in the section b/w mean pixel value and maximum pixel value(255)
+        section_bw_mean_255_LR1 = img_in_Gray_LR1[ (mean_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 <= 255) ]
+        median_bw_mean_255_LR1  = np.median(section_bw_mean_255_LR1)
+        print("\n** Median pixel value in the section between", mean_LR1, "and 255")
+        print("** >", median_bw_mean_255_LR1, "(pixel value)")
+
+        # Calc ratio 
+        ratio_old = ratio_max_pixel_value
+        ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == median_bw_mean_255_LR1) / N_all_nonzero_LR1
+        ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+        print("\n** Ratio of the pixel value", median_bw_mean_255_LR1)
+        print("** >", ratio_max_pixel_value, "(", ratio_max_pixel_value*100, "(%) )")
+
+        print("\n** Changed ratio as follows.")
+        print("** >", ratio_old, " → ", ratio_max_pixel_value)
+        print("** >", round(ratio_old*100, 2), "(%) → ", ratio_max_pixel_value*100, "(%)")
+        print("========================================================================================")
 
 
 
@@ -106,24 +126,19 @@ for i in range(180):
     p_init = 1.0
     p_interval = 0.01
 
-    # Calc all number of pixels of the input image
-    N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
-
-    # Then, calc number of pixels that pixel value is 0
+    # Then, calc number of pixels that pixel value is not 0
     img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
     N_all_nonzero   = np.sum(img_in_Gray > 0)
 
     # Determine parameter
     p = p_init
-    tmp_ratio = 0.0
-    while tmp_ratio < specified_section_ratio:
-        tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
-        tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
+    tmp_ratio_255 = 0.0
+    while tmp_ratio_255 < ratio_max_pixel_value:
+        tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
+        tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-        # Temporarily, calc specified section ratio (>= standard_pixel_value)
-        tmp_sum_pixel_number = np.sum( standard_pixel_value <= tmp_corrected_img_Gray )
-        # tmp_sum_pixel_number = np.sum( (standard_pixel_value <= tmp_corrected_img_Gray) & (tmp_corrected_img_Gray < 255) )
-        tmp_ratio = tmp_sum_pixel_number / N_all_nonzero
+        # Temporarily, calc ratio of pixel value 255
+        tmp_ratio_255 = np.sum(tmp_corrected_img_Gray == 255) / N_all_nonzero
 
         # Update parameter
         p += p_interval

@@ -29,26 +29,18 @@ plt.rc('lines', linewidth=2)
 # ---------------------------------
 p_init = 1.0
 p_interval = 0.01
-specified_section_ratio = 0.1
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
 print("\np_init\n>",                    p_init)
 print("\np_interval\n>",                p_interval)
-print("\nspecified_section_ratio\n>",   specified_section_ratio*100, "(%)")
 
 
 
 # -------------------------
 # ----- RGB histogram -----
 # -------------------------
-def rgb_hist(_img_rgb, _ax):  
-    # Draw pixel value histogram
-    # _img_gray = cv2.cvtColor(_img_rgb, cv2.COLOR_RGB2GRAY)
-    # _img_gray_nonzero = _img_gray[img_in_Gray > 0]
-    # _ax.hist(_img_gray_nonzero.ravel(), bins=255, color='black', alpha=1.0, label="Pixel value")
-
-    # Draw RGB histogram
+def rgb_hist(_img_rgb, _ax):
     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
@@ -104,17 +96,6 @@ def plot_tone_curve_and_histogram(f, _p_final, _img_in_RGB, _img_out_RGB):
     ax4.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
     ax5.set_ylim([0, (max(list_rgb_max) + max(list_rgb_max)*0.05)/2.5])
 
-    # Draw line
-    #ax5.axvline(standard_pixel_value, color='black')
-    x_section = standard_pixel_value/265 + (5/265)
-    #x_text      = x_section + 0.5*(1.0-x_section+(10/265))
-    ax5.text(x_section, 0.7, str(standard_pixel_value) + " ~ " + str(max_pixel_value_LR1), transform=ax5.transAxes, color='black')
-    ax5.text(x_section, 0.6, "→ " + str(specified_section_ratio*100) + " (%)", transform=ax5.transAxes, color='black')
-
-    # Draw rectangle
-    rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax5.transAxes, fc='black', alpha=0.2)
-    ax5.add_patch(rect)
-
 
 
 # -------------------------------
@@ -147,9 +128,10 @@ print("Input image(RGB)\n>", img_in_RGB.shape) # （height, width, channel）
 
 # Calc all number of pixels of the input image
 N_all = img_in_RGB.shape[0]*img_in_RGB.shape[1]
-print("\nN_all\n>", N_all, "(pixels)")
+print("\n-----", args[1], "-----")
+print("N_all\n>", N_all, "(pixels)")
 
-# Then, calc number of pixels that pixel value is 0
+# Then, calc number of pixels that pixel value is not 0
 img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
 N_all_nonzero   = np.sum(img_in_Gray > 0)
 print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
@@ -158,44 +140,49 @@ print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
 img_in_Gray_LR1     = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
 N_all_nonzero_LR1   = np.sum(img_in_Gray_LR1 > 0)
 max_pixel_value_LR1 = np.max(img_in_Gray_LR1)
-print("\nMax pixel value (LR=1)\n>", max_pixel_value_LR1, "(pixel value)")
+print("\n-----", args[2], "-----")
+print("Max pixel value\n>", max_pixel_value_LR1, "(pixel value)")
 
+# Calc the ratio of the maximum pixel value
+ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == max_pixel_value_LR1) / N_all_nonzero_LR1
+ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+print("\nRatio of the max pixel value\n>", ratio_max_pixel_value, " (", round(ratio_max_pixel_value*100, 2), "(%) )")
+
+# Check whether the maximum pixel value is 255 in the input image(LR=1)
 if max_pixel_value_LR1 == 255:
-    # Calc most frequent pixel value of the input image(LR=1)
+    # Calc most frequent pixel value
     img_in_Gray_nonzero_LR1         = img_in_Gray_LR1[img_in_Gray_LR1 > 0]
     bincount = np.bincount(img_in_Gray_nonzero_LR1)
     most_frequent_pixel_value_LR1   = np.argmax( bincount )
-    print("\nMost frequent pixel value (LR=1)\n>", most_frequent_pixel_value_LR1)
+    print("\nMost frequent pixel value\n>", most_frequent_pixel_value_LR1, "(pixel value)")
 
+    # Check whether the most frequent pixel value is 255 in the input image(LR=1)
     if most_frequent_pixel_value_LR1 == 255:
+        print("\n========================================================================================")
         print("** There is a possibility that pixel value \"255\" is too much in the input image(LR=1).")
-        max_pixel_value_LR1 = 254
 
+        # Calc mean pixel value
+        mean_LR1 = round(img_in_Gray_nonzero_LR1.mean(), 1)
+        print("\n** Mean pixel value (LR=1)")
+        print("** >", mean_LR1, "(pixel value)")
 
+        # Calc median pixel value in the section b/w mean pixel value and maximum pixel value(255)
+        section_bw_mean_255_LR1 = img_in_Gray_LR1[ (mean_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 <= 255) ]
+        median_bw_mean_255_LR1  = np.median(section_bw_mean_255_LR1)
+        print("\n** Median pixel value in the section between", mean_LR1, "and 255")
+        print("** >", median_bw_mean_255_LR1, "(pixel value)")
 
-# -----------------------------------------------------------------------
-# ----- Search for pixel value that determines the specified section -----
-# -----------------------------------------------------------------------
-target_pixel_value  = max_pixel_value_LR1
-tmp_ratio_LR1       = 0.0
-while tmp_ratio_LR1 < specified_section_ratio:
-    tmp_sum_pixel_number = np.sum( target_pixel_value <= img_in_Gray_LR1 )
-    # tmp_sum_pixel_number = np.sum( (target_pixel_value <= img_in_Gray_LR1) & (img_in_Gray_LR1 < 255) )
+        # Calc ratio 
+        ratio_old = ratio_max_pixel_value
+        ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == median_bw_mean_255_LR1) / N_all_nonzero_LR1
+        ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+        print("\n** Ratio of the pixel value", median_bw_mean_255_LR1)
+        print("** >", ratio_max_pixel_value, "(", ratio_max_pixel_value*100, "(%) )")
 
-    # Temporarily, calc specified section ratio
-    tmp_ratio_LR1 = tmp_sum_pixel_number / N_all_nonzero_LR1
-
-    # Next pixel value
-    target_pixel_value -= 1
-
-print("\n\n** Specified section was confirmed.")
-standard_pixel_value = target_pixel_value
-print("standard_pixel_value (LR=1)\n>", standard_pixel_value, "(pixel value)")
-
-specified_section_ratio_LR1_final = tmp_ratio_LR1
-print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_ratio_LR1_final*100, 1), "(%) (", standard_pixel_value, "~", max_pixel_value_LR1, ")")
-
-# 区間内ヒストグラム&統計値を計算する場合はここ．
+        print("\n** Changed ratio as follows.")
+        print("** >", ratio_old, " → ", ratio_max_pixel_value)
+        print("** >", round(ratio_old*100, 2), "(%) → ", ratio_max_pixel_value*100, "(%)")
+        print("========================================================================================")
 
 
 
@@ -203,21 +190,12 @@ print("\nspecified_section_ratio_LR1_final (LR=1)\n>", round(specified_section_r
 # ----- Correct pixel value for each RGB -----
 # --------------------------------------------
 def correct_pixel_value(_rgb_img, _param):
-    # Multiply
-    red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
-    green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
-    blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
-
-    # Add
-    # red   = cv2.add(_rgb_img[:, :, 0], _param) # R
-    # green = cv2.add(_rgb_img[:, :, 1], _param) # G
-    # blue  = cv2.add(_rgb_img[:, :, 2], _param) # B
+    corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
 
     # Apply correction
-    corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
-    corrected_img_RGB[:, :, 0] = red
-    corrected_img_RGB[:, :, 1] = green
-    corrected_img_RGB[:, :, 2] = blue
+    corrected_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _param) # R
+    corrected_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _param) # G
+    corrected_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _param) # B
 
     return corrected_img_RGB
 
@@ -227,15 +205,13 @@ def correct_pixel_value(_rgb_img, _param):
 # ----- Determine parameter -----
 # -------------------------------
 p = p_init
-tmp_ratio = 0.0
-while tmp_ratio < specified_section_ratio:
-    tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
-    tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
+tmp_ratio_255 = 0.0
+while tmp_ratio_255 < ratio_max_pixel_value:
+    tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
+    tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-    # Temporarily, calc specified section ratio (>= standard_pixel_value)
-    tmp_sum_pixel_number = np.sum( standard_pixel_value <= tmp_corrected_img_Gray )
-    # tmp_sum_pixel_number = np.sum( (standard_pixel_value <= tmp_corrected_img_Gray) & (tmp_corrected_img_Gray < 255) )
-    tmp_ratio = tmp_sum_pixel_number / N_all_nonzero
+    # Temporarily, calc ratio of pixel value 255
+    tmp_ratio_255 = np.sum(tmp_corrected_img_Gray == 255) / N_all_nonzero
 
     # Update parameter
     p += p_interval
@@ -243,16 +219,11 @@ while tmp_ratio < specified_section_ratio:
 p_final = round(p, 2)
 
 # Make output image
-img_out_RGB     = correct_pixel_value(img_in_RGB, p_final)
-img_out_Gray    = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
-# out_N_all_nonzero   = np.sum(img_out_Gray > 0)
-# print("\nout_N_all_nonzero\n>", out_N_all_nonzero, "(pixels)")
+img_out_RGB  = correct_pixel_value(img_in_RGB, p_final)
+img_out_Gray = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2GRAY)
 
 print("\n\n===== Result =====")
-print("p_final\n>",p_final)
-specified_section_ratio_final = tmp_ratio
-print("\nspecified_section_ratio_final\n>", round(specified_section_ratio_final*100, 1), "(%) (", standard_pixel_value, "~", max_pixel_value_LR1, ")")
-#print("\nNumber of pixels that pixel value is 255\n>", np.sum(img_out_Gray==255), "(pixels)")
+print("p_final\n>", p_final)
 print("\nThe ratio at which pixel value finally reached 255\n>", round(np.sum(img_out_Gray==255) / N_all_nonzero * 100, 2), "(%)")
 print("\n")
 
@@ -268,7 +239,7 @@ plot_tone_curve_and_histogram(tone_curve, p_final, img_in_RGB, img_out_RGB)
 # ----------------------------------
 # ----- Save figure and images -----
 # ----------------------------------
-fig_name = "images/figure_"+str(p_final)+"_"+str(round(specified_section_ratio, 2))+".png"
+fig_name = "images/figure_"+str(p_final)+".png"
 plt.savefig(fig_name)
 # plt.show()
 
@@ -276,7 +247,7 @@ plt.savefig(fig_name)
 img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
 img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
 input_img_name = "images/input.jpg"
-output_img_name = "images/improved_"+str(p_final)+"_"+str(round(specified_section_ratio, 2))+".jpg"
+output_img_name = "images/improved_"+str(p_final)+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(output_img_name, img_out_BGR)
 
