@@ -23,16 +23,11 @@ def read_img(_img_name):
 # ----- Correct pixel value for each RGB -----
 # --------------------------------------------
 def correct_pixel_value(_rgb_img, _param):
-    # Multiply
-    red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
-    green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
-    blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
-
     # Apply correction
     corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
-    corrected_img_RGB[:, :, 0] = red
-    corrected_img_RGB[:, :, 1] = green
-    corrected_img_RGB[:, :, 2] = blue
+    corrected_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _param) # R
+    corrected_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _param) # G
+    corrected_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _param) # B
 
     return corrected_img_RGB
 
@@ -56,6 +51,8 @@ def write_img(_img_name, _i):
 # -------------------------------------------
 # ----- Processing on input image(LR=1) -----
 # -------------------------------------------
+reference_section = 0.1 # 10%
+
 args = sys.argv
 img_in_RGB_LR1 = read_img(args[1])
 
@@ -83,28 +80,41 @@ if max_pixel_value_LR1 == 255:
     if most_frequent_pixel_value_LR1 == 255:
         print("\n========================================================================================")
         print("** There is a possibility that pixel value \"255\" is too much in the input image(LR=1).")
+            
+        # Determine standard pixel value in the input image(LR=1)
+        tmp_reference_section = 0.0
+        standard_pixel_value_LR1 = 254
+        while tmp_reference_section < reference_section:
+            # Temporarily, calc
+            sum_pixels_in_section = np.sum( (standard_pixel_value_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 < 255) )
+            tmp_reference_section = sum_pixels_in_section / N_all_nonzero_LR1
 
-        # Calc mean pixel value
-        mean_LR1 = round(img_in_Gray_nonzero_LR1.mean(), 1)
-        print("\n** Mean pixel value (LR=1)")
-        print("** >", mean_LR1, "(pixel value)")
+            # Next pixel value
+            standard_pixel_value_LR1 -= 1
 
-        # Calc median pixel value in the section b/w mean pixel value and maximum pixel value(255)
-        section_bw_mean_255_LR1 = img_in_Gray_LR1[ (mean_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 <= 255) ]
-        median_bw_mean_255_LR1  = np.median(section_bw_mean_255_LR1)
-        print("\n** Median pixel value in the section between", mean_LR1, "and 255")
-        print("** >", median_bw_mean_255_LR1, "(pixel value)")
+        # print("\n** final reference section")
+        # print("** >", tmp_reference_section*100, "(%)")
 
-        # Calc ratio 
+        print("\n** Standard pixel value")
+        print("** >", standard_pixel_value_LR1, "(pixel value)")
+
+        # Calc median pixel value in the section b/w standard pixel value and maximum pixel value(255)
+        section_bw_standard_255_LR1 = img_in_Gray_LR1[ (standard_pixel_value_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 < 255) ]
+        median_bw_standard_255_LR1  = int(np.median(section_bw_standard_255_LR1))
+        print("\n** Median pixel value in the section between", standard_pixel_value_LR1, "and 255")
+        print("** >", median_bw_standard_255_LR1, "(pixel value)")
+
+        # Update ratio_max_pixel_value
         ratio_old = ratio_max_pixel_value
-        ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == median_bw_mean_255_LR1) / N_all_nonzero_LR1
+        ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == median_bw_standard_255_LR1) / N_all_nonzero_LR1
         ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
-        print("\n** Ratio of the pixel value", median_bw_mean_255_LR1)
-        print("** >", ratio_max_pixel_value, "(", ratio_max_pixel_value*100, "(%) )")
+        print("\n** Ratio of the pixel value", median_bw_standard_255_LR1)
+        print("** >", ratio_max_pixel_value, "(", round(ratio_max_pixel_value*100, 3), "(%) )")
 
         print("\n** Changed ratio as follows.")
         print("** >", ratio_old, " → ", ratio_max_pixel_value)
-        print("** >", round(ratio_old*100, 2), "(%) → ", ratio_max_pixel_value*100, "(%)")
+        print("** >", round(ratio_old*100, 2), "(%) → ", round(ratio_max_pixel_value*100, 3), "(%)")
+
         print("========================================================================================")
 
 
