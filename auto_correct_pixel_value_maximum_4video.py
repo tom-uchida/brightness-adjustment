@@ -51,7 +51,7 @@ def write_img(_img_name, _i):
 # -------------------------------------------
 # ----- Processing on input image(LR=1) -----
 # -------------------------------------------
-reference_section = 0.1 # 10%
+reference_section = 0.05 # 10%
 
 args = sys.argv
 img_in_RGB_LR1 = read_img(args[1])

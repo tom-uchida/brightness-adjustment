@@ -21,7 +21,7 @@ plt.rc('lines', linewidth=2)
 # ------------------------------
 # ----- Placement settings -----
 # ------------------------------
-fig, ax = plt.subplots(3, figsize=(9, 8)) # figsize(width, height)
+fig, ax = plt.subplots(3, figsize=(8, 6)) # figsize(width, height)
 fig.subplots_adjust(hspace=0.4, wspace=0.4) # interval
 ax[0] = plt.subplot2grid((2,2), (0,0))
 ax[1] = plt.subplot2grid((2,2), (0,1))
@@ -62,8 +62,10 @@ def show_img(_i, _img, _img_name):
 
     return
 
-show_img(0, img_1,  "Input image")
-show_img(1, img_2,  "Input image (LR=1)")
+# show_img(0, img_1,  "Input image")
+# show_img(1, img_2,  "Input image (LR=1)")
+show_img(0, img_1,  "Simple")
+show_img(1, img_2,  "Decomposition")
 
 
 
@@ -103,12 +105,12 @@ get_data_of_pixel_value(img_2_gray_nonzero)
 # ----------------------
 # ----- Matplotlib -----
 # ----------------------
-ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image")
-ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Input image (LR=1)")
+# ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image")
+# ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Input image (LR=1)")
 # ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image (LR=1)")
 # ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
-# ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple version")
-# ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition version")
+ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple")
+ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition")
 # R_nonzero = img_2[:,:,0][img_2[:,:,0] > 0]
 # G_nonzero = img_2[:,:,1][img_2[:,:,1] > 0]
 # B_nonzero = img_2[:,:,2][img_2[:,:,2] > 0]
