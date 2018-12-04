@@ -27,7 +27,7 @@ plt.rc('lines', linewidth=2)
 # Set initial parameter
 p_init = 1.0
 p_interval = 0.01
-reference_section = 0.05 # 10%
+reference_section = 0.1 # 10%
 print("\n===== Initial parameter =====")
 print("input_image_data\n>",            args[1], "(args[1])")
 print("\ninput_image_data(LR=1)\n>",    args[2], "(args[2])")
@@ -212,8 +212,11 @@ def run():
     print("Max pixel value\n>", max_pixel_value_LR1, "(pixel value)")
 
     # Calc the ratio of the maximum pixel value
-    ratio_max_pixel_value = np.sum(img_in_Gray_LR1 == max_pixel_value_LR1) / N_all_nonzero_LR1
-    ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+    num_max_pixel_value_LR1 = np.sum(img_in_Gray_LR1 == max_pixel_value_LR1)
+    print("\nNumber of max pixel value (", max_pixel_value_LR1, ")\n>", num_max_pixel_value_LR1, "(pixels)")
+    ratio_max_pixel_value = num_max_pixel_value_LR1 / N_all_nonzero_LR1
+    # ratio_max_pixel_value = round(ratio_max_pixel_value, 4)
+    ratio_max_pixel_value = round(ratio_max_pixel_value, 8)
     print("\nRatio of the max pixel value\n>", ratio_max_pixel_value, " (", round(ratio_max_pixel_value*100, 2), "(%) )")
 
     # Check whether the maximum pixel value is 255 in the input image(LR=1)
@@ -268,11 +271,13 @@ def run():
     # Determine parameter
     p = p_init
     tmp_ratio_255 = 0.0
+    # ratio_max_pixel_value = 0.01
     while tmp_ratio_255 < ratio_max_pixel_value:
-        tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
-        tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
+        # Temporarily, correct input image with p
+        tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
+        tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-        # Temporarily, calc ratio of pixel value 255
+        # Then, calc ratio of pixel value 255
         tmp_ratio_255 = np.sum(tmp_corrected_img_Gray == 255) / N_all_nonzero
 
         # Update parameter
@@ -286,7 +291,9 @@ def run():
 
     print("\n\n===== Result =====")
     print("p_final\n>", p_final)
-    print("\nThe ratio at which pixel value finally reached 255\n>", round(np.sum(img_out_Gray==255) / N_all_nonzero * 100, 2), "(%)")
+    num_max_pixel_value_out = np.sum(img_out_Gray == max_pixel_value_LR1)
+    print("\nNumber of max pixel value (", max_pixel_value_LR1, ")\n>", num_max_pixel_value_out, "(pixels)")
+    print("\nThe ratio at which pixel value finally reached", max_pixel_value_LR1, "\n>", round(num_max_pixel_value_out / N_all_nonzero * 100, 2), "(%)")
     print("\n")
 
     # Create figure
