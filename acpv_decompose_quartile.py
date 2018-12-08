@@ -70,20 +70,20 @@ def grayscale_hist(_img_rgb, _ax):
 
 
 
-def plot_histogram(_p_final, _img_in_RGB, _img_out_RGB):
+def plot_histogram(_p_final, _img_in_RGB, _img_out_RGB, _title):
     fig = plt.figure(figsize=(10,12))
     gs = gridspec.GridSpec(3,2)
     x = np.arange(256)
 
     # Input image
     ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title('Input image')
+    ax1.set_title('Input image('+_title+')')
     ax1.imshow(_img_in_RGB)
     ax1.set_xticks([]), ax1.set_yticks([]) # off scale
 
     # Output image
     ax3 = fig.add_subplot(gs[0,1])
-    ax3.set_title('Output image')
+    ax3.set_title('Corrected image('+_title+')')
     ax3.imshow(_img_out_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
@@ -209,23 +209,19 @@ print("\nN_theor_high(",ratio_for_high*100,"%)\n>", N_theor_high, "(pixels) (=",
 # -----  Correct pixel value -----
 # --------------------------------
 def correct_pixel_value(_rgb_img, _param):
-    red   = cv2.multiply(_rgb_img[:, :, 0], _param) # R
-    green = cv2.multiply(_rgb_img[:, :, 1], _param) # G
-    blue  = cv2.multiply(_rgb_img[:, :, 2], _param) # B
-
     # Apply change
     corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
-    corrected_img_RGB[:, :, 0] = red
-    corrected_img_RGB[:, :, 1] = green
-    corrected_img_RGB[:, :, 2] = blue
+    corrected_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _param) # R
+    corrected_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _param) # G
+    corrected_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _param) # B
 
     return corrected_img_RGB
 
 
 
-# ----------------------------------
-# ----- Calc parameter for low -----
-# ----------------------------------
+# ----------------------------------------------------
+# ----- Calc parameter for low pixel value image -----
+# ----------------------------------------------------
 p = p_init
 count = 0
 target_pixel_value = 236
@@ -249,9 +245,9 @@ low_img_out_RGB = correct_pixel_value(low_img_in_RGB, p_final_low)
 
 
 
-# -----------------------------------
-# ----- Calc parameter for high -----
-# -----------------------------------
+# -----------------------------------------------------
+# ----- Calc parameter for high pixel value image -----
+# -----------------------------------------------------
 p = p_init
 count_equal_255 = 0
 while count_equal_255 < N_theor_high:
@@ -285,9 +281,9 @@ img_out_RGB = cv2.scaleAdd(low_img_out_RGB, 1.0, high_img_out_RGB)
 # -----------------------------------------
 # ----- Apply tone curve with p_final -----
 # -----------------------------------------
-plot_histogram(p_final_low, low_img_in_RGB, low_img_out_RGB)
-plot_histogram(p_final_high, high_img_in_RGB, high_img_out_RGB)
-plot_histogram(None, img_in_RGB, img_out_RGB)
+plot_histogram(p_final_low, low_img_in_RGB, low_img_out_RGB, "Low")
+plot_histogram(p_final_high, high_img_in_RGB, high_img_out_RGB, "High")
+plot_histogram("corrected", img_in_RGB, img_out_RGB, "")
 
 
 
@@ -297,24 +293,24 @@ plot_histogram(None, img_in_RGB, img_out_RGB)
 #plt.show()
 
 # Convert color (RGB → BGR)
-img_in_BGR = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
-img_out_BGR_low  = cv2.cvtColor(low_img_out_RGB, cv2.COLOR_RGB2BGR)
-img_out_BGR_high = cv2.cvtColor(high_img_out_RGB, cv2.COLOR_RGB2BGR)
-img_out_BGR = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
-input_img_name = "images/input.jpg"
-low_output_img_name  = "images/low_improved_"+str(p_final_low)+"_"+str(ratio_for_low)+".jpg"
-high_output_img_name = "images/high_improved_"+str(p_final_high)+"_"+str(ratio_for_high)+".jpg"
-output_img_name = "images/improved_low-"+str(p_final_low)+"_high-"+str(p_final_high)+".jpg"
+img_in_BGR              = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR)
+img_out_BGR_low         = cv2.cvtColor(low_img_out_RGB, cv2.COLOR_RGB2BGR)
+img_out_BGR_high        = cv2.cvtColor(high_img_out_RGB, cv2.COLOR_RGB2BGR)
+img_out_BGR             = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
+input_img_name          = "images/input.jpg"
+low_output_img_name     = "images/low_improved_"+str(p_final_low)+"_"+str(ratio_for_low)+".jpg"
+high_output_img_name    = "images/high_improved_"+str(p_final_high)+"_"+str(ratio_for_high)+".jpg"
+output_img_name         = "images/improved_low-"+str(p_final_low)+"_high-"+str(p_final_high)+".jpg"
 cv2.imwrite(input_img_name, img_in_BGR)
 cv2.imwrite(low_output_img_name, img_out_BGR_low)
 cv2.imwrite(high_output_img_name, img_out_BGR_high)
 cv2.imwrite(output_img_name, img_out_BGR)
 
 # Save low and high images
-low_img_in_BGR = cv2.cvtColor(low_img_in_RGB, cv2.COLOR_RGB2BGR)
+low_img_in_BGR  = cv2.cvtColor(low_img_in_RGB, cv2.COLOR_RGB2BGR)
 high_img_in_BGR = cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2BGR)
-low_img_name = "images/low.jpg"
-high_img_name = "images/high.jpg"
+low_img_name    = "images/low.jpg"
+high_img_name   = "images/high.jpg"
 cv2.imwrite(low_img_name, low_img_in_BGR)
 cv2.imwrite(high_img_name, high_img_in_BGR)
 

@@ -38,7 +38,7 @@ print("\nreference_section\n>",         reference_section, "(", reference_sectio
 
 
 # RGB histogram
-def rgb_hist(_img_rgb, _ax):
+def rgb_hist(_img_rgb, _ax, _title):
     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
@@ -47,20 +47,21 @@ def rgb_hist(_img_rgb, _ax):
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
     _ax.legend()
 
-    _ax.set_title('RGB histogram')
+    _ax.set_title('RGB histogram('+_title+')')
+    _ax.set_xlim([-5,260])
     
     return _ax
 
 
 
 # Grayscale histogram
-def grayscale_hist(_img_rgb, _ax):
+def grayscale_hist(_img_rgb, _ax, _title):
     img_Gray = cv2.cvtColor(_img_rgb, cv2.COLOR_RGB2GRAY)
     img_Gray_nonzero = img_Gray[img_Gray > 0]
     _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black', alpha=1.0)
 
-    _ax.set_title('Grayscale histogram')
-    #_ax.set_xlim([-5,260])
+    _ax.set_title('Grayscale histogram('+_title+')')
+    _ax.set_xlim([-5,260])
     
     return _ax
 
@@ -78,19 +79,19 @@ def comparative_hist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     
     # input image(LR=1)
     mean_in_LR1 = int(np.mean(img_in_Gray_LR1_nonzero))
-    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.6, label="Input image (LR=1)", color='#1F77B4')
+    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.5, label="Input image (LR=1)", color='#1F77B4')
     _ax.axvline(mean_in_LR1, color='#1F77B4')
     _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
 
     # input image
     mean_in = int(np.mean(img_in_Gray_nonzero))
-    _ax.hist(img_in_Gray_nonzero.ravel(), bins=50, alpha=0.6, label="Input image", color='#FF7E0F')
+    _ax.hist(img_in_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
     _ax.axvline(mean_in, color='#FF7E0F')
     _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
 
     # corrected image
     mean_out = int(np.mean(img_out_Gray_nonzero))
-    _ax.hist(img_out_Gray_nonzero.ravel(), bins=50, alpha=0.6, label="Corrected image", color='#2C9F2C')
+    _ax.hist(img_out_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Corrected image", color='#2C9F2C')
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
@@ -126,15 +127,15 @@ def plot_histogram(_img_in_RGB_LR1,  _img_in_RGB, _img_out_RGB, _median_bw_stand
 
     # Histogram(input image(LR=1))
     ax4 = fig.add_subplot(gs[1,0])
-    ax4 = grayscale_hist(_img_in_RGB_LR1, ax4)
+    ax4 = grayscale_hist(_img_in_RGB_LR1, ax4, "Input image (LR=1)")
     
     # Histogram(input image)
     ax5 = fig.add_subplot(gs[1,1])
-    ax5 = rgb_hist(_img_in_RGB, ax5)
+    ax5 = rgb_hist(_img_in_RGB, ax5, "Input image")
 
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
-    ax6 = rgb_hist(_img_out_RGB, ax6)
+    ax6 = rgb_hist(_img_out_RGB, ax6, "Corrected image")
 
     # Unify ylim b/w input image and corrected image
     hist_in_LR1, bins_in_LR1 = np.histogram(_img_in_RGB_LR1[_img_in_RGB_LR1>0], 50)
