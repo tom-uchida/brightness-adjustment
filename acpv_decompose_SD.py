@@ -21,6 +21,9 @@ plt.rc('grid', color='w', linestyle='solid')
 plt.rc('patch', edgecolor='#E6E6E6')
 plt.rc('lines', linewidth=2)
 
+plt.rcParams["mathtext.fontset"] = "stix"
+plt.rcParams["mathtext.rm"] = "Times New Roman"
+
 
 
 # ---------------------------------
@@ -32,11 +35,11 @@ input_image_data_LR1    = args[2]
 p_init                  = 1.0
 p_interval              = 0.01
 reference_section       = 0.1 # 10%
-print("input_image_data\n>",        input_image_data, "(args[1])")
-print("\ninput_image_data(LR=1)\n>",  input_image_data_LR1, "(args[2])")
-print("\np_init\n>",                p_init)
-print("\np_interval\n>",            p_interval)
-print("\nreference_section\n>",      reference_section*100, "(%)")
+print("input_image_data\n>",            input_image_data, "(args[1])")
+print("\ninput_image_data(LR=1)\n>",    input_image_data_LR1, "(args[2])")
+print("\np_init\n>",                    p_init)
+print("\np_interval\n>",                p_interval)
+print("\nreference_section\n>",         reference_section*100, "(%)")
 
 
 
@@ -53,79 +56,182 @@ def readImage(_img_name):
 
 
 # RGB histogram
-def rgbHist(_img_rgb, _ax):    
-    R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
-    G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
-    B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
-    _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
-    _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
-    _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
-    _ax.legend()
+# def rgbHist(_img_rgb, _ax):    
+#     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
+#     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
+#     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
+#     _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
+#     _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
+#     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
+#     _ax.legend()
 
-    _ax.set_title('RGB histogram')
-    _ax.set_xlim([-5, 260])
+#     _ax.set_title('RGB histogram')
+#     _ax.set_xlim([-5, 260])
     
-    return _ax
+#     return _ax
 
 
 
 # Grayscale histogram
-def grayscaleHist(_img_rgb, _ax):    
-    img_Gray = cv2.cvtColor(_img_rgb, cv2.COLOR_RGB2GRAY)
-    img_Gray_nonzero = img_Gray[img_Gray > 0]
+def grayscaleHist(_img_Gray, _ax, _title):    
+    img_Gray_nonzero = _img_Gray[_img_Gray > 0]
     _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black')
 
-    _ax.set_title('Grayscale histogram')
+    _ax.set_title('Histogram ('+_title+')')
     _ax.set_xlim([-5, 260])
     
     return _ax
 
 
 
-# Create histogram
-def plotHistogram(_p_final, _img_in_RGB, _img_out_RGB, _title):
-    fig = plt.figure(figsize=(10,12))
-    gs = gridspec.GridSpec(3,2)
+# Histograms of Input(LR=1), Input and Corrected
+def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
+    # Convert RGB to Grayscale
+    img_in_Gray_LR1         = cv2.cvtColor(_img_in_rgb_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_LR1_nonzero = img_in_Gray_LR1[img_in_Gray_LR1 > 0]
+    img_in_Gray             = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_nonzero     = img_in_Gray[img_in_Gray > 0]
+    img_out_Gray            = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
+    img_out_Gray_nonzero    = img_out_Gray[img_out_Gray > 0]
+    
+    # Input image(LR=1)
+    mean_in_LR1 = int(np.mean(img_in_Gray_LR1_nonzero))
+    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
+    _ax.axvline(mean_in_LR1, color='#1F77B4')
+    _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
+
+    # Input image
+    mean_in = int(np.mean(img_in_Gray_nonzero))
+    _ax.hist(img_in_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
+    _ax.axvline(mean_in, color='#FF7E0F')
+    _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
+
+    # Corrected image
+    mean_out = int(np.mean(img_out_Gray_nonzero))
+    _ax.hist(img_out_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Corrected image", color='#2C9F2C')
+    _ax.axvline(mean_out, color='#2C9F2C')
+    _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
+
+    _ax.set_title('Comparative histogram')
+    _ax.set_xlabel("Pixel value")
+    _ax.set_ylabel("Number of pixels")
+    _ax.legend(fontsize='12')
+    
+    return _ax
+
+
+
+# Create histogram (Low, High)
+def plotHist4LowAndHighImage(_p_final, _img_in_RGB, _img_out_RGB, _title, _ylim):
+    # Convert RGB to Grayscale
+    img_in_Gray = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    img_out_Gray = cv2.cvtColor(_img_out_RGB, cv2.COLOR_RGB2GRAY)
+
+    fig = plt.figure(figsize=(10,7))
+    gs = gridspec.GridSpec(2,2)
 
     # Input image
     ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title('Input image'+_title)
+    ax1.set_title('Input image'+' ('+_title+')')
     ax1.imshow(_img_in_RGB)
     ax1.set_xticks([]), ax1.set_yticks([]) # off scale
 
-    # Output image
-    ax3 = fig.add_subplot(gs[0,1])
-    ax3.set_title('Corrected image'+_title)
+    # Corrected image
+    ax2 = fig.add_subplot(gs[0,1])
+    ax2.set_title('Corrected image'+' ('+_title+')')
+    ax2.imshow(_img_out_RGB)
+    ax2.set_xticks([]), ax2.set_yticks([])
+
+    # Grayscale histogram(Input image)
+    ax3 = fig.add_subplot(gs[1,0])
+    ax3 = grayscaleHist(img_in_Gray, ax3, "Input image")
+
+    # Grayscale histogram(Corrected image)
+    ax4 = fig.add_subplot(gs[1,1])
+    ax4 = grayscaleHist(img_out_Gray, ax4, "Corrected image")
+
+    # Unify ylim b/w input image and corrected image
+    ax3.set_ylim([0, _ylim])
+    ax4.set_ylim([0, _ylim])
+
+    # Draw line
+    ax3.axvline(boundary_pixel_value, color='red')
+    ax3.text(boundary_pixel_value+5, _ylim*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax4.axvline(boundary_pixel_value, color='red')
+    ax4.text(boundary_pixel_value+5, _ylim*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+
+    # Save figure
+    fig_name = "images/figure_"+str(_p_final)+"_"+str(_title)+".png"
+    plt.savefig(fig_name)
+
+
+
+# Create histogram (Input(LR1), Input, Corrected)
+def plotHist4LR1AndInAndOut(_p_final, _img_in_RGB_LR1, _img_in_RGB, _img_out_RGB):
+    # Convert RGB to Grayscale
+    img_in_Gray_LR1 = cv2.cvtColor(_img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray     = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    img_out_Gray    = cv2.cvtColor(_img_out_RGB, cv2.COLOR_RGB2GRAY)
+
+    fig = plt.figure(figsize=(12,10)) # (wdith, height)
+    gs = gridspec.GridSpec(3,3)
+
+    # Input image(LR=1)
+    ax1 = fig.add_subplot(gs[0,0])
+    ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
+    ax1.imshow(_img_in_RGB_LR1)
+    ax1.set_xticks([]), ax1.set_yticks([])
+
+    # Input image
+    ax2 = fig.add_subplot(gs[0,1])
+    ax2.set_title('Input image')
+    ax2.imshow(_img_in_RGB)
+    ax2.set_xticks([]), ax2.set_yticks([]) # off scale
+
+    # Corrected image
+    ax3 = fig.add_subplot(gs[0,2])
+    ax3.set_title('Corrected image')
     ax3.imshow(_img_out_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
-    # Grayscale Histogram(input image)
+    # Grayscale histogram(Input image(LR=1))
     ax4 = fig.add_subplot(gs[1,0])
-    ax4 = grayscaleHist(_img_in_RGB, ax4)
+    ax4 = grayscaleHist(img_in_Gray_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
 
-    # Grayscale Histogram(output image)
+    # Grayscale histogram(Input image)
     ax5 = fig.add_subplot(gs[1,1])
-    ax5 = grayscaleHist(_img_out_RGB, ax5)
+    ax5 = grayscaleHist(img_in_Gray, ax5, "Input image")
+
+    # Grayscale histogram(Corrected image)
+    ax6 = fig.add_subplot(gs[1,2])
+    ax6 = grayscaleHist(img_out_Gray, ax6, "Corrected image")
+
+    # Unify ylim b/w input image and corrected image
+    hist_in_LR1, bins_in_LR1    = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1>0],  50)
+    hist_in, bins_in            = np.histogram(img_in_Gray[img_in_Gray>0],          50)
+    hist_out, bins_out          = np.histogram(img_out_Gray[img_out_Gray>0],        50)
+    list_gray_max = [max(hist_in_LR1), max(hist_in), max(hist_out)]
+    ax4.set_ylim([0, max(list_gray_max)*1.1])
+    ax5.set_ylim([0, max(list_gray_max)*1.1])
+    ax6.set_ylim([0, max(list_gray_max)*1.1])
     
-    # RGB Histogram(input image)
-    ax6 = fig.add_subplot(gs[2,0])
-    ax6 = rgbHist(_img_in_RGB, ax6)
+    # Comparative histogram (Input(LR1), Input, Corrected)
+    ax7 = fig.add_subplot(gs[2,:])
+    ax7 = comparativeHist(_img_in_RGB_LR1, _img_in_RGB, _img_out_RGB, ax7, max(list_gray_max)*1.1)
+    ax7.set_ylim([0, max(list_gray_max)*1.1])
 
-    # RGB Histogram(output image)
-    ax7 = fig.add_subplot(gs[2,1])
-    ax7 = rgbHist(_img_out_RGB, ax7)
+    # Draw line
+    ax5.axvline(boundary_pixel_value, color='red')
+    ax5.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax6.axvline(boundary_pixel_value, color='red')
+    ax6.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
 
-    # Unify ylim b/w input image and improved image
-    hist_in, bins_in    = np.histogram(_img_in_RGB[_img_in_RGB>0], 50)
-    hist_out, bins_out  = np.histogram(_img_out_RGB[_img_out_RGB>0], 50)
-    list_rgb_max        = [max(hist_in), max(hist_out)]
-    ax4.set_ylim([0, max(list_rgb_max)/2.3])
-    ax5.set_ylim([0, max(list_rgb_max)/2.3])
-    ax6.set_ylim([0, max(list_rgb_max)/2.3])
-    ax7.set_ylim([0, max(list_rgb_max)/2.3])
-
-    fig_name = "images/figure_"+str(_p_final)+"_"+str(_title)+".png"
+    # Save figure
+    fig_name = "images/figure_"+str(_p_final)+".png"
     plt.savefig(fig_name)
+
+    # return ylim
+    return max(list_gray_max)*1.1
 
 
 
@@ -141,9 +247,9 @@ def preProcess():
     # ------ Input image -----
     # ------------------------
     print("\n-----", args[1], "-----")
-    # Then, calc number of pixels that pixel value is not 0
-    N_all_nonzero   = np.sum(img_in_Gray > 0)
-    print("\nN_all_nonzero\n>", N_all_nonzero, "(pixels)")
+    # Calc number of pixels that pixel value is not 0
+    N_all_nonzero = np.sum(img_in_Gray > 0)
+    print("N_all_nonzero\n>", N_all_nonzero, "(pixels)")
 
     # Calc mean pixel value of the input image
     img_in_Gray_nonzero = img_in_Gray[img_in_Gray > 0]
@@ -250,7 +356,7 @@ def decomposeImage(_boundary_pixel_value):
     low_index_bool  =  img_in_Gray <= _boundary_pixel_value
     high_index_bool =  ~low_index_bool
 
-    # Sepate the input image into R,G,B channel
+    # Separate the input image into R,G,B channel
     img_in_R, img_in_G, img_in_B = img_in_RGB[:,:,0], img_in_RGB[:,:,1], img_in_RGB[:,:,2]
 
     # Apply decomposition
@@ -360,9 +466,9 @@ def saveCorrectedImages():
     img_out_BGR_high        = cv2.cvtColor(high_img_out_RGB, cv2.COLOR_RGB2BGR)
     img_out_BGR             = cv2.cvtColor(img_out_RGB, cv2.COLOR_RGB2BGR)
     input_img_name          = "images/input.jpg"
-    low_output_img_name     = "images/low_improved_"+str(p_final_low)+".jpg"
-    high_output_img_name    = "images/high_improved_"+str(p_final_high)+".jpg"
-    output_img_name         = "images/improved_low-"+str(p_final_low)+"_high-"+str(p_final_high)+".jpg"
+    low_output_img_name     = "images/low_corrected_"+str(p_final_low)+".jpg"
+    high_output_img_name    = "images/high_corrected_"+str(p_final_high)+".jpg"
+    output_img_name         = "images/corrected_low-"+str(p_final_low)+"_high-"+str(p_final_high)+".jpg"
     cv2.imwrite(input_img_name, img_in_BGR)
     cv2.imwrite(low_output_img_name, img_out_BGR_low)
     cv2.imwrite(high_output_img_name, img_out_BGR_high)
@@ -384,14 +490,15 @@ if __name__ == "__main__":
     img_in_RGB_LR1  = readImage(args[2])
 
     # Convert RGB image to Grayscale image
-    img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_LR1 = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray     = cv2.cvtColor(img_in_RGB,      cv2.COLOR_RGB2GRAY)
+    img_in_Gray_LR1 = cv2.cvtColor(img_in_RGB_LR1,  cv2.COLOR_RGB2GRAY)
 
     # Pre-process
     N_all_nonzero, N_all_nonzero_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1, mean, mean_LR1, sd, sd_LR1 = preProcess()
 
     # Decompose input image
-    low_img_in_RGB, high_img_in_RGB = decomposeImage(mean+sd*2)
+    boundary_pixel_value = mean+sd*2
+    low_img_in_RGB, high_img_in_RGB = decomposeImage(boundary_pixel_value)
 
     # Correct low and high pixel value images
     low_img_out_RGB, p_final_low   = determineParameter4LowPixelValueImage(mean_LR1+sd_LR1*2)
@@ -401,9 +508,11 @@ if __name__ == "__main__":
     img_out_RGB = synthesizeLowAndHighPixelValueImages()
 
     # Create figure with p_final
-    plotHistogram(p_final_low,  low_img_in_RGB,     low_img_out_RGB,    "(Low)")
-    plotHistogram(p_final_high, high_img_in_RGB,    high_img_out_RGB,   "(High)")
-    plotHistogram("corrected",  img_in_RGB,         img_out_RGB,        "")
+    ylim = plotHist4LR1AndInAndOut("corrected", img_in_RGB_LR1, img_in_RGB, img_out_RGB)
+    plotHist4LowAndHighImage(p_final_low,  low_img_in_RGB,     low_img_out_RGB,    "Low",   ylim)
+    plotHist4LowAndHighImage(p_final_high, high_img_in_RGB,    high_img_out_RGB,   "High",  ylim)
+
+    
 
     # Save corrected images
     saveCorrectedImages()

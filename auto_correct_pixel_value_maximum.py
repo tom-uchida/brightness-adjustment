@@ -22,6 +22,9 @@ plt.rc('grid', color='w', linestyle='solid')
 plt.rc('patch', edgecolor='#E6E6E6')
 plt.rc('lines', linewidth=2)
 
+plt.rcParams["mathtext.fontset"] = "stix"
+plt.rcParams["mathtext.rm"] = "Times New Roman"
+
 
 
 # Set initial parameter
@@ -47,7 +50,7 @@ def rgb_hist(_img_rgb, _ax, _title):
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
     _ax.legend()
 
-    _ax.set_title('RGB histogram('+_title+')')
+    _ax.set_title('RGB histogram ('+_title+')')
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -60,7 +63,7 @@ def grayscale_hist(_img_rgb, _ax, _title):
     img_Gray_nonzero = img_Gray[img_Gray > 0]
     _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black', alpha=1.0)
 
-    _ax.set_title('Grayscale histogram('+_title+')')
+    _ax.set_title('Histogram ('+_title+')')
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -79,7 +82,7 @@ def comparative_hist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     
     # input image(LR=1)
     mean_in_LR1 = int(np.mean(img_in_Gray_LR1_nonzero))
-    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.5, label="Input image (LR=1)", color='#1F77B4')
+    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
     _ax.axvline(mean_in_LR1, color='#1F77B4')
     _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
 
@@ -95,21 +98,22 @@ def comparative_hist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
-    _ax.set_title('Comparative grayscale histograms')
-    _ax.legend()
+    _ax.set_title('Comparative histogram')
+    _ax.set_xlabel("Pixel value")
+    _ax.set_ylabel("Number of pixels")
+    _ax.legend(fontsize='12')
     
     return _ax
 
 
 
-def plot_histogram(_img_in_RGB_LR1,  _img_in_RGB, _img_out_RGB, _median_bw_standard_255_LR1=None, _standard_pixel_value_LR1=None):
+def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_out_RGB, _median_bw_standard_255_LR1=None, _standard_pixel_value_LR1=None):
     fig = plt.figure(figsize=(10, 10))
     gs = gridspec.GridSpec(3,3)
-    x = np.arange(256)
 
     # Input image(LR=1)
     ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title('Input image (LR=1)')
+    ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
     ax1.imshow(_img_in_RGB_LR1)
     ax1.set_xticks([]), ax1.set_yticks([])
 
@@ -127,15 +131,17 @@ def plot_histogram(_img_in_RGB_LR1,  _img_in_RGB, _img_out_RGB, _median_bw_stand
 
     # Histogram(input image(LR=1))
     ax4 = fig.add_subplot(gs[1,0])
-    ax4 = grayscale_hist(_img_in_RGB_LR1, ax4, "Input image (LR=1)")
+    ax4 = grayscale_hist(_img_in_RGB_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
     
     # Histogram(input image)
     ax5 = fig.add_subplot(gs[1,1])
-    ax5 = rgb_hist(_img_in_RGB, ax5, "Input image")
+    # ax5 = rgb_hist(_img_in_RGB, ax5, "Input image")
+    ax5 = grayscale_hist(_img_in_RGB, ax5, "Input image")
 
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
-    ax6 = rgb_hist(_img_out_RGB, ax6, "Corrected image")
+    # ax6 = rgb_hist(_img_out_RGB, ax6, "Corrected image")
+    ax6 = grayscale_hist(_img_out_RGB, ax6, "Corrected image")
 
     # Unify ylim b/w input image and corrected image
     hist_in_LR1, bins_in_LR1 = np.histogram(_img_in_RGB_LR1[_img_in_RGB_LR1>0], 50)
@@ -154,7 +160,7 @@ def plot_histogram(_img_in_RGB_LR1,  _img_in_RGB, _img_out_RGB, _median_bw_stand
     if _median_bw_standard_255_LR1 is not None:
         # Draw line
         ax4.axvline(_median_bw_standard_255_LR1, color='black', alpha=0.5)
-        ax4.text(_median_bw_standard_255_LR1-100, max(list_max)/2.5*0.7, "median:"+str(_median_bw_standard_255_LR1), color='black')
+        ax4.text(_median_bw_standard_255_LR1-110, max(list_max)/2.5*0.7, "median:"+str(_median_bw_standard_255_LR1), color='black', fontsize='12')
 
         # Draw rectangle
         rect = plt.Rectangle((_standard_pixel_value_LR1, 0), 254-_standard_pixel_value_LR1, max(list_max)/2.5, fc='black', alpha=0.3)
