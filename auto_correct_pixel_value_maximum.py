@@ -184,8 +184,8 @@ def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_p
     # If max pixel value is less than 255 (LR=1)
     elif _standard_pixel_value_LR1 is not None:
         # Draw text
-        x = (_standard_pixel_value_LR1+max_pixel_value_LR1)*0.5 - 40
-        text = str(_standard_pixel_value_LR1) + "~" + str(max_pixel_value_LR1)
+        x = (_standard_pixel_value_LR1+max_pixel_value_LR1)*0.5 - 100
+        text = "["+str(_standard_pixel_value_LR1)+", "+str(max_pixel_value_LR1)+"]\n→ "+str(reference_section_for_correction*100)+"(%)"
         ax4.text(x, max(list_max)*1.1*0.7, text, color='black', fontsize='12')
 
         # Draw rectangle
@@ -247,18 +247,17 @@ def preProcess():
 
 
 
-def determineCorrectionParameter_UsingSubstituion255(_ratio_max_pixel_value):
+def determineCorrectionParameter_UsingSubstituion255(_reference_section, _ratio_max_pixel_value):
     print("\n========================================================================================")
     print("** There is a possibility that pixel value \"255\" is too much in the input image(LR=1).")
 
     # Set reference section for searching substituion of 255
-    reference_section = 0.1 # 10%
-    print("** reference_section\n>", reference_section, "(", reference_section*100, "(%) )")
+    print("** reference_section\n>", _reference_section, "(", _reference_section*100, "(%) )")
             
     # Determine standard pixel value in the input image(LR=1)
     tmp_reference_section = 0.0
     standard_pixel_value_LR1 = 254
-    while tmp_reference_section < reference_section:
+    while tmp_reference_section < _reference_section:
         # Temporarily, calc
         sum_pixels_in_section = np.sum( (standard_pixel_value_LR1 <= img_in_Gray_LR1) & (img_in_Gray_LR1 < 255) )
         tmp_reference_section = sum_pixels_in_section / N_all_nonzero_LR1
@@ -311,18 +310,17 @@ def determineCorrectionParameter_UsingSubstituion255(_ratio_max_pixel_value):
 
 
 
-def determineCorrectionParameter_UsingSection():
+def determineCorrectionParameter_UsingSection(_reference_section_for_correction):
     print("\n====================================================================")
     print("** The max pixel value is less than \"255\" in the input image(LR=1).")
 
     # Set reference section for searching substituion of 255
-    reference_section_for_correction = 0.01 # 1%
-    print("\n** reference_section_for_correction\n>", reference_section_for_correction, "(", reference_section_for_correction*100, "(%) )")
+    print("\n** reference_section_for_correction\n>", _reference_section_for_correction, "(", _reference_section_for_correction*100, "(%) )")
 
     # Determine standard pixel value in the input image(LR=1)
     tmp_reference_section = 0.0
     standard_pixel_value_LR1 = max_pixel_value_LR1
-    while tmp_reference_section < reference_section_for_correction:
+    while tmp_reference_section < _reference_section_for_correction:
         # Temporarily, calc
         sum_pixels_in_section = np.sum( (standard_pixel_value_LR1 <= img_in_Gray_LR1) )
         tmp_reference_section = sum_pixels_in_section / N_all_nonzero_LR1
@@ -338,14 +336,14 @@ def determineCorrectionParameter_UsingSection():
 
     print("\n** Reference section")
     print("** >", standard_pixel_value_LR1, "(pixel value) ~", max_pixel_value_LR1, "(pixel value)")
-    print("** >", reference_section_for_correction*100, "(%)")
+    print("** >", _reference_section_for_correction*100, "(%)")
 
     print("====================================================================")
 
     # Determine parameter
     p = p_init
     tmp_ratio = 0.0
-    while tmp_ratio < reference_section_for_correction:
+    while tmp_ratio < _reference_section_for_correction:
         # Temporarily, correct input image with p
         tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
         tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
@@ -447,18 +445,19 @@ if __name__ == "__main__":
 
     # Check whether the most frequent pixel value is 255 (LR=1)
     if most_frequent_pixel_value_LR1 == 255:
-        p_final, median_bw_standard_255_LR1, standard_pixel_value_LR1 = determineCorrectionParameter_UsingSubstituion255(ratio_max_pixel_value)
+        reference_section = 0.1
+        p_final, median_bw_standard_255_LR1, standard_pixel_value_LR1 = determineCorrectionParameter_UsingSubstituion255(reference_section, ratio_max_pixel_value)
         img_corrected_RGB = correctPixelValue(p_final, standard_pixel_value_LR1, median_bw_standard_255_LR1)
 
     # Check whether the max pixel value is less than 255 (LR=1)
-    elif max_pixel_value_LR1 < 255:
-        p_final, standard_pixel_value_LR1 = determineCorrectionParameter_UsingSection()
+    elif max_pixel_value_LR1 <= 255:
+        reference_section_for_correction = 0.01 # 1%
+        p_final, standard_pixel_value_LR1 = determineCorrectionParameter_UsingSection(reference_section_for_correction)
         img_corrected_RGB = correctPixelValue(p_final, standard_pixel_value_LR1)
 
     else: # If (max_pixel_value_LR1 == 255) & (most_frequent_pixel_value_LR1 != 255) :
         p_final = determineCorrectionParameter(ratio_max_pixel_value)
         img_corrected_RGB = correctPixelValue(p_final)
-
 
     # Save figure and images
     saveFigureAndImages(p_final, img_in_RGB, img_corrected_RGB)

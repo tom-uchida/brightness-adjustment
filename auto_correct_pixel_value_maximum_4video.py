@@ -40,7 +40,7 @@ def write_img(_img_name, _i):
     # convert color (RGB → BGR)
     img_out_BGR = cv2.cvtColor(_img_name, cv2.COLOR_RGB2BGR)
 
-    img_name = "images/serial_number_images/corrected_image{0:03d}.bmp"
+    img_name = "images/serial_number_images/corrected_image{0:03d}.png"
 
     cv2.imwrite(img_name.format(_i), img_out_BGR)
 
@@ -51,7 +51,7 @@ def write_img(_img_name, _i):
 # -------------------------------------------
 # ----- Processing on input image(LR=1) -----
 # -------------------------------------------
-reference_section = 0.05 # 10%
+reference_section = 0.1 # 10%
 
 args = sys.argv
 img_in_RGB_LR1 = read_img(args[1])
@@ -124,36 +124,39 @@ if max_pixel_value_LR1 == 255:
 #           for all images in the directory -----
 # -----------------------------------------------
 #image_files = glob.glob("images/serial_number_images/*.bmp")
+#image_files = glob.glob("images/serial_number_images/Data_0.1t/data0/*.png")
+
+# Set initial parameter
+p_init = 1.0
+p_interval = 0.01
+p_final = 1.4 # 0.1:1.4 0.3:1.2
 
 img_count = 0
 #for i in image_files:
-for i in range(180):
+for i in range(24):
     # Read input image
     #img_in_RGB = read_img(i)
-    img_in_RGB = read_img("images/serial_number_images/image{0:03d}.bmp".format(i))
-
-    # Set initial parameter
-    p_init = 1.0
-    p_interval = 0.01
+    # img_in_RGB = read_img("images/serial_number_images/Data_0.1t/data0/image{0:03d}.bmp".format(i))
+    img_in_RGB = read_img("images/serial_number_images/Data_0.1t/data0/image{0:03d}.png".format(i))
 
     # Then, calc number of pixels that pixel value is not 0
     img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
     N_all_nonzero   = np.sum(img_in_Gray > 0)
 
     # Determine parameter
-    p = p_init
-    tmp_ratio_255 = 0.0
-    while tmp_ratio_255 < ratio_max_pixel_value:
-        tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
-        tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
+    # p = p_init
+    # tmp_ratio_255 = 0.0
+    # while tmp_ratio_255 < ratio_max_pixel_value:
+    #     tmp_corrected_img_RGB = correct_pixel_value(img_in_RGB, p)
+    #     tmp_corrected_img_Gray = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
-        # Temporarily, calc ratio of pixel value 255
-        tmp_ratio_255 = np.sum(tmp_corrected_img_Gray == 255) / N_all_nonzero
+    #     # Temporarily, calc ratio of pixel value 255
+    #     tmp_ratio_255 = np.sum(tmp_corrected_img_Gray == 255) / N_all_nonzero
 
-        # Update parameter
-        p += p_interval
+    #     # Update parameter
+    #     p += p_interval
 
-    p_final = round(p, 2)
+    # p_final = round(p, 2)
 
     # Make output image
     img_out_RGB = correct_pixel_value(img_in_RGB, p_final)
@@ -164,6 +167,9 @@ for i in range(180):
     # Update image count
     img_count += 1
 
-    if i == 179:
-        print("\nNumber of input images\n>", i+1)
-        print("\n")
+    # if i == 179:
+    #     print("\nNumber of input images\n>", i+1)
+    #     print("\n")
+
+print("\nNumber of input images\n>", img_count)
+print("\n")

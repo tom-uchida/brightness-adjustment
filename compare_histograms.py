@@ -64,8 +64,10 @@ def show_img(_i, _img, _img_name):
 
 # show_img(0, img_1,  "Input image")
 # show_img(1, img_2,  "Input image (LR=1)")
-show_img(0, img_1,  "Simple")
-show_img(1, img_2,  "Decomposition")
+# show_img(0, img_1,  "Simple")
+# show_img(1, img_2,  "Decomposition")
+show_img(0, img_1,  "Image(2D)")
+show_img(1, img_2,  "Point Cloud(3D)")
 
 
 
@@ -109,8 +111,10 @@ get_data_of_pixel_value(img_2_gray_nonzero)
 # ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Input image (LR=1)")
 # ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Input image (LR=1)")
 # ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
-ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple")
-ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition")
+# ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple")
+# ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition")
+ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Image(2D)")
+ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Point Cloud(3D)")
 # R_nonzero = img_2[:,:,0][img_2[:,:,0] > 0]
 # G_nonzero = img_2[:,:,1][img_2[:,:,1] > 0]
 # B_nonzero = img_2[:,:,2][img_2[:,:,2] > 0]
@@ -134,13 +138,13 @@ ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Dec
 # rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax[2].transAxes, fc='black', alpha=0.3)
 # ax[2].add_patch(rect)
 
-ax[2].set_title("Comparative histograms", fontsize=12)
-ax[2].set_xlabel("Pixel value", fontsize=12)
-ax[2].set_ylabel("Number of pixels", fontsize=12)
+ax[2].set_title("Comparative histograms")
+ax[2].set_xlabel("Pixel value")
+ax[2].set_ylabel("Number of pixels")
 ax[2].set_xlim([-5, 260])
 #ax[2].set_ylim([0, 750000])
 #plt.grid()
-ax[2].legend(fontsize=12)
+ax[2].legend()
 
 #fig.show()
 plt.show()

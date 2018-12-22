@@ -156,14 +156,14 @@ def plotHist4LowAndHighImage(_p_final, _img_in_RGB, _img_out_RGB, _title, _ylim,
 
     # Draw libe (boundary_pixel_value)
     ax3.axvline(boundary_pixel_value, color='red')
-    ax3.text(boundary_pixel_value+5, _ylim*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax3.text(boundary_pixel_value+5, _ylim*0.6, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
     ax4.axvline(boundary_pixel_value, color='red')
-    ax4.text(boundary_pixel_value+5, _ylim*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax4.text(boundary_pixel_value+5, _ylim*0.6, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
 
     # Draw line (target_pixel_value_for_low)
-    if _isLow:
-        ax4.axvline(target_pixel_value_for_low, color='blue')
-        ax4.text(target_pixel_value_for_low+5, _ylim*0.7, "target(low):"+str(target_pixel_value_for_low), color='blue', fontsize='12')
+    # if _isLow:
+    #     ax4.axvline(target_pixel_value_for_low, color='blue')
+    #     ax4.text(target_pixel_value_for_low-80, _ylim*0.7, "target:"+str(target_pixel_value_for_low), color='blue', fontsize='12')
 
     # Save figure
     fig_name = "images/figure_"+str(_p_final)+"_"+str(_title)+".png"
@@ -227,11 +227,11 @@ def plotHist4LR1AndInAndOut(_p_final, _img_in_RGB_LR1, _img_in_RGB, _img_out_RGB
 
     # Draw line
     ax4.axvline(target_pixel_value_for_low, color='blue')
-    ax4.text(target_pixel_value_for_low+5, max(list_gray_max)*1.1*0.7, "target(low):"+str(target_pixel_value_for_low), color='blue', fontsize='12')
+    #ax4.text(target_pixel_value_for_low-100, max(list_gray_max)*1.1*0.7, "target(low):"+str(target_pixel_value_for_low), color='blue', fontsize='12')
     ax5.axvline(boundary_pixel_value, color='red')
-    ax5.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax5.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.6, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
     ax6.axvline(boundary_pixel_value, color='red')
-    ax6.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.7, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
+    ax6.text(boundary_pixel_value+5, max(list_gray_max)*1.1*0.6, "boundary:"+str(boundary_pixel_value), color='red', fontsize='12')
 
     # Save figure
     fig_name = "images/figure_"+str(_p_final)+".png"
@@ -399,14 +399,16 @@ def correctPixelValue(_rgb_img, _param):
 def determineParameter4LowPixelValueImage(_target_pixel_value):
     p = p_init
     tmp_ratio = 0.0
-    ratio_target_pixel_value = np.sum(img_in_Gray_LR1 == _target_pixel_value) / N_all_nonzero_LR1
+    ratio_target_pixel_value_LR1 = np.sum(img_in_Gray_LR1 == _target_pixel_value) / N_all_nonzero_LR1
 
-    while tmp_ratio <= ratio_target_pixel_value:
+    #while tmp_ratio <= ratio_target_pixel_value_LR1:
+    while tmp_ratio <= ratio_max_pixel_value_LR1:
         tmp_img_RGB     = correctPixelValue(low_img_in_RGB, p)
         tmp_img_Gray    = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
 
         # Temporarily, calc ratio of the target pixel value
-        tmp_ratio = np.sum(_target_pixel_value <= tmp_img_Gray) / N_all_nonzero
+        #tmp_ratio = np.sum(_target_pixel_value <= tmp_img_Gray) / N_all_nonzero
+        tmp_ratio = np.sum(max_pixel_value_LR1 <= tmp_img_Gray) / N_all_nonzero
         
         # Update parameter
         p += p_interval
@@ -415,7 +417,7 @@ def determineParameter4LowPixelValueImage(_target_pixel_value):
     p_final_low = round(p, 2)
     print("\n\n===== Result for \"low pixel value image\" =====")
     print("target_pixel_value\n>", _target_pixel_value)
-    print("\nratio_target_pixel_value\n>", ratio_target_pixel_value, " (", round(ratio_target_pixel_value*100, 2), "(%) )")
+    print("\nratio_target_pixel_value_LR1\n>", ratio_target_pixel_value_LR1, " (", round(ratio_target_pixel_value_LR1*100, 2), "(%) )")
     print("\np_final_low\n>", p_final_low)
 
     # Make low corrected image
@@ -434,8 +436,8 @@ def determineParameter4HighPixelValueImage():
     p = p_init
     tmp_ratio = 0.0
     while tmp_ratio <= ratio_max_pixel_value_LR1:
-        tmp_img_RGB     = correctPixelValue(high_img_in_RGB, p)
-        tmp_img_Gray    = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
+        tmp_img_RGB  = correctPixelValue(high_img_in_RGB, p)
+        tmp_img_Gray = cv2.cvtColor(tmp_img_RGB, cv2.COLOR_RGB2GRAY)
 
         # Temporarily, calc ratio of the max pixel value(LR=1)
         tmp_ratio = np.sum(max_pixel_value_LR1 <= tmp_img_Gray) / N_all_nonzero
@@ -520,8 +522,11 @@ if __name__ == "__main__":
     # Correct low and high pixel value images
     third_quater = int(stats.scoreatpercentile(img_in_Gray_LR1[img_in_Gray_LR1>0], 75))
     print ("\nThird quartile\n>", third_quater, "(pixel value)")
-    # target_pixel_value_for_low = mean_LR1+sd_LR1*2
-    target_pixel_value_for_low = 255
+    target_pixel_value_for_low = mean_LR1+sd_LR1*2
+    #target_pixel_value_for_low = third_quater
+    #target_pixel_value_for_low = max_pixel_value_LR1
+    if target_pixel_value_for_low > 255:
+        target_pixel_value_for_low = 255
     low_img_corrected_RGB, p_final_low   = determineParameter4LowPixelValueImage(target_pixel_value_for_low)
     high_img_corrected_RGB, p_final_high = determineParameter4HighPixelValueImage()
     
