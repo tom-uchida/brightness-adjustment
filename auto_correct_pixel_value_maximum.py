@@ -263,11 +263,13 @@ def determineCorrectionParameter_UsingSubstituion255(_reference_section, _ratio_
         tmp_reference_section = sum_pixels_in_section / N_all_nonzero_LR1
 
         # Next pixel value
-        standard_pixel_value_LR1 -= 1
+        standard_pixel_value_LR1 -= 1 
 
     # print("\n** final reference section")
     # print("** >", tmp_reference_section*100, "(%)")
 
+    if standard_pixel_value_LR1 < 0:
+        standard_pixel_value_LR1 = 0
     print("\n** Standard pixel value")
     print("** >", standard_pixel_value_LR1, "(pixel value)")
 

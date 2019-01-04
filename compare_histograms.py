@@ -21,7 +21,7 @@ plt.rc('lines', linewidth=2)
 # ------------------------------
 # ----- Placement settings -----
 # ------------------------------
-fig, ax = plt.subplots(3, figsize=(8, 6)) # figsize(width, height)
+fig, ax = plt.subplots(3, figsize=(8, 8)) # figsize(width, height)
 fig.subplots_adjust(hspace=0.4, wspace=0.4) # interval
 ax[0] = plt.subplot2grid((2,2), (0,0))
 ax[1] = plt.subplot2grid((2,2), (0,1))
@@ -66,8 +66,10 @@ def show_img(_i, _img, _img_name):
 # show_img(1, img_2,  "Input image (LR=1)")
 # show_img(0, img_1,  "Simple")
 # show_img(1, img_2,  "Decomposition")
-show_img(0, img_1,  "Image(2D)")
-show_img(1, img_2,  "Point Cloud(3D)")
+# show_img(0, img_1,  "Image color correction(2D)")
+# show_img(1, img_2,  "Point Cloud color correction(3D)")
+show_img(0, img_1,  "Input image")
+show_img(1, img_2,  "Corrected image")
 
 
 
@@ -113,8 +115,10 @@ get_data_of_pixel_value(img_2_gray_nonzero)
 # ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Improved image")
 # ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Simple")
 # ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Decomposition")
-ax[2].hist(img_1_gray_nonzero.ravel(), bins=255, color='r', alpha=0.5, label="Image(2D)")
-ax[2].hist(img_2_gray_nonzero.ravel(), bins=255, color='b', alpha=0.5, label="Point Cloud(3D)")
+# ax[2].hist(img_1_gray_nonzero.ravel(), bins=1, color='r', alpha=0.5, label="Image color correction(2D)")
+# ax[2].hist(img_2_gray_nonzero.ravel(), bins=1, color='b', alpha=0.5, label="Point Cloud color correction(3D)")
+ax[2].hist(img_1_gray_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="Input image")
+ax[2].hist(img_2_gray_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="Corrected image")
 # R_nonzero = img_2[:,:,0][img_2[:,:,0] > 0]
 # G_nonzero = img_2[:,:,1][img_2[:,:,1] > 0]
 # B_nonzero = img_2[:,:,2][img_2[:,:,2] > 0]

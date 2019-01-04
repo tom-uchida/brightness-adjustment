@@ -123,7 +123,7 @@ if max_pixel_value_LR1 == 255:
 # ----- Correct pixel value 
 #           for all images in the directory -----
 # -----------------------------------------------
-#image_files = glob.glob("images/serial_number_images/*.bmp")
+image_files = glob.glob("images/serial_number_images/*.bmp")
 #image_files = glob.glob("images/serial_number_images/Data_0.1t/data0/*.png")
 
 # Set initial parameter
@@ -132,12 +132,12 @@ p_interval = 0.01
 p_final = 1.4 # 0.1:1.4 0.3:1.2
 
 img_count = 0
-#for i in image_files:
-for i in range(24):
+# for i in image_files:
+for i in range(180):
     # Read input image
-    #img_in_RGB = read_img(i)
-    # img_in_RGB = read_img("images/serial_number_images/Data_0.1t/data0/image{0:03d}.bmp".format(i))
-    img_in_RGB = read_img("images/serial_number_images/Data_0.1t/data0/image{0:03d}.png".format(i))
+    # img_in_RGB = read_img(i)
+    img_in_RGB = read_img("images/serial_number_images/image{0:03d}.bmp".format(i))
+    # img_in_RGB = read_img("images/serial_number_images/Data_0.1t/data0/image{0:03d}.png".format(i))
 
     # Then, calc number of pixels that pixel value is not 0
     img_in_Gray     = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
