@@ -60,7 +60,7 @@ def rgb_hist(_img_rgb, _ax, _title):
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
     _ax.legend()
 
-    _ax.set_title('RGB histogram ('+_title+')')
+    _ax.set_title('Histogram ('+_title+')')
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -122,8 +122,8 @@ def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_p
     img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
     img_corrected_Gray  = cv2.cvtColor(_img_corrected_RGB, cv2.COLOR_RGB2GRAY)
 
-    fig = plt.figure(figsize=(10, 10))
-    gs = gridspec.GridSpec(3,3)
+    fig = plt.figure(figsize=(10, 6)) # (width, height)
+    gs = gridspec.GridSpec(2,3)
 
     # Input image(LR=1)
     ax1 = fig.add_subplot(gs[0,0])
@@ -145,17 +145,18 @@ def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_p
 
     # Histogram(input image(LR=1))
     ax4 = fig.add_subplot(gs[1,0])
-    ax4 = grayscale_hist(img_in_Gray_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    # ax4 = grayscale_hist(img_in_Gray_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    ax4 = rgb_hist(_img_in_RGB_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
     
     # Histogram(input image)
     ax5 = fig.add_subplot(gs[1,1])
-    # ax5 = rgb_hist(_img_in_RGB, ax5, "Input image")
-    ax5 = grayscale_hist(img_in_Gray, ax5, "Input image")
+    # ax5 = grayscale_hist(img_in_Gray, ax5, "Input image")
+    ax5 = rgb_hist(_img_in_RGB, ax5, "Input image")
 
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
-    # ax6 = rgb_hist(_img_out_RGB, ax6, "Corrected image")
-    ax6 = grayscale_hist(img_corrected_Gray, ax6, "Corrected image")
+    # ax6 = grayscale_hist(img_corrected_Gray, ax6, "Corrected image")
+    ax6 = rgb_hist(_img_corrected_RGB, ax6, "Corrected image")
 
     # Unify ylim b/w input image and corrected image
     hist_in_LR1, bins_in_LR1 = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1>0], 50)
@@ -166,10 +167,10 @@ def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_p
     ax5.set_ylim([0, max(list_max)*1.1])
     ax6.set_ylim([0, max(list_max)*1.1])
 
-    # Histograms(Input(LR1), Input, Corrected)
-    ax7 = fig.add_subplot(gs[2,:])
-    ax7 = comparative_hist(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, ax7, max(list_max)*1.1)
-    ax7.set_ylim([0, max(list_max)*1.1])
+    # # Histograms(Input(LR1), Input, Corrected)
+    # ax7 = fig.add_subplot(gs[2,:])
+    # ax7 = comparative_hist(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, ax7, max(list_max)*1.1)
+    # ax7.set_ylim([0, max(list_max)*1.1])
 
     # If most frequent value is 255 (LR=1)
     if _median_bw_standard_255_LR1 is not None:
@@ -187,11 +188,13 @@ def plot_histogram(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_p
         x = (_standard_pixel_value_LR1+max_pixel_value_LR1)*0.5 - 100
         text = "["+str(_standard_pixel_value_LR1)+", "+str(max_pixel_value_LR1)+"]\n→ "+str(reference_section_for_correction*100)+"(%)"
         ax4.text(x, max(list_max)*1.1*0.7, text, color='black', fontsize='12')
+        ax6.text(x, max(list_max)*1.1*0.7, text, color='black', fontsize='12')
 
         # Draw rectangle
         rect = plt.Rectangle((_standard_pixel_value_LR1, 0), max_pixel_value_LR1-_standard_pixel_value_LR1, max(list_max)*1.1, fc='black', alpha=0.3)
         ax4.add_patch(rect)
-        #ax6.add_patch(rect)
+        rect = plt.Rectangle((_standard_pixel_value_LR1, 0), max_pixel_value_LR1-_standard_pixel_value_LR1, max(list_max)*1.1, fc='black', alpha=0.3)
+        ax6.add_patch(rect)
 
 
 

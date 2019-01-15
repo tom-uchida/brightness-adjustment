@@ -68,7 +68,8 @@ def show_img(_i, _img, _img_name):
 # ----- Convert RGB to Gray -----
 # -------------------------------
 img_in_gray = cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2GRAY)
-img_in_gray_nonzero = img_in_gray[img_in_gray>0]
+# img_in_gray_nonzero = img_in_gray[img_in_gray>0]
+img_in_gray_nonzero = img_in_gray[img_in_gray<255]
 print("img_in_gray : ", img_in_gray.shape)  
 print("\n")
 
