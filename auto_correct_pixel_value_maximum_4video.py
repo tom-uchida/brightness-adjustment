@@ -40,7 +40,7 @@ def write_img(_img_name, _i):
     # convert color (RGB → BGR)
     img_out_BGR = cv2.cvtColor(_img_name, cv2.COLOR_RGB2BGR)
 
-    img_name = "images/serial_number_images/corrected_image{0:03d}.png"
+    img_name = "images/serial_number_images/corrected_image{0:03d}.bmp"
 
     cv2.imwrite(img_name.format(_i), img_out_BGR)
 
@@ -51,7 +51,7 @@ def write_img(_img_name, _i):
 # -------------------------------------------
 # ----- Processing on input image(LR=1) -----
 # -------------------------------------------
-reference_section = 0.1 # 10%
+reference_section = 0.01 # 1%
 
 args = sys.argv
 img_in_RGB_LR1 = read_img(args[1])
@@ -123,17 +123,18 @@ if max_pixel_value_LR1 == 255:
 # ----- Correct pixel value 
 #           for all images in the directory -----
 # -----------------------------------------------
-image_files = glob.glob("images/serial_number_images/*.bmp")
+#image_files = glob.glob("images/serial_number_images/*.bmp")
 #image_files = glob.glob("images/serial_number_images/Data_0.1t/data0/*.png")
 
 # Set initial parameter
-p_init = 1.0
-p_interval = 0.01
-p_final = 1.4 # 0.1:1.4 0.3:1.2
+p_init      = 1.0
+p_interval  = 0.01
+p_final     = 3.0 # 0.1:1.4 0.3:1.2
 
 img_count = 0
 # for i in image_files:
-for i in range(180):
+#for i in range(180):
+for i in range(360):
     # Read input image
     # img_in_RGB = read_img(i)
     img_in_RGB = read_img("images/serial_number_images/image{0:03d}.bmp".format(i))
@@ -166,10 +167,6 @@ for i in range(180):
 
     # Update image count
     img_count += 1
-
-    # if i == 179:
-    #     print("\nNumber of input images\n>", i+1)
-    #     print("\n")
 
 print("\nNumber of input images\n>", img_count)
 print("\n")
