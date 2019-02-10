@@ -35,7 +35,7 @@ print("===================================")
 args = sys.argv
 if len(args) != 3:
     print("\nUSAGE        : $ python correct_pixel_value.py [input_image_data] [input_image_data(LR=1)]")
-    print("For example  : $ python correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp]]")
+    print("Example      : $ python correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp]]")
     #raise Exception
     sys.exit()
 
