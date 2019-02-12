@@ -323,10 +323,10 @@ def saveFigureAndImages(_p_final, _img_in_RGB, _img_corrected_RGB):
 def execCommand(_fig_name, _input_img_name, _corrected_img_name):
     preview_command = ['open', _fig_name, _input_img_name, _corrected_img_name]
     try:
-	    res = subprocess.check_call(preview_command)
+      res = subprocess.check_call(preview_command)
 
     except:
-	    print("ERROR")
+      print("ERROR")
 
 
 
