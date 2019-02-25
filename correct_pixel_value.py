@@ -81,9 +81,9 @@ def checkBackgroundColor(_bgcolor):
 
 # RGB Histogram
 def rgbHist(_img_rgb, _ax, _title):
-    R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] > 0]
-    G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] > 0]
-    B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] > 0]
+    R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] != bgcolor]
+    G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] != bgcolor]
+    B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] != bgcolor]
     _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
     _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
@@ -98,7 +98,7 @@ def rgbHist(_img_rgb, _ax, _title):
 
 # Grayscale Histogram
 def grayscaleHist(_img_gray, _ax, _title):
-    img_Gray_nonzero = _img_gray[_img_gray > 0]
+    img_Gray_nonzero = _img_gray[_img_gray != bgcolor]
     _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black', alpha=1.0)
 
     _ax.set_title('Histogram ('+_title+')')
@@ -111,28 +111,28 @@ def grayscaleHist(_img_gray, _ax, _title):
 # Histograms of Input image(LR=1), Input image and Corrected image
 def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     # Convert RGB to Grayscale
-    img_in_Gray_LR1         = cv2.cvtColor(_img_in_rgb_LR1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_LR1_nonzero = img_in_Gray_LR1[img_in_Gray_LR1 > 0]
-    img_in_Gray             = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_nonzero     = img_in_Gray[img_in_Gray > 0]
-    img_out_Gray            = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
-    img_out_Gray_nonzero    = img_out_Gray[img_out_Gray > 0]
+    img_in_Gray_LR1             = cv2.cvtColor(_img_in_rgb_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_LR1_non_bgcolor = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor]
+    img_in_Gray                 = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_non_bgcolor     = img_in_Gray[img_in_Gray != bgcolor]
+    img_out_Gray                = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
+    img_out_Gray_non_bgcolor    = img_out_Gray[img_out_Gray != bgcolor]
     
     # input image(LR=1)
-    mean_in_LR1 = int(np.mean(img_in_Gray_LR1_nonzero))
-    _ax.hist(img_in_Gray_LR1_nonzero.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
+    mean_in_LR1 = int(np.mean(img_in_Gray_LR1_non_bgcolor))
+    _ax.hist(img_in_Gray_LR1_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
     _ax.axvline(mean_in_LR1, color='#1F77B4')
     _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
 
     # input image
-    mean_in = int(np.mean(img_in_Gray_nonzero))
-    _ax.hist(img_in_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
+    mean_in = int(np.mean(img_in_Gray_non_bgcolor))
+    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
     _ax.axvline(mean_in, color='#FF7E0F')
     _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
 
     # corrected image
-    mean_out = int(np.mean(img_out_Gray_nonzero))
-    _ax.hist(img_out_Gray_nonzero.ravel(), bins=50, alpha=0.5, label="Corrected image", color='#2C9F2C')
+    mean_out = int(np.mean(img_out_Gray_non_bgcolor))
+    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Corrected image", color='#2C9F2C')
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
@@ -189,9 +189,9 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_pix
     ax6 = rgbHist(_img_corrected_RGB, ax6, "Corrected image")
 
     # Unify ylim b/w input image and corrected image
-    hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1>0],      50)
-    hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray>0],              50)
-    hist_corrected, bins_corrected  = np.histogram(img_corrected_Gray[img_corrected_Gray>0],50)
+    hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],      50)
+    hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
+    hist_corrected, bins_corrected  = np.histogram(img_corrected_Gray[img_corrected_Gray != bgcolor],50)
     list_max = [max(hist_in_LR1), max(hist_in), max(hist_corrected)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
@@ -259,31 +259,36 @@ def preProcess():
 
 
 def preProcess4LR1():
+    # Convert RGB to Grayscale
+    img_in_Gray_LR1                 = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+
+    # Exclude background color
+    img_in_Gray_non_bgcolor_LR1     = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor]
+
+    # Calc the number of pixels excluding background color
+    N_all_non_bgcolor_LR1           = np.sum(img_in_Gray_LR1 != bgcolor)
+
     # Calc max pixel value of the input image (LR=1)
-    img_in_Gray_LR1         = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
-    N_all_non_bgcolor_LR1   = np.sum(img_in_Gray_LR1 != bgcolor)
-    max_pixel_value_LR1     = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor].max()
+    max_pixel_value_LR1             = np.max(img_in_Gray_non_bgcolor_LR1)
     print("\nMax pixel value (LR=1)           :", max_pixel_value_LR1, "(pixel value)")
 
     # Calc mean pixel value (LR=1)
-    mean_pixel_value_LR1    = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor].mean()
-    print("Mean pixel value (LR=1)          :", round(mean_pixel_value_LR1, 2), "(pixel value)")
+    mean_pixel_value_LR1            = np.mean(img_in_Gray_non_bgcolor_LR1)
+    print("Mean pixel value (LR=1)          :", round(mean_pixel_value_LR1, 1), "(pixel value)")
 
     # Calc ratio of the max pixel value (LR=1)
-    num_max_pixel_value_LR1   = np.sum(img_in_Gray_LR1 == max_pixel_value_LR1)
+    num_max_pixel_value_LR1         = np.sum(img_in_Gray_non_bgcolor_LR1 == max_pixel_value_LR1)
     print("Num. of max pixel value (LR=1)   :", num_max_pixel_value_LR1, "(pixels)")
-    ratio_max_pixel_value_LR1 = num_max_pixel_value_LR1 / N_all_non_bgcolor_LR1
-    # ratio_max_pixel_value_LR1 = round(ratio_max_pixel_value, 4)
-    ratio_max_pixel_value_LR1 = round(ratio_max_pixel_value_LR1, 8)
+    ratio_max_pixel_value_LR1       = num_max_pixel_value_LR1 / N_all_non_bgcolor_LR1
+    # ratio_max_pixel_value_LR1       = round(ratio_max_pixel_value_LR1, 8)
     print("Ratio of max pixel value (LR=1)  :", round(ratio_max_pixel_value_LR1*100, 2), "(%)")
 
     # Calc most frequent pixel value (LR=1)
-    img_in_Gray_non_bgcolor_LR1     = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor]
     bincount = np.bincount(img_in_Gray_non_bgcolor_LR1)
     most_frequent_pixel_value_LR1   = np.argmax( bincount )
     print("Most frequent pixel value (LR=1) :", most_frequent_pixel_value_LR1, "(pixel value)")
 
-    return N_all_non_bgcolor_LR1, img_in_Gray_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1, img_in_Gray_non_bgcolor_LR1
+    return img_in_Gray_LR1, img_in_Gray_non_bgcolor_LR1, N_all_non_bgcolor_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1, 
 
 
 
@@ -295,8 +300,8 @@ def determineCorrectParameter(_ratio_of_reference_section):
     # Determine standard pixel value in the input image(LR=1)
     while tmp_reference_section < _ratio_of_reference_section:
         # Temporarily calc    
-        sum_pixels_in_section     = np.sum( (standard_pixel_value_LR1 <= img_in_Gray_LR1) )
-        tmp_reference_section     = sum_pixels_in_section / N_all_non_bgcolor_LR1
+        sum_of_pixels_in_section  = np.sum( (standard_pixel_value_LR1 <= img_in_Gray_non_bgcolor_LR1) )
+        tmp_reference_section     = sum_of_pixels_in_section / N_all_non_bgcolor_LR1
 
         # Next pixel value
         standard_pixel_value_LR1 -= 1
@@ -305,7 +310,7 @@ def determineCorrectParameter(_ratio_of_reference_section):
     print("Reference section                :", standard_pixel_value_LR1, "~", max_pixel_value_LR1, "(pixel value)")
     print("Ratio of reference section       :", round(tmp_reference_section*100, 2), "(%)")
 
-    # Determine parameter
+    # Determine tuning parameter
     p = p_init
     tmp_ratio = 0.0
     while tmp_ratio < _ratio_of_reference_section:
@@ -313,9 +318,12 @@ def determineCorrectParameter(_ratio_of_reference_section):
         tmp_corrected_img_RGB   = correct_pixel_value(img_in_RGB, p)
         tmp_corrected_img_Gray  = cv2.cvtColor(tmp_corrected_img_RGB, cv2.COLOR_RGB2GRAY)
 
+        # Exclude background color
+        tmp_corrected_img_non_bgcolor_Gray = tmp_corrected_img_Gray[tmp_corrected_img_Gray != bgcolor]
+
         # Then, calc ratio of max pixel value(LR=1)
-        tmp_sum_pixels_in_section = np.sum(standard_pixel_value_LR1 <= tmp_corrected_img_Gray)
-        tmp_ratio = tmp_sum_pixels_in_section / N_all_non_bgcolor
+        tmp_sum_of_pixels_in_section = np.sum(standard_pixel_value_LR1 <= tmp_corrected_img_non_bgcolor_Gray)
+        tmp_ratio = tmp_sum_of_pixels_in_section / N_all_non_bgcolor
 
         # Update parameter
         p += p_interval
@@ -382,7 +390,7 @@ if __name__ == "__main__":
     print(" STEP1 : Get max pixel value (LR=1)")  
     print("====================================")
     N_all_non_bgcolor = preProcess()
-    N_all_non_bgcolor_LR1, img_in_Gray_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1, img_in_Gray_non_bgcolor_LR1 = preProcess4LR1()
+    img_in_Gray_LR1, img_in_Gray_non_bgcolor_LR1, N_all_non_bgcolor_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1 = preProcess4LR1()
 
     print("\n\n================================================")
     print(" STEP2 : Search for standard pixel value (LR=1)")
