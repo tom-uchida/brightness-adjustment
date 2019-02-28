@@ -34,8 +34,8 @@ print("==============================")
 # Check arguments
 args = sys.argv
 if len(args) != 3:
-    print("\nUSAGE   : $ python correct_pixel_value.py [input_image_data] [input_image_data(LR=1)]")
-    print("EXAMPLE : $ python correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp]")
+    print("\nUSAGE   : $ python adjust_luminance.py [input_image_data] [input_image_data(LR=1)]")
+    print("EXAMPLE : $ python adjust_luminance.py [input_image.bmp] [input_image_LR1.bmp]")
     #raise Exception
     sys.exit()
 
@@ -93,7 +93,7 @@ def grayscaleHist(_img_gray, _ax, _title):
 
 
 
-# Histograms of Input image(LR=1), Input image and Corrected image
+# Histograms of Input image(LR=1), Input image and Adjusted image
 def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     # Convert RGB to Grayscale
     img_in_Gray_LR1             = cv2.cvtColor(_img_in_rgb_LR1, cv2.COLOR_RGB2GRAY)
@@ -115,9 +115,9 @@ def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     _ax.axvline(mean_in, color='#FF7E0F')
     _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
 
-    # corrected image
+    # adjusted image
     mean_out = int(np.mean(img_out_Gray_non_bgcolor))
-    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Corrected image", color='#2C9F2C')
+    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Adjusted image", color='#2C9F2C')
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
@@ -131,11 +131,11 @@ def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
 
 
 # Create Figure
-def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_pixel_value_LR1, _ratio):
+def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel_value_LR1, _ratio):
     # Convert RGB to Grayscale
     img_in_Gray_LR1     = cv2.cvtColor(_img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
     img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_corrected_Gray  = cv2.cvtColor(_img_corrected_RGB, cv2.COLOR_RGB2GRAY)
+    img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
     gs = gridspec.GridSpec(2,3)
@@ -152,10 +152,10 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_pix
     ax2.imshow(_img_in_RGB)
     ax2.set_xticks([]), ax2.set_yticks([])
 
-    # Corrected image
+    # adjusted image
     ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title('Corrected image')
-    ax3.imshow(_img_corrected_RGB)
+    ax3.set_title('Adjusted image')
+    ax3.imshow(_img_adjusted_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
     # Histogram(input image(LR=1))
@@ -170,21 +170,21 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_pix
 
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
-    # ax6 = grayscaleHist(img_corrected_Gray, ax6, "Corrected image")
-    ax6 = rgbHist(_img_corrected_RGB, ax6, "Corrected image")
+    # ax6 = grayscaleHist(img_adjusted_Gray, ax6, "adjusted image")
+    ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image")
 
-    # Unify ylim b/w input image and corrected image
+    # Unify ylim b/w input image and adjusted image
     hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],      50)
     hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
-    hist_corrected, bins_corrected  = np.histogram(img_corrected_Gray[img_corrected_Gray != bgcolor],50)
-    list_max = [max(hist_in_LR1), max(hist_in), max(hist_corrected)]
+    hist_adjusted, bins_adjusted  = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
+    list_max = [max(hist_in_LR1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
     ax6.set_ylim([0, max(list_max)*1.1])
 
-    # # Histograms(Input(LR1), Input, Corrected)
+    # # Histograms(Input(LR1), Input, adjusted)
     # ax7 = fig.add_subplot(gs[2,:])
-    # ax7 = comparativeHist(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, ax7, max(list_max)*1.1)
+    # ax7 = comparativeHist(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, ax7, max(list_max)*1.1)
     # ax7.set_ylim([0, max(list_max)*1.1])
 
     # Draw text
@@ -202,16 +202,16 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_corrected_RGB, _standard_pix
 
 
 
-# Correct Pixel Value for each RGB
-def correct_pixel_value(_rgb_img, _correct_param):
-    corrected_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
+# adjust Pixel Value for each RGB
+def adjust_pixel_value(_rgb_img, _adjust_param):
+    adjusted_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
 
-    # Apply correction
-    corrected_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _correct_param) # R
-    corrected_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _correct_param) # G
-    corrected_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _correct_param) # B
+    # Apply adjustion
+    adjusted_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _adjust_param) # R
+    adjusted_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _adjust_param) # G
+    adjusted_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _adjust_param) # B
 
-    return corrected_img_RGB
+    return adjusted_img_RGB
 
 
 
@@ -278,7 +278,7 @@ def preProcess4LR1():
 
 
 
-def determineCorrectParameter(_ratio_of_reference_section):
+def determineadjustParameter(_ratio_of_reference_section):
     # Initialize
     tmp_ratio_of_reference_section = 0.0
     reference_pixel_value_LR1      = max_pixel_value_LR1
@@ -300,15 +300,15 @@ def determineCorrectParameter(_ratio_of_reference_section):
     p = p_init
     tmp_ratio = 0.0
     while tmp_ratio < _ratio_of_reference_section:
-        # Temporarily, correct pixel value of the input image with p
-        tmp_img_corrected_RGB   = correct_pixel_value(img_in_RGB, p)
-        tmp_img_corrected_Gray  = cv2.cvtColor(tmp_img_corrected_RGB, cv2.COLOR_RGB2GRAY)
+        # Temporarily, adjust pixel value of the input image with p
+        tmp_img_adjusted_RGB   = adjust_pixel_value(img_in_RGB, p)
+        tmp_img_adjusted_Gray  = cv2.cvtColor(tmp_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
         # Exclude background color
-        tmp_corrected_img_non_bgcolor_Gray = tmp_img_corrected_Gray[tmp_img_corrected_Gray != bgcolor]
+        tmp_adjusted_img_non_bgcolor_Gray = tmp_img_adjusted_Gray[tmp_img_adjusted_Gray != bgcolor]
 
         # Then, calc ratio of max pixel value(LR=1)
-        sum_of_pixels_in_reference_section = np.sum(reference_pixel_value_LR1 <= tmp_corrected_img_non_bgcolor_Gray)
+        sum_of_pixels_in_reference_section = np.sum(reference_pixel_value_LR1 <= tmp_adjusted_img_non_bgcolor_Gray)
         tmp_ratio = sum_of_pixels_in_reference_section / N_all_non_bgcolor
 
         # Update parameter
@@ -320,51 +320,51 @@ def determineCorrectParameter(_ratio_of_reference_section):
 
 
 
-def correctPixelValue(_p_final, _standard_pixel_value_LR1):
+def adjustPixelValue(_p_final, _standard_pixel_value_LR1):
     print("p_final                          :", _p_final)
 
-    # Create corrected image
-    img_corrected_RGB  = correct_pixel_value(img_in_RGB, _p_final)
-    img_corrected_Gray = cv2.cvtColor(img_corrected_RGB, cv2.COLOR_RGB2GRAY)
+    # Create adjusted image
+    img_adjusted_RGB  = adjust_pixel_value(img_in_RGB, _p_final)
+    img_adjusted_Gray = cv2.cvtColor(img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     # Exclude 
-    img_corrected_non_bgcolor_Gray = img_corrected_Gray[img_corrected_Gray != bgcolor]
+    img_adjusted_non_bgcolor_Gray = img_adjusted_Gray[img_adjusted_Gray != bgcolor]
 
-    # For the corrected image, calc ratio of num. of pixels in the reference section
-    sum_of_pixels_in_reference_section = np.sum( (reference_pixel_value_LR1 <= img_corrected_Gray) & (img_corrected_Gray <= max_pixel_value_LR1) )
+    # For the adjusted image, calc ratio of num. of pixels in the reference section
+    sum_of_pixels_in_reference_section = np.sum( (reference_pixel_value_LR1 <= img_adjusted_Gray) & (img_adjusted_Gray <= max_pixel_value_LR1) )
     ratio = sum_of_pixels_in_reference_section / N_all_non_bgcolor
     print("Ratio of reference section       :", round(ratio*100, 2), "(%)")
 
-    #print("Ratio of num. of pixels to 255   :", round(np.sum(img_corrected_Gray==255) / N_all_non_bgcolor * 100, 2), "(%)")
+    #print("Ratio of num. of pixels to 255   :", round(np.sum(img_adjusted_Gray==255) / N_all_non_bgcolor * 100, 2), "(%)")
 
     # Create figure
-    createFigure(img_in_RGB_LR1, img_in_RGB, img_corrected_RGB, _standard_pixel_value_LR1, ratio)
+    createFigure(img_in_RGB_LR1, img_in_RGB, img_adjusted_RGB, _standard_pixel_value_LR1, ratio)
 
-    return img_corrected_RGB
+    return img_adjusted_RGB
 
 
 
 # Save figure and images
-def saveFigureAndImages(_p_final, _img_in_RGB, _img_corrected_RGB):
+def saveFigureAndImages(_p_final, _img_in_RGB, _img_adjusted_RGB):
     fig_name = "images/figure_"+str(_p_final)+".png"
     plt.savefig(fig_name)
     # plt.show()
 
     # convert color RGB to BGR
     img_in_BGR          = cv2.cvtColor(_img_in_RGB,         cv2.COLOR_RGB2BGR)
-    img_out_BGR         = cv2.cvtColor(_img_corrected_RGB,  cv2.COLOR_RGB2BGR)
+    img_out_BGR         = cv2.cvtColor(_img_adjusted_RGB,  cv2.COLOR_RGB2BGR)
     input_img_name      = "images/input.bmp"
-    corrected_img_name  = "images/corrected_"+str(_p_final)+".bmp"
+    adjusted_img_name  = "images/adjusted_"+str(_p_final)+".bmp"
     cv2.imwrite(input_img_name, img_in_BGR)
-    cv2.imwrite(corrected_img_name, img_out_BGR)
+    cv2.imwrite(adjusted_img_name, img_out_BGR)
 
-    #execCommand(fig_name, input_img_name, corrected_img_name)
+    #execCommand(fig_name, input_img_name, adjusted_img_name)
 
 
 
 # Exec. command
-def execCommand(_fig_name, _input_img_name, _corrected_img_name):
-    preview_command = ['open', _fig_name, _input_img_name, _corrected_img_name]
+def execCommand(_fig_name, _input_img_name, _adjusted_img_name):
+    preview_command = ['open', _fig_name, _input_img_name, _adjusted_img_name]
     try:
         res = subprocess.check_call(preview_command)
 
@@ -387,12 +387,12 @@ if __name__ == "__main__":
     print("\n\n================================================")
     print(" STEP2 : Search for reference pixel value (LR=1)")
     print("================================================")
-    p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineCorrectParameter(ratio_of_reference_section)
+    p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineadjustParameter(ratio_of_reference_section)
 
     print("\n\n=============================")
-    print(" STEP3 : Correct pixel value")
+    print(" STEP3 : Adjust pixel value")
     print("=============================")
-    img_corrected_RGB = correctPixelValue(p_final, reference_pixel_value_LR1)
+    img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_LR1)
 
     # Save figure and images
-    saveFigureAndImages(p_final, img_in_RGB, img_corrected_RGB)
+    saveFigureAndImages(p_final, img_in_RGB, img_adjusted_RGB)
