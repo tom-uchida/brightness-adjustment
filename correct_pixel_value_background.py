@@ -1,7 +1,7 @@
 ######################################
 #   @file   correct_pixel_value.py
 #   @author Tomomasa Uchida
-#   @date   2019/02/25
+#   @date   2019/03/09
 ######################################
 
 import numpy as np
@@ -25,17 +25,17 @@ plt.rcParams["mathtext.fontset"] = "stix"
 plt.rcParams["mathtext.rm"] = "Times New Roman"
 
 # Message
-print("====================================")
-print("     Re-tuning Image Brightness")
-print("      author : Tomomasa Uchida")
-print("      date   : 2019/02/25")
-print("====================================")
+print("==============================")
+print("     Luminance Adjustment")
+print("       Tomomasa Uchida")
+print("         2019/03/09")
+print("==============================")
 
 # Check arguments
 args = sys.argv
-if len(args) != 4:
-    print("\nUSAGE        : $ python correct_pixel_value.py [input_image_data] [input_image_data(LR=1)] [back_ground_color]")
-    print("Example      : $ python correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp] [Black:0 or White:255]")
+if len(args) != 5:
+    print("\nUSAGE        : $ python correct_pixel_value.py [input_image_data] [input_image_data(LR=1)] [back_ground_color] [alpha]")
+    print("Example      : $ python correct_pixel_value.py [input_image.bmp] [input_image_LR1.bmp] [Black:0 or White:255] 0.1")
     #raise Exception
     sys.exit()
 
@@ -43,9 +43,11 @@ if len(args) != 4:
 p_init      = 1.0
 p_interval  = 0.01
 ratio_of_reference_section = 0.01 # 1(%)
+alpha       = float(args[4])
 print("\nInput image data (args[1])       :", args[1])
 print("Input image data(LR=1) (args[2]) :", args[2])
-# print("Background color (args[3])       :", args[3])
+print("Background color (args[3])       :", args[3])
+print("Alpha (args[4])                  :", args[4])
 # print("p_init                           :", p_init)
 # print("p_interval                       :", p_interval)
 # print("Ratio of reference section       :", ratio_of_reference_section*100, "(%)")
@@ -74,8 +76,59 @@ def checkBackgroundColor(_bgcolor):
         return 255
 
     else:
-        print("\n** The background color(args[3]) is not defined. (Black:0 or White:255)")
+        print("\n** The background color(args[3]) is not corresponded. (Black:0 or White:255)")
         sys.exit()
+
+
+
+def subtractBackgroundColor(_img_in_RGB, _alpha, _bgcolor):
+    # Check whether the target pixel color of the input image is the background color
+    img_in_Gray      = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    bg_index_bool    = img_in_Gray == _bgcolor
+    nonbg_index_bool = ~bg_index_bool
+
+    # Separate the input image into R,G,B channel
+    img_in_R, img_in_G, img_in_B = _img_in_RGB[:,:,0], _img_in_RGB[:,:,1], _img_in_RGB[:,:,2]
+
+    # Apply decomposition
+    bg_img_in_R      = np.where(bg_index_bool,      _bgcolor, 0)
+    bg_img_in_G      = np.where(bg_index_bool,      _bgcolor, 0)
+    bg_img_in_B      = np.where(bg_index_bool,      _bgcolor, 0)
+    nonbg_img_in_R   = np.where(nonbg_index_bool,   img_in_R, 0)
+    nonbg_img_in_G   = np.where(nonbg_index_bool,   img_in_G, 0)
+    nonbg_img_in_B   = np.where(nonbg_index_bool,   img_in_B, 0)
+
+    # Create two images
+    bg_img_in_RGB, nonbg_img_in_RGB = _img_in_RGB.copy(), _img_in_RGB.copy()
+    bg_img_in_RGB[:,:,0], bg_img_in_RGB[:,:,1], bg_img_in_RGB[:,:,2]  = bg_img_in_R, bg_img_in_G, bg_img_in_B
+    nonbg_img_in_RGB[:,:,0], nonbg_img_in_RGB[:,:,1], nonbg_img_in_RGB[:,:,2]  = nonbg_img_in_R, nonbg_img_in_G, nonbg_img_in_B
+
+    # [Pixel Color] = alpha * [Point Color] + (1-alpha) * [Background Color]
+    subtraction_value = (1.0 - _alpha) * _bgcolor
+    subtraction_value = 50
+
+    # Subtract background color from the input image
+    subtracted_nonbg_img_in_RGB = np.empty((_img_in_RGB.shape[0], _img_in_RGB.shape[1], 3), dtype=np.uint8)
+    subtracted_nonbg_img_in_RGB[:,:,0] = cv2.subtract(nonbg_img_in_RGB[:,:,0], subtraction_value)
+    subtracted_nonbg_img_in_RGB[:,:,1] = cv2.subtract(nonbg_img_in_RGB[:,:,1], subtraction_value)
+    subtracted_nonbg_img_in_RGB[:,:,2] = cv2.subtract(nonbg_img_in_RGB[:,:,2], subtraction_value)
+
+    # Combine two images
+    subtracted_img_in_RGB = np.empty((_img_in_RGB.shape[0], _img_in_RGB.shape[1], 3), dtype=np.uint8)
+    subtracted_img_in_RGB = cv2.scaleAdd(bg_img_in_RGB, 1.0, subtracted_nonbg_img_in_RGB)
+
+    if _bgcolor != 0:
+        print("** Subtracted ", subtraction_value ," from each pixel value of the input image (argv[1]).")
+
+    subtracted_img_in_BGR = cv2.cvtColor(subtracted_img_in_RGB, cv2.COLOR_RGB2BGR)
+    subtracted_img_name   = "images/subtracted.bmp"
+    cv2.imwrite(subtracted_img_name, subtracted_img_in_BGR)
+
+    bg_img_in_BGR = cv2.cvtColor(bg_img_in_RGB, cv2.COLOR_RGB2BGR)
+    bg_img_name   = "images/bg.bmp"
+    cv2.imwrite(bg_img_name, bg_img_in_BGR)
+
+    return subtracted_img_in_RGB
 
 
 
@@ -383,8 +436,9 @@ if __name__ == "__main__":
     img_in_RGB      = readImage(args[1])
     img_in_RGB_LR1  = readImage(args[2])
 
-    # Check background color
-    bgcolor = checkBackgroundColor(args[3])
+    # Processing on the background color
+    bgcolor     = checkBackgroundColor(args[3])
+    img_in_RGB  = subtractBackgroundColor(img_in_RGB, alpha, bgcolor)
 
     print("\n\n====================================")
     print(" STEP1 : Get max pixel value (LR=1)")  
