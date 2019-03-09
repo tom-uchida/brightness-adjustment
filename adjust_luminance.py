@@ -176,7 +176,7 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     # Unify ylim b/w input image and adjusted image
     hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],      50)
     hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
-    hist_adjusted, bins_adjusted  = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
+    hist_adjusted, bins_adjusted    = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
     list_max = [max(hist_in_LR1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
@@ -202,11 +202,11 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
 
 
 
-# adjust Pixel Value for each RGB
+# Adjust Pixel Value for each RGB
 def adjust_pixel_value(_rgb_img, _adjust_param):
     adjusted_img_RGB = np.empty((_rgb_img.shape[0], _rgb_img.shape[1], 3), dtype=np.uint8)
 
-    # Apply adjustion
+    # Apply adjustment
     adjusted_img_RGB[:, :, 0] = cv2.multiply(_rgb_img[:, :, 0], _adjust_param) # R
     adjusted_img_RGB[:, :, 1] = cv2.multiply(_rgb_img[:, :, 1], _adjust_param) # G
     adjusted_img_RGB[:, :, 2] = cv2.multiply(_rgb_img[:, :, 2], _adjust_param) # B
@@ -278,7 +278,7 @@ def preProcess4LR1():
 
 
 
-def determineadjustParameter(_ratio_of_reference_section):
+def determineAdjustParameter(_ratio_of_reference_section):
     # Initialize
     tmp_ratio_of_reference_section = 0.0
     reference_pixel_value_LR1      = max_pixel_value_LR1
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     print("\n\n================================================")
     print(" STEP2 : Search for reference pixel value (LR=1)")
     print("================================================")
-    p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineadjustParameter(ratio_of_reference_section)
+    p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineAdjustParameter(ratio_of_reference_section)
 
     print("\n\n=============================")
     print(" STEP3 : Adjust pixel value")
