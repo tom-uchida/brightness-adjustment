@@ -40,7 +40,7 @@ def write_img(_img_name, _i):
     # convert color (RGB → BGR)
     img_out_BGR = cv2.cvtColor(_img_name, cv2.COLOR_RGB2BGR)
 
-    img_name = "images/serial_number_images/corrected_image{0:03d}.bmp"
+    img_name = "images/serial_number_images/adjusted_image{0:03d}.bmp"
 
     cv2.imwrite(img_name.format(_i), img_out_BGR)
 
@@ -129,7 +129,7 @@ if max_pixel_value_LR1 == 255:
 # Set initial parameter
 p_init      = 1.0
 p_interval  = 0.01
-p_final     = 3.0 # 0.1:1.4 0.3:1.2
+p_final     = 2.0 # 0.1:1.4 0.3:1.2
 
 img_count = 0
 # for i in image_files:
