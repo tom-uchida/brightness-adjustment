@@ -1,28 +1,28 @@
-## Luminance Adjustment
+## Brightness Adjustment
 
 ### Overview
-Adjust luminance of an image.
+Adjust brightness of an image.
 
 ### Usage
 ```
-$ python adjust_luminance.py
-==============================
-     Luminance Adjustment
+$ python adjust_brightness.py
+===============================
+     Brightness Adjustment
        Tomomasa Uchida
          2019/02/28
-==============================
+===============================
 
-USAGE   : $ python adjust_luminance.py [input_image_data] [input_image_data(LR=1)]
-EXAMPLE : $ python adjust_luminance.py [input_image.bmp] [input_image_LR1.bmp]
+USAGE   : $ python adjust_brightness.py [input_image_data] [input_image_data(LR=1)]
+EXAMPLE : $ python adjust_brightness.py [input_image.bmp] [input_image_LR1.bmp]
 ```
 
 ### Example
 ```
-==============================
-     Luminance Adjustment
+===============================
+     Brightness Adjustment
        Tomomasa Uchida
          2019/02/28
-==============================
+===============================
 
 Input image data (args[1])       : images/IMAGE_DATA/kabuto_alpha02_LR200_black.bmp
 Input image data(LR=1) (args[2]) : images/IMAGE_DATA/kabuto_alpha02_LR1_black.bmp
@@ -44,19 +44,19 @@ Ratio of max pixel value (LR=1)  : 0.01 (%)
 Most frequent pixel value (LR=1) : 204 (pixel value)
 
 
-================================================
+=================================================
  STEP2 : Search for reference pixel value (LR=1)
-================================================
-Reference pixel value (LR=1)     : 233 (pixel value)
-Reference section (LR=1)         : 233 ~ 255 (pixel value)
+=================================================
+Reference pixel value (LR=1)     : 234 (pixel value)
+Reference section (LR=1)         : 234 ~ 255 (pixel value)
 Ratio of reference section (LR=1): 1.07 (%)
 
 
-=============================
+============================
  STEP3 : Adjust pixel value
-=============================
-p_final                          : 2.39
-Ratio of reference section       : 1.12 (%)
+============================
+p_final                          : 2.4
+Ratio of reference section       : 1.11 (%)
 ```
 
 ## Image
