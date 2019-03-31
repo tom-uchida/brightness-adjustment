@@ -53,7 +53,7 @@ Ratio of reference section (LR=1): 1.07 (%)
 
 
 =============================
- STEP3 : Correct pixel value
+ STEP3 : Adjust pixel value
 =============================
 p_final                          : 2.39
 Ratio of reference section       : 1.12 (%)

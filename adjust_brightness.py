@@ -1,5 +1,5 @@
 ######################################
-#   @file   adjust_luminance.py
+#   @file   adjust_brightness.py
 #   @author Tomomasa Uchida
 #   @date   2019/02/28
 ######################################
@@ -25,17 +25,17 @@ plt.rcParams["mathtext.fontset"] = "stix"
 plt.rcParams["mathtext.rm"] = "Times New Roman"
 
 # Message
-print("==============================")
-print("     Luminance Adjustment")
+print("===============================")
+print("     Brightness Adjustment")
 print("       Tomomasa Uchida")
 print("         2019/02/28")
-print("==============================")
+print("===============================")
 
 # Check arguments
 args = sys.argv
 if len(args) != 3:
-    print("\nUSAGE   : $ python adjust_luminance.py [input_image_data] [input_image_data(LR=1)]")
-    print("EXAMPLE : $ python adjust_luminance.py [input_image.bmp] [input_image_LR1.bmp]")
+    print("\nUSAGE   : $ python adjust_brightness.py [input_image_data] [input_image_data(LR=1)]")
+    print("EXAMPLE : $ python adjust_brightness.py [input_image.bmp] [input_image_LR1.bmp]")
     #raise Exception
     sys.exit()
 
@@ -135,10 +135,10 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     # Convert RGB to Grayscale
     img_in_Gray_LR1     = cv2.cvtColor(_img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
     img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
+    img_adjusted_Gray   = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
-    gs = gridspec.GridSpec(2,3)
+    gs  = gridspec.GridSpec(2,3)
 
     # Input image(LR=1)
     ax1 = fig.add_subplot(gs[0,0])
@@ -283,7 +283,7 @@ def determineAdjustParameter(_ratio_of_reference_section):
     tmp_ratio_of_reference_section = 0.0
     reference_pixel_value_LR1      = max_pixel_value_LR1
 
-    # Determine standard pixel value in the input image(LR=1)
+    # Determine reference pixel value in the input image(LR=1)
     while tmp_ratio_of_reference_section < _ratio_of_reference_section:
         # Temporarily calc    
         sum_of_pixels_in_section        = np.sum( (reference_pixel_value_LR1 <= img_in_Gray_non_bgcolor_LR1) )
@@ -292,6 +292,7 @@ def determineAdjustParameter(_ratio_of_reference_section):
         # Next pixel value
         reference_pixel_value_LR1 -= 1
 
+    reference_pixel_value_LR1 += 1
     print("Reference pixel value (LR=1)     :", reference_pixel_value_LR1, "(pixel value)")
     print("Reference section (LR=1)         :", reference_pixel_value_LR1, "~", max_pixel_value_LR1, "(pixel value)")
     print("Ratio of reference section (LR=1):", round(tmp_ratio_of_reference_section*100, 2), "(%)")
@@ -354,7 +355,7 @@ def saveFigureAndImages(_p_final, _img_in_RGB, _img_adjusted_RGB):
     img_in_BGR          = cv2.cvtColor(_img_in_RGB,         cv2.COLOR_RGB2BGR)
     img_out_BGR         = cv2.cvtColor(_img_adjusted_RGB,  cv2.COLOR_RGB2BGR)
     input_img_name      = "images/input.bmp"
-    adjusted_img_name  = "images/adjusted_"+str(_p_final)+".bmp"
+    adjusted_img_name   = "images/adjusted_"+str(_p_final)+".bmp"
     cv2.imwrite(input_img_name, img_in_BGR)
     cv2.imwrite(adjusted_img_name, img_out_BGR)
 
@@ -386,12 +387,12 @@ if __name__ == "__main__":
 
     print("\n\n================================================")
     print(" STEP2 : Search for reference pixel value (LR=1)")
-    print("================================================")
+    print("=================================================")
     p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineAdjustParameter(ratio_of_reference_section)
 
-    print("\n\n=============================")
+    print("\n\n============================")
     print(" STEP3 : Adjust pixel value")
-    print("=============================")
+    print("============================")
     img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_LR1)
 
     # Save figure and images
