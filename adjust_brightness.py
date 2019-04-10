@@ -13,6 +13,7 @@ import cv2
 import subprocess
 import sys
 import statistics
+import time
 
 # Graph settings
 plt.style.use('seaborn-white')
@@ -379,6 +380,7 @@ if __name__ == "__main__":
     img_in_RGB      = readImage(args[1])
     img_in_RGB_LR1  = readImage(args[2])
 
+    start = time.time()
     print("\n\n====================================")
     print(" STEP1 : Get max pixel value (LR=1)")  
     print("====================================")
@@ -394,6 +396,9 @@ if __name__ == "__main__":
     print(" STEP3 : Adjust pixel value")
     print("============================")
     img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_LR1)
+
+    elapsed_time = time.time() - start
+    print ("\nElapsed time                     : {0}".format(elapsed_time) + "[sec]")
 
     # Save figure and images
     saveFigureAndImages(p_final, img_in_RGB, img_adjusted_RGB)
