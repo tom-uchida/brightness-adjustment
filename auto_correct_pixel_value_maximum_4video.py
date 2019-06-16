@@ -129,7 +129,7 @@ if max_pixel_value_LR1 == 255:
 # Set initial parameter
 p_init      = 1.0
 p_interval  = 0.01
-p_final     = 2.0 # 0.1:1.4 0.3:1.2
+p_final     = 3.0 # 0.1:1.4 0.3:1.2
 
 img_count = 0
 # for i in image_files:
