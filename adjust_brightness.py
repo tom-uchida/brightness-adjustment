@@ -143,7 +143,8 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
 
     # Input image(LR=1)
     ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
+    # ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
+    ax1.set_title('Input image ($L=1$)')
     ax1.imshow(_img_in_RGB_LR1)
     ax1.set_xticks([]), ax1.set_yticks([])
 
@@ -162,7 +163,8 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     # Histogram(input image(LR=1))
     ax4 = fig.add_subplot(gs[1,0])
     # ax4 = grayscaleHist(img_in_Gray_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
-    ax4 = rgbHist(_img_in_RGB_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    # ax4 = rgbHist(_img_in_RGB_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    ax4 = rgbHist(_img_in_RGB_LR1, ax4, "Input image ($L=1$)")
     
     # Histogram(input image)
     ax5 = fig.add_subplot(gs[1,1])
