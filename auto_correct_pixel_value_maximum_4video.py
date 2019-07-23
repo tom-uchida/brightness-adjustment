@@ -40,7 +40,7 @@ def write_img(_img_name, _i):
     # convert color (RGB → BGR)
     img_out_BGR = cv2.cvtColor(_img_name, cv2.COLOR_RGB2BGR)
 
-    img_name = "images/serial_number_images/adjusted_image{0:03d}.png"
+    img_name = "images/serial_number_images/adjusted_image{0:03d}.bmp"
 
     cv2.imwrite(img_name.format(_i), img_out_BGR)
 
