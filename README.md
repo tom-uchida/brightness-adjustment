@@ -1,9 +1,9 @@
 ## Brightness Adjustment
 
 ### Overview
-Adjust brightness of an image.
+Adjust brightness of an image automatically.
 
-### Usage
+#### Usage
 ```
 $ python adjust_brightness.py
 ===============================
@@ -16,8 +16,9 @@ USAGE   : $ python adjust_brightness.py [input_image_data] [input_image_data(LR=
 EXAMPLE : $ python adjust_brightness.py [input_image.bmp] [input_image_LR1.bmp]
 ```
 
-### Example
+#### Example
 ```
+$ python adjust_brightness.py images/IMAGE_DATA/kabuto_alpha02_LR200_black.bmp images/IMAGE_DATA/kabuto_alpha02_LR1_black.bmp
 ===============================
      Brightness Adjustment
        Tomomasa Uchida
@@ -59,16 +60,16 @@ p_final                          : 2.4
 Ratio of reference section       : 1.11 (%)
 ```
 
-## Image
+### Result
 
-### Input image
+#### Input image
 ![sample1](resources/sample/ookabuto/input.bmp)
 
-### Input image (LR=1)
+#### Input image (L=1)
 ![sample2](resources/sample/ookabuto/LR1.bmp)
 
-### Adjusted image
-![sample2](resources/sample/ookabuto/adjusted_2.39.bmp)
+#### Adjusted image
+![sample3](resources/sample/ookabuto/adjusted_2.39.bmp)
 
-### Figure
-![sample2](resources/sample/ookabuto/figure_2.39.png)
+#### Figure
+![sample4](resources/sample/ookabuto/figure_2.39.png)
