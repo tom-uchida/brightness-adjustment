@@ -35,8 +35,9 @@ print("===============================")
 # Check arguments
 args = sys.argv
 if len(args) != 3:
-    print("\nUSAGE   : $ python adjust_brightness.py [input_image_data] [input_image_data(LR=1)]")
-    print("EXAMPLE : $ python adjust_brightness.py [input_image.bmp] [input_image_LR1.bmp]")
+    print("\n")
+    print("USAGE   : $ python adjust_brightness.py [input_image_data] [input_image_data(L=1)]")
+    print("EXAMPLE : $ python adjust_brightness.py [input_image.bmp] [input_image_L1.bmp]")
     #raise Exception
     sys.exit()
 
@@ -45,8 +46,9 @@ p_init      = 1.0
 p_interval  = 0.01
 ratio_of_reference_section = 0.01 # 1(%)
 bgcolor     = 0 # Background color : Black(0, 0, 0)
-print("\nInput image data (args[1])       :", args[1])
-print("Input image data(LR=1) (args[2]) :", args[2])
+print("\n")
+print("Input image data        (args[1]) :", args[1])
+print("Input image data (L=1) (args[2]) :", args[2])
 # print("p_init                           :", p_init)
 # print("p_interval                       :", p_interval)
 # print("Ratio of reference section       :", ratio_of_reference_section*100, "(%)")
@@ -94,21 +96,21 @@ def grayscaleHist(_img_gray, _ax, _title):
 
 
 
-# Histograms of Input image(LR=1), Input image and Adjusted image
-def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
+# Histograms of Input image(L=1), Input image and Adjusted image
+def comparativeHist(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     # Convert RGB to Grayscale
-    img_in_Gray_LR1             = cv2.cvtColor(_img_in_rgb_LR1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_LR1_non_bgcolor = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor]
+    img_in_Gray_L1             = cv2.cvtColor(_img_in_rgb_L1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_L1_non_bgcolor = img_in_Gray_L1[img_in_Gray_L1 != bgcolor]
     img_in_Gray                 = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
     img_in_Gray_non_bgcolor     = img_in_Gray[img_in_Gray != bgcolor]
     img_out_Gray                = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
     img_out_Gray_non_bgcolor    = img_out_Gray[img_out_Gray != bgcolor]
     
-    # input image(LR=1)
-    mean_in_LR1 = int(np.mean(img_in_Gray_LR1_non_bgcolor))
-    _ax.hist(img_in_Gray_LR1_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
-    _ax.axvline(mean_in_LR1, color='#1F77B4')
-    _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
+    # input image(L=1)
+    mean_in_L1 = int(np.mean(img_in_Gray_L1_non_bgcolor))
+    _ax.hist(img_in_Gray_L1_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
+    _ax.axvline(mean_in_L1, color='#1F77B4')
+    _ax.text(mean_in_L1+5, _y_max*0.8, "mean:"+str(mean_in_L1), color='#1F77B4', fontsize='12')
 
     # input image
     mean_in = int(np.mean(img_in_Gray_non_bgcolor))
@@ -132,20 +134,20 @@ def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
 
 
 # Create Figure
-def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel_value_LR1, _ratio):
+def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel_value_L1, _ratio):
     # Convert RGB to Grayscale
-    img_in_Gray_LR1     = cv2.cvtColor(_img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_L1     = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
     img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
     img_adjusted_Gray   = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,3)
 
-    # Input image(LR=1)
+    # Input image(L=1)
     ax1 = fig.add_subplot(gs[0,0])
     # ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
     ax1.set_title('Input image ($L=1$)')
-    ax1.imshow(_img_in_RGB_LR1)
+    ax1.imshow(_img_in_RGB_L1)
     ax1.set_xticks([]), ax1.set_yticks([])
 
     # Input image
@@ -160,11 +162,11 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     ax3.imshow(_img_adjusted_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
-    # Histogram(input image(LR=1))
+    # Histogram(input image(L=1))
     ax4 = fig.add_subplot(gs[1,0])
-    # ax4 = grayscaleHist(img_in_Gray_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
-    # ax4 = rgbHist(_img_in_RGB_LR1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
-    ax4 = rgbHist(_img_in_RGB_LR1, ax4, "Input image ($L=1$)")
+    # ax4 = grayscaleHist(img_in_Gray_L1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    # ax4 = rgbHist(_img_in_RGB_L1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
+    ax4 = rgbHist(_img_in_RGB_L1, ax4, "Input image ($L=1$)")
     
     # Histogram(input image)
     ax5 = fig.add_subplot(gs[1,1])
@@ -177,30 +179,30 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image")
 
     # Unify ylim b/w input image and adjusted image
-    hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],      50)
+    hist_in_L1,    bins_in_L1     = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],      50)
     hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
     hist_adjusted, bins_adjusted    = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
-    list_max = [max(hist_in_LR1), max(hist_in), max(hist_adjusted)]
+    list_max = [max(hist_in_L1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
     ax6.set_ylim([0, max(list_max)*1.1])
 
-    # # Histograms(Input(LR1), Input, adjusted)
+    # # Histograms(Input(L1), Input, adjusted)
     # ax7 = fig.add_subplot(gs[2,:])
-    # ax7 = comparativeHist(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, ax7, max(list_max)*1.1)
+    # ax7 = comparativeHist(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, ax7, max(list_max)*1.1)
     # ax7.set_ylim([0, max(list_max)*1.1])
 
     # Draw text
-    x       = (_standard_pixel_value_LR1+max_pixel_value_LR1)*0.5 - 100
-    text    = "["+str(_standard_pixel_value_LR1)+", "+str(max_pixel_value_LR1)+"]\n→ "+str(round(ratio_of_reference_section_LR1*100, 2))+"(%)"
+    x       = (_standard_pixel_value_L1+max_pixel_value_L1)*0.5 - 100
+    text    = "["+str(_standard_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(ratio_of_reference_section_L1*100, 2))+"(%)"
     ax4.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
-    text    = "["+str(_standard_pixel_value_LR1)+", "+str(max_pixel_value_LR1)+"]\n→ "+str(round(_ratio*100, 2))+"(%)"
+    text    = "["+str(_standard_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(_ratio*100, 2))+"(%)"
     ax6.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
 
     # Draw reference section
-    rect = plt.Rectangle((_standard_pixel_value_LR1, 0), max_pixel_value_LR1-_standard_pixel_value_LR1, max(list_max)*1.1, fc='black', alpha=0.3)
+    rect = plt.Rectangle((_standard_pixel_value_L1, 0), max_pixel_value_L1-_standard_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
     ax4.add_patch(rect)
-    rect = plt.Rectangle((_standard_pixel_value_LR1, 0), max_pixel_value_LR1-_standard_pixel_value_LR1, max(list_max)*1.1, fc='black', alpha=0.3)
+    rect = plt.Rectangle((_standard_pixel_value_L1, 0), max_pixel_value_L1-_standard_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
     ax6.add_patch(rect)
 
 
@@ -247,58 +249,58 @@ def preProcess():
 
 
 
-def preProcess4LR1():
+def preProcess4L1():
     # Convert RGB to Grayscale
-    img_in_Gray_LR1                 = cv2.cvtColor(img_in_RGB_LR1, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_L1                 = cv2.cvtColor(img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
 
     # Exclude background color
-    img_in_Gray_non_bgcolor_LR1     = img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor]
+    img_in_Gray_non_bgcolor_L1     = img_in_Gray_L1[img_in_Gray_L1 != bgcolor]
 
     # Calc the number of pixels excluding background color
-    N_all_non_bgcolor_LR1           = np.sum(img_in_Gray_LR1 != bgcolor)
+    N_all_non_bgcolor_L1           = np.sum(img_in_Gray_L1 != bgcolor)
 
-    # Calc max pixel value of the input image (LR=1)
-    max_pixel_value_LR1             = np.max(img_in_Gray_non_bgcolor_LR1)
-    print("\nMax pixel value (LR=1)           :", max_pixel_value_LR1, "(pixel value)")
+    # Calc max pixel value of the input image (L=1)
+    max_pixel_value_L1             = np.max(img_in_Gray_non_bgcolor_L1)
+    print("\nMax pixel value (L=1)           :", max_pixel_value_L1, "(pixel value)")
 
-    # Calc mean pixel value (LR=1)
-    mean_pixel_value_LR1            = np.mean(img_in_Gray_non_bgcolor_LR1)
-    print("Mean pixel value (LR=1)          :", round(mean_pixel_value_LR1, 1), "(pixel value)")
+    # Calc mean pixel value (L=1)
+    mean_pixel_value_L1            = np.mean(img_in_Gray_non_bgcolor_L1)
+    print("Mean pixel value (L=1)          :", round(mean_pixel_value_L1, 1), "(pixel value)")
 
-    # Calc ratio of the max pixel value (LR=1)
-    num_max_pixel_value_LR1         = np.sum(img_in_Gray_non_bgcolor_LR1 == max_pixel_value_LR1)
-    print("Num. of max pixel value (LR=1)   :", num_max_pixel_value_LR1, "(pixels)")
-    ratio_max_pixel_value_LR1       = num_max_pixel_value_LR1 / N_all_non_bgcolor_LR1
-    # ratio_max_pixel_value_LR1       = round(ratio_max_pixel_value_LR1, 8)
-    print("Ratio of max pixel value (LR=1)  :", round(ratio_max_pixel_value_LR1*100, 2), "(%)")
+    # Calc ratio of the max pixel value (L=1)
+    num_max_pixel_value_L1         = np.sum(img_in_Gray_non_bgcolor_L1 == max_pixel_value_L1)
+    print("Num. of max pixel value (L=1)   :", num_max_pixel_value_L1, "(pixels)")
+    ratio_max_pixel_value_L1       = num_max_pixel_value_L1 / N_all_non_bgcolor_L1
+    # ratio_max_pixel_value_L1       = round(ratio_max_pixel_value_L1, 8)
+    print("Ratio of max pixel value (L=1)  :", round(ratio_max_pixel_value_L1*100, 2), "(%)")
 
-    # Calc most frequent pixel value (LR=1)
-    bincount = np.bincount(img_in_Gray_non_bgcolor_LR1)
-    most_frequent_pixel_value_LR1   = np.argmax( bincount )
-    print("Most frequent pixel value (LR=1) :", most_frequent_pixel_value_LR1, "(pixel value)")
+    # Calc most frequent pixel value (L=1)
+    bincount = np.bincount(img_in_Gray_non_bgcolor_L1)
+    most_frequent_pixel_value_L1   = np.argmax( bincount )
+    print("Most frequent pixel value (L=1) :", most_frequent_pixel_value_L1, "(pixel value)")
 
-    return img_in_Gray_LR1, img_in_Gray_non_bgcolor_LR1, N_all_non_bgcolor_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1, 
+    return img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1, 
 
 
 
 def determineAdjustParameter(_ratio_of_reference_section):
     # Initialize
     tmp_ratio_of_reference_section = 0.0
-    reference_pixel_value_LR1      = max_pixel_value_LR1
+    reference_pixel_value_L1      = max_pixel_value_L1
 
-    # Determine reference pixel value in the input image(LR=1)
+    # Determine reference pixel value in the input image(L=1)
     while tmp_ratio_of_reference_section < _ratio_of_reference_section:
         # Temporarily calc    
-        sum_of_pixels_in_section        = np.sum( (reference_pixel_value_LR1 <= img_in_Gray_non_bgcolor_LR1) )
-        tmp_ratio_of_reference_section  = sum_of_pixels_in_section / N_all_non_bgcolor_LR1
+        sum_of_pixels_in_section        = np.sum( (reference_pixel_value_L1 <= img_in_Gray_non_bgcolor_L1) )
+        tmp_ratio_of_reference_section  = sum_of_pixels_in_section / N_all_non_bgcolor_L1
 
         # Next pixel value
-        reference_pixel_value_LR1 -= 1
+        reference_pixel_value_L1 -= 1
 
-    reference_pixel_value_LR1 += 1
-    print("Reference pixel value (LR=1)     :", reference_pixel_value_LR1, "(pixel value)")
-    print("Reference section (LR=1)         :", reference_pixel_value_LR1, "~", max_pixel_value_LR1, "(pixel value)")
-    print("Ratio of reference section (LR=1):", round(tmp_ratio_of_reference_section*100, 2), "(%)")
+    reference_pixel_value_L1 += 1
+    print("Reference pixel value (L=1)     :", reference_pixel_value_L1, "(pixel value)")
+    print("Reference section (L=1)         :", reference_pixel_value_L1, "~", max_pixel_value_L1, "(pixel value)")
+    print("Ratio of reference section (L=1):", round(tmp_ratio_of_reference_section*100, 2), "(%)")
 
     # Determine tuning parameter
     p = p_init
@@ -311,8 +313,8 @@ def determineAdjustParameter(_ratio_of_reference_section):
         # Exclude background color
         tmp_adjusted_img_non_bgcolor_Gray = tmp_img_adjusted_Gray[tmp_img_adjusted_Gray != bgcolor]
 
-        # Then, calc ratio of max pixel value(LR=1)
-        sum_of_pixels_in_reference_section = np.sum(reference_pixel_value_LR1 <= tmp_adjusted_img_non_bgcolor_Gray)
+        # Then, calc ratio of max pixel value(L=1)
+        sum_of_pixels_in_reference_section = np.sum(reference_pixel_value_L1 <= tmp_adjusted_img_non_bgcolor_Gray)
         tmp_ratio = sum_of_pixels_in_reference_section / N_all_non_bgcolor
 
         # Update parameter
@@ -320,11 +322,11 @@ def determineAdjustParameter(_ratio_of_reference_section):
 
     p_final = round(p, 2)
 
-    return p_final, reference_pixel_value_LR1, tmp_ratio_of_reference_section
+    return p_final, reference_pixel_value_L1, tmp_ratio_of_reference_section
 
 
 
-def adjustPixelValue(_p_final, _standard_pixel_value_LR1):
+def adjustPixelValue(_p_final, _standard_pixel_value_L1):
     print("p_final                          :", _p_final)
 
     # Create adjusted image
@@ -335,14 +337,14 @@ def adjustPixelValue(_p_final, _standard_pixel_value_LR1):
     img_adjusted_non_bgcolor_Gray = img_adjusted_Gray[img_adjusted_Gray != bgcolor]
 
     # For the adjusted image, calc ratio of num. of pixels in the reference section
-    sum_of_pixels_in_reference_section = np.sum( (reference_pixel_value_LR1 <= img_adjusted_Gray) & (img_adjusted_Gray <= max_pixel_value_LR1) )
+    sum_of_pixels_in_reference_section = np.sum( (reference_pixel_value_L1 <= img_adjusted_Gray) & (img_adjusted_Gray <= max_pixel_value_L1) )
     ratio = sum_of_pixels_in_reference_section / N_all_non_bgcolor
     print("Ratio of reference section       :", round(ratio*100, 2), "(%)")
 
     #print("Ratio of num. of pixels to 255   :", round(np.sum(img_adjusted_Gray==255) / N_all_non_bgcolor * 100, 2), "(%)")
 
     # Create figure
-    createFigure(img_in_RGB_LR1, img_in_RGB, img_adjusted_RGB, _standard_pixel_value_LR1, ratio)
+    createFigure(img_in_RGB_L1, img_in_RGB, img_adjusted_RGB, _standard_pixel_value_L1, ratio)
 
     return img_adjusted_RGB
 
@@ -380,24 +382,24 @@ def execCommand(_fig_name, _input_img_name, _adjusted_img_name):
 if __name__ == "__main__":
     # Read two input images
     img_in_RGB      = readImage(args[1])
-    img_in_RGB_LR1  = readImage(args[2])
+    img_in_RGB_L1  = readImage(args[2])
 
     start = time.time()
     print("\n\n====================================")
-    print(" STEP1 : Get max pixel value (LR=1)")  
+    print(" STEP1: Get max pixel value (L=1)")  
     print("====================================")
     N_all_non_bgcolor = preProcess()
-    img_in_Gray_LR1, img_in_Gray_non_bgcolor_LR1, N_all_non_bgcolor_LR1, max_pixel_value_LR1, ratio_max_pixel_value_LR1 = preProcess4LR1()
+    img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1 = preProcess4L1()
 
     print("\n\n================================================")
-    print(" STEP2 : Search for reference pixel value (LR=1)")
+    print(" STEP2: Search for reference pixel value (L=1)")
     print("=================================================")
-    p_final, reference_pixel_value_LR1, ratio_of_reference_section_LR1 = determineAdjustParameter(ratio_of_reference_section)
+    p_final, reference_pixel_value_L1, ratio_of_reference_section_L1 = determineAdjustParameter(ratio_of_reference_section)
 
     print("\n\n============================")
-    print(" STEP3 : Adjust pixel value")
+    print(" STEP3: Adjust pixel value")
     print("============================")
-    img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_LR1)
+    img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_L1)
 
     elapsed_time = time.time() - start
     print ("\nElapsed time                     : {0}".format(elapsed_time) + "[sec]")
