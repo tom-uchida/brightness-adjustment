@@ -46,7 +46,9 @@ p_init      = 1.0
 p_interval  = 0.01
 ratio_of_reference_section = 0.01 # 1(%)
 bgcolor     = 0 # Background color : Black(0, 0, 0)
-print("\nInput image data (args[1])       :", args[1])
+bin_number  = 255 
+print("\n")
+print("Input image data (args[1])       :", args[1])
 print("Input image data(LR=1) (args[2]) :", args[2])
 # print("p_init                           :", p_init)
 # print("p_interval                       :", p_interval)
@@ -71,9 +73,9 @@ def rgbHist(_img_rgb, _ax, _title):
     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] != bgcolor]
     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] != bgcolor]
     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] != bgcolor]
-    _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
-    _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
-    _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
+    _ax.hist(R_nonzero.ravel(), bins=bin_number, color='r', alpha=0.5, label="R")
+    _ax.hist(G_nonzero.ravel(), bins=bin_number, color='g', alpha=0.5, label="G")
+    _ax.hist(B_nonzero.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
     _ax.legend()
 
     _ax.set_title('Histogram ('+_title+')')
@@ -86,7 +88,7 @@ def rgbHist(_img_rgb, _ax, _title):
 # Grayscale Histogram
 def grayscaleHist(_img_gray, _ax, _title):
     img_Gray_nonzero = _img_gray[_img_gray != bgcolor]
-    _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black', alpha=1.0)
+    _ax.hist(img_Gray_nonzero.ravel(), bins=bin_number, color='black', alpha=1.0)
 
     _ax.set_title('Histogram ('+_title+')')
     _ax.set_xlim([-5,260])
@@ -107,19 +109,19 @@ def comparativeHist(_img_in_rgb_LR1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     
     # input image(LR=1)
     mean_in_LR1 = int(np.mean(img_in_Gray_LR1_non_bgcolor))
-    _ax.hist(img_in_Gray_LR1_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
+    _ax.hist(img_in_Gray_LR1_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
     _ax.axvline(mean_in_LR1, color='#1F77B4')
     _ax.text(mean_in_LR1+5, _y_max*0.8, "mean:"+str(mean_in_LR1), color='#1F77B4', fontsize='12')
 
     # input image
     mean_in = int(np.mean(img_in_Gray_non_bgcolor))
-    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
+    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Input image", color='#FF7E0F')
     _ax.axvline(mean_in, color='#FF7E0F')
     _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
 
     # adjusted image
     mean_out = int(np.mean(img_out_Gray_non_bgcolor))
-    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Adjusted image", color='#2C9F2C')
+    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Adjusted image", color='#2C9F2C')
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
@@ -178,9 +180,9 @@ def createFigure(_img_in_RGB_LR1, _img_in_RGB, _img_adjusted_RGB, _standard_pixe
     ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image")
 
     # Unify ylim b/w input image and adjusted image
-    hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],      50)
-    hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
-    hist_adjusted, bins_adjusted    = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
+    hist_in_LR1,    bins_in_LR1     = np.histogram(img_in_Gray_LR1[img_in_Gray_LR1 != bgcolor],     bin_number)
+    hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],             bin_number)
+    hist_adjusted, bins_adjusted    = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor], bin_number)
     list_max = [max(hist_in_LR1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
@@ -354,7 +356,7 @@ def searchThresholdPixelValue(_img_in_RGB):
     img_in_Gray = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
 
     # Get histogram of input image
-    hist, bins = np.histogram(img_in_Gray[img_in_Gray != bgcolor], bins=50)
+    hist, bins = np.histogram(img_in_Gray[img_in_Gray != bgcolor], bins=bin_number)
 
     # Convert "tuple" to "numpy array"
     hist = np.array(hist) # print(hist.size)
@@ -367,16 +369,17 @@ def searchThresholdPixelValue(_img_in_RGB):
 
         if diff > max_pixel_number:
             max_pixel_number = diff
-            index = i
+            index = i+1
 
-    threshold_pixel_value = int(bins[index])
-    print("max_pixel_number = ", max_pixel_number)
     print("index = ", index)
+    threshold_pixel_value = int(bins[index])
     print("threshold_pixel_value = ", threshold_pixel_value)
+    # print("max_pixel_number = ", max_pixel_number)
+    
 
 
     # Create figure
-    fig = plt.figure(figsize=(5, 6)) # figsize=(width, height)
+    fig = plt.figure(figsize=(6, 6)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,1)
 
     # Input image(LR=1)
