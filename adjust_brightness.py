@@ -101,10 +101,10 @@ def comparativeHist(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
     # Convert RGB to Grayscale
     img_in_Gray_L1             = cv2.cvtColor(_img_in_rgb_L1, cv2.COLOR_RGB2GRAY)
     img_in_Gray_L1_non_bgcolor = img_in_Gray_L1[img_in_Gray_L1 != bgcolor]
-    img_in_Gray                 = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_non_bgcolor     = img_in_Gray[img_in_Gray != bgcolor]
-    img_out_Gray                = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
-    img_out_Gray_non_bgcolor    = img_out_Gray[img_out_Gray != bgcolor]
+    img_in_Gray                = cv2.cvtColor(_img_in_rgb, cv2.COLOR_RGB2GRAY)
+    img_in_Gray_non_bgcolor    = img_in_Gray[img_in_Gray != bgcolor]
+    img_out_Gray               = cv2.cvtColor(_img_out_rgb, cv2.COLOR_RGB2GRAY)
+    img_out_Gray_non_bgcolor   = img_out_Gray[img_out_Gray != bgcolor]
     
     # input image(L=1)
     mean_in_L1 = int(np.mean(img_in_Gray_L1_non_bgcolor))
@@ -137,8 +137,8 @@ def comparativeHist(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
 def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel_value_L1, _ratio):
     # Convert RGB to Grayscale
     img_in_Gray_L1     = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_adjusted_Gray   = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
+    img_in_Gray        = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,3)
@@ -180,8 +180,8 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel
 
     # Unify ylim b/w input image and adjusted image
     hist_in_L1,    bins_in_L1     = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],      50)
-    hist_in,        bins_in         = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
-    hist_adjusted, bins_adjusted    = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
+    hist_in,        bins_in       = np.histogram(img_in_Gray[img_in_Gray != bgcolor],              50)
+    hist_adjusted, bins_adjusted  = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
     list_max = [max(hist_in_L1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
@@ -286,7 +286,7 @@ def preProcess4L1():
 def determineAdjustParameter(_ratio_of_reference_section):
     # Initialize
     tmp_ratio_of_reference_section = 0.0
-    reference_pixel_value_L1      = max_pixel_value_L1
+    reference_pixel_value_L1       = max_pixel_value_L1
 
     # Determine reference pixel value in the input image(L=1)
     while tmp_ratio_of_reference_section < _ratio_of_reference_section:
@@ -381,7 +381,7 @@ def execCommand(_fig_name, _input_img_name, _adjusted_img_name):
 
 if __name__ == "__main__":
     # Read two input images
-    img_in_RGB      = readImage(args[1])
+    img_in_RGB     = readImage(args[1])
     img_in_RGB_L1  = readImage(args[2])
 
     start = time.time()
