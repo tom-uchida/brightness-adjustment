@@ -134,7 +134,7 @@ def comparativeHist(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
 
 
 # Create Figure
-def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel_value_L1, _ratio):
+def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_value_L1, _ratio):
     # Convert RGB to Grayscale
     img_in_Gray_L1     = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
     img_in_Gray        = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
@@ -193,16 +193,16 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _standard_pixel
     # ax7.set_ylim([0, max(list_max)*1.1])
 
     # Draw text
-    x       = (_standard_pixel_value_L1+max_pixel_value_L1)*0.5 - 100
-    text    = "["+str(_standard_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(ratio_of_reference_section_L1*100, 2))+"(%)"
+    x       = (_ref_pixel_value_L1+max_pixel_value_L1)*0.5 - 100
+    text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(ratio_of_reference_section_L1*100, 2))+"(%)"
     ax4.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
-    text    = "["+str(_standard_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(_ratio*100, 2))+"(%)"
+    text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(_ratio*100, 2))+"(%)"
     ax6.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
 
     # Draw reference section
-    rect = plt.Rectangle((_standard_pixel_value_L1, 0), max_pixel_value_L1-_standard_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
+    rect = plt.Rectangle((_ref_pixel_value_L1, 0), max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
     ax4.add_patch(rect)
-    rect = plt.Rectangle((_standard_pixel_value_L1, 0), max_pixel_value_L1-_standard_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
+    rect = plt.Rectangle((_ref_pixel_value_L1, 0), max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
     ax6.add_patch(rect)
 
 
@@ -326,7 +326,7 @@ def determineAdjustParameter(_ratio_of_reference_section):
 
 
 
-def adjustPixelValue(_p_final, _standard_pixel_value_L1):
+def adjustPixelValue(_p_final, _reference_pixel_value_L1):
     print("p_final                          :", _p_final)
 
     # Create adjusted image
@@ -337,14 +337,14 @@ def adjustPixelValue(_p_final, _standard_pixel_value_L1):
     img_adjusted_non_bgcolor_Gray = img_adjusted_Gray[img_adjusted_Gray != bgcolor]
 
     # For the adjusted image, calc ratio of num. of pixels in the reference section
-    sum_of_pixels_in_reference_section = np.sum( (reference_pixel_value_L1 <= img_adjusted_Gray) & (img_adjusted_Gray <= max_pixel_value_L1) )
+    sum_of_pixels_in_reference_section = np.sum( (_reference_pixel_value_L1 <= img_adjusted_Gray) & (img_adjusted_Gray <= max_pixel_value_L1) )
     ratio = sum_of_pixels_in_reference_section / N_all_non_bgcolor
     print("Ratio of reference section       :", round(ratio*100, 2), "(%)")
 
     #print("Ratio of num. of pixels to 255   :", round(np.sum(img_adjusted_Gray==255) / N_all_non_bgcolor * 100, 2), "(%)")
 
     # Create figure
-    createFigure(img_in_RGB_L1, img_in_RGB, img_adjusted_RGB, _standard_pixel_value_L1, ratio)
+    createFigure(img_in_RGB_L1, img_in_RGB, img_adjusted_RGB, _reference_pixel_value_L1, ratio)
 
     return img_adjusted_RGB
 

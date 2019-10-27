@@ -1,8 +1,8 @@
-###############################################
-#   @file   adjust_brightness_decompose.py
+######################################################
+#   @file   adjust_brightness_decompose_mapping.py
 #   @author Tomomasa Uchida
-#   @date   2019/10/26
-###############################################
+#   @date   2019/10/27
+######################################################
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -247,23 +247,6 @@ def searchThresholdPixelValue(_img_in_RGB):
 
     threshold_pixel_value = int(bins[index4bins]) + int(255/bin_number)
 
-    # # Create figure
-    # fig = plt.figure(figsize=(6, 6)) # figsize=(width, height)
-    # gs  = gridspec.GridSpec(2,1)
-
-    # # Input image(LR=1)
-    # ax1 = fig.add_subplot(gs[0,0])
-    # ax1.set_title('Input image')
-    # ax1.imshow(_img_in_RGB)
-    # ax1.set_xticks([]), ax1.set_yticks([])
-
-    # # Histogram(input image(LR=1))
-    # ax4 = fig.add_subplot(gs[1,0])
-    # ax4 = grayscaleHist(img_in_Gray, ax4, "Input image")
-    # ax4.axvline(threshold_pixel_value, color='red')
-
-    # plt.show()
-
     return threshold_pixel_value
 
 
@@ -319,7 +302,7 @@ def decomposeImage(_img_in_RGB, _threshold_pixel_value):
 
     # # Histogram(Low image)
     # ax2 = fig.add_subplot(gs[1,0])
-    # ax2.hist(low_img_in_Gray.ravel(), bins=bin_number, color='black', alpha=1.0)
+    # ax2 = grayscaleHist(low_img_in_Gray.ravel(), ax2, "Low image")
     # # ax2.axvline(threshold_pixel_value, color='red')
     # ax2.set_xlim([-5, 260])
     # ax2.set_ylim([0, 20000])
@@ -332,14 +315,99 @@ def decomposeImage(_img_in_RGB, _threshold_pixel_value):
 
     # # Histogram(High image)
     # ax4 = fig.add_subplot(gs[1,1])
-    # ax4.hist(high_img_in_Gray.ravel(), bins=bin_number, color='black', alpha=1.0)
+    # ax4 = grayscaleHist(high_img_in_Gray.ravel(), ax4, "High image")
     # # ax4.axvline(threshold_pixel_value, color='red')
     # ax4.set_xlim([-5, 260])
     # ax4.set_ylim([0, 20000])
 
     # plt.show()
 
-    return low_img_in_RGB, high_img_in_RGB
+    return b_index_high, low_img_in_RGB, high_img_in_RGB
+
+
+
+def mappingPixelValue(_b_index_high, _low_img_in_RGB, _high_img_in_RGB):
+    # Convert RGB image to Grayscale image
+    low_img_in_Gray  = cv2.cvtColor(_low_img_in_RGB,  cv2.COLOR_RGB2GRAY)
+    high_img_in_Gray = cv2.cvtColor(_high_img_in_RGB, cv2.COLOR_RGB2GRAY)
+
+    # Exclude background color
+    low_img_in_Gray_non_bgcolor  = low_img_in_Gray[low_img_in_Gray != bgcolor]
+    high_img_in_Gray_non_bgcolor = high_img_in_Gray[high_img_in_Gray != bgcolor]
+
+    # Get min and max pixel value for low and high pixel value images
+    low_min   = low_img_in_Gray_non_bgcolor.min()
+    low_max   = low_img_in_Gray_non_bgcolor.max()
+    print("( low_min, low_max )   = (", low_min, ",", low_max, ")")
+
+    high_min  = high_img_in_Gray_non_bgcolor.min()
+    high_max  = high_img_in_Gray_non_bgcolor.max()
+    print("( high_min, high_max ) = (", high_min, ",", high_max, ")")
+    
+    # Mapping "high" to "low"
+    tmp_img_uint8 = _high_img_in_RGB.copy()
+    tmp_img_float = tmp_img_uint8.astype(float)
+
+    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   30) # R
+    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   30) # G
+    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   30) # B
+    
+    # tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   float(high_min)) # R
+    # tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   float(high_min)) # G
+    # tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   float(high_min)) # B
+
+    # tmp_img_float[:,:,0] = cv2.divide(tmp_img_float[:,:,0],     float(high_max-high_min))
+    # tmp_img_float[:,:,1] = cv2.divide(tmp_img_float[:,:,1],     float(high_max-high_min))
+    # tmp_img_float[:,:,2] = cv2.divide(tmp_img_float[:,:,2],     float(high_max-high_min))
+
+    # tmp_img_float[:,:,0] = cv2.multiply(tmp_img_float[:,:,0],   float(low_max-low_min))
+    # tmp_img_float[:,:,1] = cv2.multiply(tmp_img_float[:,:,1],   float(low_max-low_min))
+    # tmp_img_float[:,:,2] = cv2.multiply(tmp_img_float[:,:,2],   float(low_max-low_min))
+
+    # tmp_img_float[:,:,0] = cv2.add(tmp_img_float[:,:,0],        float(low_min))
+    # tmp_img_float[:,:,1] = cv2.add(tmp_img_float[:,:,1],        float(low_min))
+    # tmp_img_float[:,:,2] = cv2.add(tmp_img_float[:,:,2],        float(low_min))
+
+    tmp_img_uint8 = tmp_img_float.astype(np.uint8)
+
+    mapped_high_img_in_RGB  = _high_img_in_RGB.copy()
+    mapped_high_img_in_RGB[:,:,0] = np.where(_b_index_high, tmp_img_uint8[:,:,0], bgcolor)
+    mapped_high_img_in_RGB[:,:,1] = np.where(_b_index_high, tmp_img_uint8[:,:,1], bgcolor)
+    mapped_high_img_in_RGB[:,:,2] = np.where(_b_index_high, tmp_img_uint8[:,:,2], bgcolor)
+
+    mapped_high_img_in_Gray = cv2.cvtColor(mapped_high_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    mapped_high_img_in_Gray_non_bgcolor = mapped_high_img_in_Gray[mapped_high_img_in_Gray != bgcolor]
+    high_min  = mapped_high_img_in_Gray_non_bgcolor.min()
+    high_max  = mapped_high_img_in_Gray_non_bgcolor.max()
+    print("Mapped.")
+    print("( high_min, high_max ) = (", high_min, ",", high_max, ")")
+
+    # # Create figure
+    # fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,2)
+
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title('Before')
+    # ax1.imshow(high_img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
+
+    # ax2 = fig.add_subplot(gs[0,1])
+    # ax2.set_title('After')
+    # ax2.imshow(mapped_high_img_in_RGB)
+    # ax2.set_xticks([]), ax2.set_yticks([])
+
+    # ax3 = fig.add_subplot(gs[1,0])
+    # ax3 = grayscaleHist(high_img_in_Gray, ax3, "Before")
+    # ax3.axvline(threshold_pixel_value, color='red')
+
+    # ax4 = fig.add_subplot(gs[1,1])
+    # # ax4 = grayscaleHist(mapped_high_img_in_Gray, ax4, "After")
+    # ax4 = rgbHist(mapped_high_img_in_RGB, ax4, "After")
+    # ax4.axvline(threshold_pixel_value, color='red')
+
+    # plt.show()
+
+    return mapped_high_img_in_RGB
 
 
 
@@ -531,35 +599,63 @@ if __name__ == "__main__":
     N_all_non_bgcolor = preProcess(img_in_RGB)
     bin_number  = 255
     threshold_pixel_value           = searchThresholdPixelValue(img_in_RGB)
-    low_img_in_RGB, high_img_in_RGB = decomposeImage(img_in_RGB, threshold_pixel_value)
-    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB)
-    adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB)
-    adjusted_img_RGB  = cv2.scaleAdd(adjusted_low_img_in_RGB, 1.0, adjusted_high_img_in_RGB)
+    b_index_high, low_img_in_RGB, high_img_in_RGB = decomposeImage(img_in_RGB, threshold_pixel_value)
+    mapped_high_img_in_RGB = mappingPixelValue(b_index_high, low_img_in_RGB, high_img_in_RGB)
+    mapped_img_in_RGB  = cv2.scaleAdd(low_img_in_RGB, 1.0, mapped_high_img_in_RGB)
+    mapped_img_in_Gray = cv2.cvtColor(mapped_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    adjusted_img_RGB  = BrightnessAdjustment(mapped_img_in_RGB)
     adjusted_img_Gray = cv2.cvtColor(adjusted_img_RGB, cv2.COLOR_RGB2GRAY)
 
     print ("\nElapsed time                     : {0}".format(time.time() - start_time) + "[sec]")
 
-    # Create figure
-    fig = plt.figure(figsize=(4, 6)) # figsize=(width, height)
-    gs  = gridspec.GridSpec(2,1)
+    # Save image
+    # mapped_img_in_BGR = cv2.cvtColor(mapped_img_in_RGB,         cv2.COLOR_RGB2BGR)
+    # cv2.imwrite("images/adjusted.bmp", mapped_img_in_BGR)
 
-    # Adjusted image
-    ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title("Adjusted image")
-    ax1.imshow(adjusted_img_RGB)
-    ax1.set_xticks([]), ax1.set_yticks([])
 
-    # Histogram
-    ax2 = fig.add_subplot(gs[1,0])
-    # ax2 = rgbHist(adjusted_img_RGB, ax2, "Adjusted image")
-    ax2 = grayscaleHist(adjusted_img_RGB, ax2, "Adjusted image")
-    ax2.axvline(threshold_pixel_value, color='red')
+    # # Create figure
+    # fig = plt.figure(figsize=(6, 8)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,1)
 
-    plt.show()
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title('After')
+    # ax1.imshow(mapped_img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
 
-    adjusted_img_BGR = cv2.cvtColor(adjusted_img_RGB,  cv2.COLOR_RGB2BGR)
+    # ax2 = fig.add_subplot(gs[1,0])
+    # ax2 = grayscaleHist(mapped_img_in_Gray, ax2, "After")
+    # ax2.axvline(threshold_pixel_value, color='red')
+
+    # plt.show()
+
+
+    # # Create figure
+    # fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,2)
+
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title('Before')
+    # ax1.imshow(img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
+
+    # ax2 = fig.add_subplot(gs[0,1])
+    # ax2.set_title('After')
+    # ax2.imshow(adjusted_img_RGB)
+    # ax2.set_xticks([]), ax2.set_yticks([])
+
+    # ax3 = fig.add_subplot(gs[1,0])
+    # ax3 = grayscaleHist(img_in_Gray, ax3, "Before")
+    # ax3.axvline(threshold_pixel_value, color='red')
+
+    # ax4 = fig.add_subplot(gs[1,1])
+    # ax4 = grayscaleHist(adjusted_img_Gray, ax4, "After")
+    # ax4.axvline(threshold_pixel_value, color='red')
+
+    # plt.show()
+
+    # Save image
+    adjusted_img_BGR = cv2.cvtColor(adjusted_img_RGB, cv2.COLOR_RGB2BGR)
     cv2.imwrite("images/adjusted.bmp", adjusted_img_BGR)
-
 
     # # Create figure
     # createFigure(img_in_RGB_L1, _img_RGB, img_adjusted_RGB, ref_pixel_value_L1, ratio_final, max_pixel_value_L1, ratio_of_ref_section_L1)
