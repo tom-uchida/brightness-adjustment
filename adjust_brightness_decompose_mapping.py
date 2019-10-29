@@ -347,26 +347,22 @@ def mappingPixelValue(_b_index_high, _low_img_in_RGB, _high_img_in_RGB):
     # Mapping "high" to "low"
     tmp_img_uint8 = _high_img_in_RGB.copy()
     tmp_img_float = tmp_img_uint8.astype(float)
-
-    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   30) # R
-    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   30) # G
-    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   30) # B
     
-    # tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   float(high_min)) # R
-    # tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   float(high_min)) # G
-    # tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   float(high_min)) # B
+    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   float(high_min)) # R
+    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   float(high_min)) # G
+    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   float(high_min)) # B
 
-    # tmp_img_float[:,:,0] = cv2.divide(tmp_img_float[:,:,0],     float(high_max-high_min))
-    # tmp_img_float[:,:,1] = cv2.divide(tmp_img_float[:,:,1],     float(high_max-high_min))
-    # tmp_img_float[:,:,2] = cv2.divide(tmp_img_float[:,:,2],     float(high_max-high_min))
+    tmp_img_float[:,:,0] = cv2.divide(tmp_img_float[:,:,0],     float(high_max-high_min))
+    tmp_img_float[:,:,1] = cv2.divide(tmp_img_float[:,:,1],     float(high_max-high_min))
+    tmp_img_float[:,:,2] = cv2.divide(tmp_img_float[:,:,2],     float(high_max-high_min))
 
-    # tmp_img_float[:,:,0] = cv2.multiply(tmp_img_float[:,:,0],   float(low_max-low_min))
-    # tmp_img_float[:,:,1] = cv2.multiply(tmp_img_float[:,:,1],   float(low_max-low_min))
-    # tmp_img_float[:,:,2] = cv2.multiply(tmp_img_float[:,:,2],   float(low_max-low_min))
+    tmp_img_float[:,:,0] = cv2.multiply(tmp_img_float[:,:,0],   float(low_max-low_min))
+    tmp_img_float[:,:,1] = cv2.multiply(tmp_img_float[:,:,1],   float(low_max-low_min))
+    tmp_img_float[:,:,2] = cv2.multiply(tmp_img_float[:,:,2],   float(low_max-low_min))
 
-    # tmp_img_float[:,:,0] = cv2.add(tmp_img_float[:,:,0],        float(low_min))
-    # tmp_img_float[:,:,1] = cv2.add(tmp_img_float[:,:,1],        float(low_min))
-    # tmp_img_float[:,:,2] = cv2.add(tmp_img_float[:,:,2],        float(low_min))
+    tmp_img_float[:,:,0] = cv2.add(tmp_img_float[:,:,0],        float(low_min))
+    tmp_img_float[:,:,1] = cv2.add(tmp_img_float[:,:,1],        float(low_min))
+    tmp_img_float[:,:,2] = cv2.add(tmp_img_float[:,:,2],        float(low_min))
 
     tmp_img_uint8 = tmp_img_float.astype(np.uint8)
 
