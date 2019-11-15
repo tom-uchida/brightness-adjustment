@@ -254,9 +254,6 @@ def searchThresholdPixelValue():
 
 # Decompose the input image
 def separateBackgroundColor():
-    # ndarray(dtype: bool)
-    b_index_bgcolor     = img_in_Gray == BGColor_Gray
-    b_index_non_bgcolor = ~b_index_bgcolor
     num_of_bgcolor      = np.count_nonzero(b_index_bgcolor)
     num_of_non_bgcolor  = np.count_nonzero(b_index_non_bgcolor)
     print("Num of Background Color           :", num_of_bgcolor)
@@ -265,13 +262,13 @@ def separateBackgroundColor():
 
     # Apply decomposition
     bg_R     = np.where(b_index_bgcolor,     BGColor[0],        0)
-    bg_G     = np.where(b_index_bgcolor,     BGColor[0],        0)
-    bg_B     = np.where(b_index_bgcolor,     BGColor[0],        0)
+    bg_G     = np.where(b_index_bgcolor,     BGColor[1],        0)
+    bg_B     = np.where(b_index_bgcolor,     BGColor[2],        0)
     non_bg_R = np.where(b_index_non_bgcolor, img_in_RGB[:,:,0], 0)
     non_bg_G = np.where(b_index_non_bgcolor, img_in_RGB[:,:,1], 0)
     non_bg_B = np.where(b_index_non_bgcolor, img_in_RGB[:,:,2], 0)
 
-    # Create low and high pixel value images
+    # Create BGColor image and Non-BGColor image
     img_in_RGB_bgcolor, img_in_RGB_non_bgcolor = img_in_RGB.copy(), img_in_RGB.copy()
     img_in_RGB_bgcolor[:,:,0], img_in_RGB_bgcolor[:,:,1], img_in_RGB_bgcolor[:,:,2] = bg_R, bg_G, bg_B
     img_in_RGB_non_bgcolor[:,:,0], img_in_RGB_non_bgcolor[:,:,1], img_in_RGB_non_bgcolor[:,:,2] = non_bg_R,non_bg_G, non_bg_B
@@ -281,12 +278,7 @@ def separateBackgroundColor():
 
 
 def transformPixelValueDistributionStatistically():
-    # Exclude background color
-    img_in_Gray_non_bgcolor  = img_in_RGB[img_in_Gray != BGColor_Gray]
-
-    # 背景色は，以降の処理の対象から外す．
-
-    tmp_img_uint8 = img_in_RGB.copy()
+    tmp_img_uint8 = img_in_RGB_non_bgcolor.copy()
     tmp_img_float = tmp_img_uint8.astype(float)
     
     # Make the mean pixel value "0"
@@ -305,14 +297,77 @@ def transformPixelValueDistributionStatistically():
     tmp_img_float[:,:,1] = cv2.add(tmp_img_float[:,:,1],        float(ideal_mean_pixel_value))
     tmp_img_float[:,:,2] = cv2.add(tmp_img_float[:,:,2],        float(ideal_mean_pixel_value))
 
+    # Convert float to np.uint8
     tmp_img_uint8 = tmp_img_float.astype(np.uint8)
 
-    # mapped_high_img_in_Gray = cv2.cvtColor(mapped_high_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    # mapped_high_img_in_Gray_non_bgcolor = mapped_high_img_in_Gray[mapped_high_img_in_Gray != BGColor_Gray]
-    # high_min  = mapped_high_img_in_Gray_non_bgcolor.min()
-    # high_max  = mapped_high_img_in_Gray_non_bgcolor.max()
-    # print("( high_min, high_max ) = (", high_min, ",", high_max, ")")
-    print("\nPre-processed done!")
+    # Exclude background color from calculation
+    pre_processed_img_in_RGB = tmp_img_uint8
+    pre_processed_img_in_RGB[:,:,0] = np.where(b_index_non_bgcolor, tmp_img_uint8[:,:,0], 0) # R
+    pre_processed_img_in_RGB[:,:,1] = np.where(b_index_non_bgcolor, tmp_img_uint8[:,:,1], 0) # G
+    pre_processed_img_in_RGB[:,:,2] = np.where(b_index_non_bgcolor, tmp_img_uint8[:,:,2], 0) # B
+    print("\nStatistically, transformed pixel value distribution.")
+
+    # # Save image
+    # pre_processed_img_in_BGR = cv2.cvtColor(pre_processed_img_in_RGB, cv2.COLOR_RGB2BGR)
+    # cv2.imwrite("images/pre_processed.bmp", pre_processed_img_in_BGR)
+
+    # # Create figure
+    # fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,2)
+
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title('Before')
+    # ax1.imshow(img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
+
+    # ax2 = fig.add_subplot(gs[0,1])
+    # ax2.set_title('After')
+    # ax2.imshow(pre_processed_img_in_RGB)
+    # ax2.set_xticks([]), ax2.set_yticks([])
+
+    # ax3 = fig.add_subplot(gs[1,0])
+    # ax3 = rgbHist(img_in_RGB, ax3, "Before")
+    # ax3.axvline(threshold_pixel_value, color='red')
+
+    # ax4 = fig.add_subplot(gs[1,1])
+    # ax4 = rgbHist(pre_processed_img_in_RGB, ax4, "After")
+    # ax4.axvline(threshold_pixel_value, color='red')
+
+    # plt.show()
+
+    # return 
+
+
+
+def mappingPixelValue():
+    img_in_Gray_non_bgcolor = cv2.cvtColor(img_in_RGB_non_bgcolor, cv2.COLOR_RGB2GRAY)
+    min_pixel_value = img_in_Gray_non_bgcolor.min()
+    max_pixel_value = img_in_Gray_non_bgcolor.max()
+
+    # Mapping
+    tmp_img_uint8 = img_in_RGB.copy()
+    tmp_img_float = tmp_img_uint8.astype(float)
+    
+    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   float(min_pixel_value)) # R
+    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   float(min_pixel_value)) # G
+    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   float(min_pixel_value)) # B
+
+    tmp_img_float[:,:,0] = cv2.divide(tmp_img_float[:,:,0],     float(max_pixel_value-min_pixel_value))
+    tmp_img_float[:,:,1] = cv2.divide(tmp_img_float[:,:,1],     float(max_pixel_value-min_pixel_value))
+    tmp_img_float[:,:,2] = cv2.divide(tmp_img_float[:,:,2],     float(max_pixel_value-min_pixel_value))
+
+    tmp_img_float[:,:,0] = cv2.multiply(tmp_img_float[:,:,0],   float(threshold_pixel_value-min_pixel_value))
+    tmp_img_float[:,:,1] = cv2.multiply(tmp_img_float[:,:,1],   float(threshold_pixel_value-min_pixel_value))
+    tmp_img_float[:,:,2] = cv2.multiply(tmp_img_float[:,:,2],   float(threshold_pixel_value-min_pixel_value))
+
+    tmp_img_uint8 = tmp_img_float.astype(np.uint8)
+
+    mapped_img_in_RGB = tmp_img_uint8
+    print("Mapping done.")
+
+    # Save image
+    mapped_img_in_BGR = cv2.cvtColor(mapped_img_in_RGB, cv2.COLOR_RGB2BGR)
+    cv2.imwrite("images/mapped.bmp", mapped_img_in_BGR)
 
     # Create figure
     fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
@@ -325,7 +380,7 @@ def transformPixelValueDistributionStatistically():
 
     ax2 = fig.add_subplot(gs[0,1])
     ax2.set_title('After')
-    ax2.imshow(tmp_img_uint8)
+    ax2.imshow(mapped_img_in_RGB)
     ax2.set_xticks([]), ax2.set_yticks([])
 
     ax3 = fig.add_subplot(gs[1,0])
@@ -333,21 +388,19 @@ def transformPixelValueDistributionStatistically():
     ax3.axvline(threshold_pixel_value, color='red')
 
     ax4 = fig.add_subplot(gs[1,1])
-    # ax4 = grayscaleHist(mapped_high_img_in_Gray, ax4, "After")
-    ax4 = rgbHist(tmp_img_uint8, ax4, "After")
+    ax4 = rgbHist(mapped_img_in_RGB, ax4, "After")
     ax4.axvline(threshold_pixel_value, color='red')
 
     plt.show()
 
-    # return 
+    return mapped_img_in_RGB
 
 
-
-def preProcess():
-    print("Input image (RGB)                 :", img_in_RGB.shape) # (height, width, channel)
+def preProcess(_img_RGB):
+    print("Input image (RGB)                 :", _img_RGB.shape) # (height, width, channel)
 
     # Calc all number of pixels of the input image
-    N_all = img_in_RGB.shape[0] * img_in_RGB.shape[1]
+    N_all = _img_RGB.shape[0] * _img_RGB.shape[1]
     print("N_all                             :", N_all, "(pixels)")
 
     # Exclude background color
@@ -529,26 +582,29 @@ if __name__ == "__main__":
     img_in_Gray    = cv2.cvtColor(img_in_RGB,     cv2.COLOR_RGB2GRAY)
     img_in_Gray_L1 = cv2.cvtColor(img_in_RGB_L1,  cv2.COLOR_RGB2GRAY)
 
+    # Extract background color index
+    b_index_bgcolor     = img_in_Gray == BGColor_Gray # ndarray(dtype: bool)
+    b_index_non_bgcolor = ~b_index_bgcolor
+
     # Start time count
     start_time = time.time()
 
-    N_all, N_all_non_bgcolor, mean_pixel_value, std_pixel_value = preProcess()
+    N_all, N_all_non_bgcolor, mean_pixel_value, std_pixel_value = preProcess(img_in_RGB)
     bin_number              = 50
     threshold_pixel_value   = searchThresholdPixelValue()
     ideal_std_pixel_value   = threshold_pixel_value/4
     ideal_mean_pixel_value  = threshold_pixel_value/2
     img_in_RGB_bgcolor, img_in_RGB_non_bgcolor = separateBackgroundColor()
-    # transformed_img_in_RGB  = transformPixelValueDistributionStatistically()
-    # transformed_img_in_Gray = cv2.cvtColor(transformed_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    # adjusted_img_RGB        = BrightnessAdjustment(transformed_img_in_RGB)
-    # adjusted_img_Gray       = cv2.cvtColor(adjusted_img_RGB, cv2.COLOR_RGB2GRAY)
+    # pre_processed_img_in_RGB  = transformPixelValueDistributionStatistically()
+    mapped_img_in_RGB       = mappingPixelValue()
+    adjusted_img_out_RGB    = BrightnessAdjustment(mapped_img_in_RGB)
+    adjusted_img_out_Gray   = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
 
     print ("\nElapsed time                      : {0}".format(time.time() - start_time) + "[sec]")
 
     # Save image
-    # mapped_img_in_BGR = cv2.cvtColor(mapped_img_in_RGB,         cv2.COLOR_RGB2BGR)
-    # cv2.imwrite("images/adjusted.bmp", mapped_img_in_BGR)
-
+    adjusted_img_out_BGR = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2BGR)
+    cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
     # # Create figure
     # fig = plt.figure(figsize=(6, 8)) # figsize=(width, height)
