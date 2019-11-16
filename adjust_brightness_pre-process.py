@@ -16,7 +16,8 @@ import statistics
 import time
 
 # Graph settings
-plt.style.use('seaborn-white')
+# plt.style.use('seaborn-white')
+plt.style.use('bmh')
 colors = cycler('color', ['#EE6666', '#3388BB', '#9988DD', '#EECC55', '#88BB44', '#FFBBBB'])
 plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
 plt.rc('grid', color='w', linestyle='solid')
@@ -282,9 +283,9 @@ def transformPixelValueDistributionStatistically():
     tmp_img_float = tmp_img_uint8.astype(float)
     
     # Make the mean pixel value "0"
-    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_uint8[:,:,0],   float(mean_pixel_value)) # R
-    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_uint8[:,:,1],   float(mean_pixel_value)) # G
-    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_uint8[:,:,2],   float(mean_pixel_value)) # B
+    tmp_img_float[:,:,0] = cv2.subtract(tmp_img_float[:,:,0],   float(mean_pixel_value)) # R
+    tmp_img_float[:,:,1] = cv2.subtract(tmp_img_float[:,:,1],   float(mean_pixel_value)) # G
+    tmp_img_float[:,:,2] = cv2.subtract(tmp_img_float[:,:,2],   float(mean_pixel_value)) # B
 
     # Make the std pixel value "ideal_std_pixel_value"
     multiply_value = ideal_std_pixel_value / std_pixel_value
@@ -307,35 +308,35 @@ def transformPixelValueDistributionStatistically():
     pre_processed_img_in_RGB[:,:,2] = np.where(b_index_non_bgcolor, tmp_img_uint8[:,:,2], 0) # B
     print("\nStatistically, transformed pixel value distribution.")
 
-    # # Save image
-    # pre_processed_img_in_BGR = cv2.cvtColor(pre_processed_img_in_RGB, cv2.COLOR_RGB2BGR)
-    # cv2.imwrite("images/pre_processed.bmp", pre_processed_img_in_BGR)
+    # Save image
+    pre_processed_img_in_BGR = cv2.cvtColor(pre_processed_img_in_RGB, cv2.COLOR_RGB2BGR)
+    cv2.imwrite("images/transformed.bmp", pre_processed_img_in_BGR)
 
-    # # Create figure
-    # fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
-    # gs  = gridspec.GridSpec(2,2)
+    # Create figure
+    fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    gs  = gridspec.GridSpec(2,2)
 
-    # ax1 = fig.add_subplot(gs[0,0])
-    # ax1.set_title('Before')
-    # ax1.imshow(img_in_RGB)
-    # ax1.set_xticks([]), ax1.set_yticks([])
+    ax1 = fig.add_subplot(gs[0,0])
+    ax1.set_title('Before')
+    ax1.imshow(img_in_RGB)
+    ax1.set_xticks([]), ax1.set_yticks([])
 
-    # ax2 = fig.add_subplot(gs[0,1])
-    # ax2.set_title('After')
-    # ax2.imshow(pre_processed_img_in_RGB)
-    # ax2.set_xticks([]), ax2.set_yticks([])
+    ax2 = fig.add_subplot(gs[0,1])
+    ax2.set_title('After')
+    ax2.imshow(pre_processed_img_in_RGB)
+    ax2.set_xticks([]), ax2.set_yticks([])
 
-    # ax3 = fig.add_subplot(gs[1,0])
-    # ax3 = rgbHist(img_in_RGB, ax3, "Before")
-    # ax3.axvline(threshold_pixel_value, color='red')
+    ax3 = fig.add_subplot(gs[1,0])
+    ax3 = rgbHist(img_in_RGB, ax3, "Before")
+    ax3.axvline(threshold_pixel_value, color='red')
 
-    # ax4 = fig.add_subplot(gs[1,1])
-    # ax4 = rgbHist(pre_processed_img_in_RGB, ax4, "After")
-    # ax4.axvline(threshold_pixel_value, color='red')
+    ax4 = fig.add_subplot(gs[1,1])
+    ax4 = rgbHist(pre_processed_img_in_RGB, ax4, "After")
+    ax4.axvline(threshold_pixel_value, color='red')
 
-    # plt.show()
+    plt.show()
 
-    # return 
+    return pre_processed_img_in_RGB
 
 
 
@@ -365,33 +366,33 @@ def mappingPixelValue():
     mapped_img_in_RGB = tmp_img_uint8
     print("Mapping done.")
 
-    # Save image
-    mapped_img_in_BGR = cv2.cvtColor(mapped_img_in_RGB, cv2.COLOR_RGB2BGR)
-    cv2.imwrite("images/mapped.bmp", mapped_img_in_BGR)
+    # # Save image
+    # mapped_img_in_BGR = cv2.cvtColor(mapped_img_in_RGB, cv2.COLOR_RGB2BGR)
+    # cv2.imwrite("images/mapped.bmp", mapped_img_in_BGR)
 
-    # Create figure
-    fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
-    gs  = gridspec.GridSpec(2,2)
+    # # Create figure
+    # fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,2)
 
-    ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title('Before')
-    ax1.imshow(img_in_RGB)
-    ax1.set_xticks([]), ax1.set_yticks([])
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title('Before')
+    # ax1.imshow(img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
 
-    ax2 = fig.add_subplot(gs[0,1])
-    ax2.set_title('After')
-    ax2.imshow(mapped_img_in_RGB)
-    ax2.set_xticks([]), ax2.set_yticks([])
+    # ax2 = fig.add_subplot(gs[0,1])
+    # ax2.set_title('After')
+    # ax2.imshow(mapped_img_in_RGB)
+    # ax2.set_xticks([]), ax2.set_yticks([])
 
-    ax3 = fig.add_subplot(gs[1,0])
-    ax3 = rgbHist(img_in_RGB, ax3, "Before")
-    ax3.axvline(threshold_pixel_value, color='red')
+    # ax3 = fig.add_subplot(gs[1,0])
+    # ax3 = rgbHist(img_in_RGB, ax3, "Before")
+    # ax3.axvline(threshold_pixel_value, color='red')
 
-    ax4 = fig.add_subplot(gs[1,1])
-    ax4 = rgbHist(mapped_img_in_RGB, ax4, "After")
-    ax4.axvline(threshold_pixel_value, color='red')
+    # ax4 = fig.add_subplot(gs[1,1])
+    # ax4 = rgbHist(mapped_img_in_RGB, ax4, "After")
+    # ax4.axvline(threshold_pixel_value, color='red')
 
-    plt.show()
+    # plt.show()
 
     return mapped_img_in_RGB
 
@@ -595,16 +596,15 @@ if __name__ == "__main__":
     ideal_std_pixel_value   = threshold_pixel_value/4
     ideal_mean_pixel_value  = threshold_pixel_value/2
     img_in_RGB_bgcolor, img_in_RGB_non_bgcolor = separateBackgroundColor()
-    # pre_processed_img_in_RGB  = transformPixelValueDistributionStatistically()
     mapped_img_in_RGB       = mappingPixelValue()
-    adjusted_img_out_RGB    = BrightnessAdjustment(mapped_img_in_RGB)
-    adjusted_img_out_Gray   = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    pre_processed_img_in_RGB = transformPixelValueDistributionStatistically()
+    # adjusted_img_out_RGB    = BrightnessAdjustment(mapped_img_in_RGB)
+    # adjusted_img_out_Gray   = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    # # Save image
+    # adjusted_img_out_BGR = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2BGR)
+    # cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
     print ("\nElapsed time                      : {0}".format(time.time() - start_time) + "[sec]")
-
-    # Save image
-    adjusted_img_out_BGR = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2BGR)
-    cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
     # # Create figure
     # fig = plt.figure(figsize=(6, 8)) # figsize=(width, height)
