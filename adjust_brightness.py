@@ -45,6 +45,7 @@ if len(args) != 3:
 p_init      = 1.0
 p_interval  = 0.01
 ratio_of_reference_section = 0.01 # 1(%)
+# ratio_of_reference_section = 0.005 # 1(%)
 bgcolor     = 0 # Background color : Black(0, 0, 0)
 print("\n")
 print("Input image data        (args[1]) :", args[1])
