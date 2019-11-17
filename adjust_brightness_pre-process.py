@@ -7,6 +7,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cycler
+from scipy import stats
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as pat
 import cv2
@@ -14,6 +15,7 @@ import subprocess
 import sys
 import statistics
 import time
+
 
 # Graph settings
 # plt.style.use('seaborn-white')
@@ -397,6 +399,66 @@ def mappingPixelValue():
     return mapped_img_in_RGB
 
 
+
+def robustScaler():
+    # Exclude background color pixel
+    tmp_img = img_in_Gray[b_index_non_bgcolor]
+
+    # Calc quartile pixel value
+    first_quater    = np.uint8(stats.scoreatpercentile(tmp_img, 25))
+    second_quater   = np.uint8(np.median(tmp_img))
+    third_quater    = np.uint8(stats.scoreatpercentile(tmp_img, 75))
+    print ("1st quartile                     :", first_quater,   "(pixel value)")
+    print ("2nd quartile (median)            :", second_quater,  "(pixel value")
+    print ("3rd quartile                     :", third_quater,   "(pixel value)")
+
+    tmp_img_float = img_in_RGB.copy().astype(float)
+
+    # RobustScale
+    tmp_img_float = (tmp_img_float-second_quater) / (third_quater-first_quater)
+    tmp_max, tmp_min = np.max(tmp_img_float), np.min(tmp_img_float)
+    print("( Max, Min ) = (", tmp_max, ",", tmp_min, ")")
+
+    # Make the min pixel value "0"
+    tmp_img_float = tmp_img_float + (-tmp_min)
+    tmp_max, tmp_min = np.max(tmp_img_float), np.min(tmp_img_float)
+    print("( Max, Min ) = (", tmp_max, ",", tmp_min, ")")
+
+    scaled_img_in_RGB = tmp_img_float.astype(np.uint8)
+    print("\nRobust scaling done.")
+
+    # Create figure
+    fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    gs  = gridspec.GridSpec(2,2)
+
+    ax1 = fig.add_subplot(gs[0,0])
+    ax1.set_title('Before')
+    ax1.imshow(img_in_RGB)
+    ax1.set_xticks([]), ax1.set_yticks([])
+
+    ax2 = fig.add_subplot(gs[0,1])
+    ax2.set_title('After')
+    ax2.imshow(scaled_img_in_RGB)
+    ax2.set_xticks([]), ax2.set_yticks([])
+
+    ax3 = fig.add_subplot(gs[1,0])
+    ax3 = rgbHist(img_in_RGB, ax3, "Before")
+    ax3.axvline(first_quater,   color='red')
+    ax3.axvline(second_quater,  color='blue')
+    ax3.axvline(third_quater,   color='green')
+
+    ax4 = fig.add_subplot(gs[1,1])
+    ax4 = rgbHist(scaled_img_in_RGB, ax4, "After")
+    ax4.axvline(first_quater,   color='red')
+    ax4.axvline(second_quater,  color='blue')
+    ax4.axvline(third_quater,   color='green')
+
+    plt.show()
+    
+    return scaled_img_in_RGB
+
+
+
 def preProcess(_img_RGB):
     print("Input image (RGB)                 :", _img_RGB.shape) # (height, width, channel)
 
@@ -593,14 +655,17 @@ if __name__ == "__main__":
     N_all, N_all_non_bgcolor, mean_pixel_value, std_pixel_value = preProcess(img_in_RGB)
     bin_number              = 50
     threshold_pixel_value   = searchThresholdPixelValue()
-    ideal_std_pixel_value   = threshold_pixel_value/4
-    ideal_mean_pixel_value  = threshold_pixel_value/2
+    # threshold_pixel_value   = mean_pixel_value + std_pixel_value*2
+    # ideal_std_pixel_value   = threshold_pixel_value/4
+    # ideal_mean_pixel_value  = threshold_pixel_value/2
     img_in_RGB_bgcolor, img_in_RGB_non_bgcolor = separateBackgroundColor()
-    mapped_img_in_RGB       = mappingPixelValue()
-    pre_processed_img_in_RGB = transformPixelValueDistributionStatistically()
-    # adjusted_img_out_RGB    = BrightnessAdjustment(mapped_img_in_RGB)
+    scaled_img_in_RGB       = robustScaler()
+    # mapped_img_in_RGB       = mappingPixelValue()
+    # pre_processed_img_in_RGB = transformPixelValueDistributionStatistically()
+    # adjusted_img_out_RGB    = BrightnessAdjustment(scaled_img_in_RGB)
     # adjusted_img_out_Gray   = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
-    # # Save image
+
+    # # # Save image
     # adjusted_img_out_BGR = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2BGR)
     # cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
