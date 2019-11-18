@@ -143,8 +143,8 @@ def comparativeHist(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax, _y_max):
 def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_value_L1, _ratio, _max_pixel_value_L1, _ratio_of_ref_section_L1):
     # Convert RGB to Grayscale
     img_in_Gray_L1     = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray         = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_adjusted_Gray   = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
+    img_in_Gray        = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
+    img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
     fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,3)

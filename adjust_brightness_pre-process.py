@@ -259,8 +259,8 @@ def searchThresholdPixelValue():
 def separateBackgroundColor():
     num_of_bgcolor      = np.count_nonzero(b_index_bgcolor)
     num_of_non_bgcolor  = np.count_nonzero(b_index_non_bgcolor)
-    print("Num of Background Color           :", num_of_bgcolor)
-    print("Num of Non-Background Color       :", num_of_non_bgcolor)
+    print("Num of Background Color           :", num_of_bgcolor, "(pixels)")
+    print("Num of Non-Background Color       :", num_of_non_bgcolor, "(pixels)")
     print("The ratio of Background Color     :", round(num_of_bgcolor/N_all*100), "(%)")
 
     # Apply decomposition
@@ -437,6 +437,64 @@ def preProcessPixelValueDistribution(_robust_scaled_img_in_RGB_f):
     # plt.show()
 
     return pre_processed_img_in_RGB
+
+
+
+def dealWithOutlierPixelValue():
+    # # Calc. mean and std pixel value for each RGB
+    # bool_R_only_non_bgcolor = img_in_RGB[:,:,0][b_index_non_bgcolor]
+    # bool_G_only_non_bgcolor = img_in_RGB[:,:,1][b_index_non_bgcolor]
+    # bool_B_only_non_bgcolor = img_in_RGB[:,:,2][b_index_non_bgcolor]
+    # R_mean, R_std = np.uint8(np.mean(bool_R_only_non_bgcolor)), np.uint8(np.std(bool_R_only_non_bgcolor))
+    # G_mean, G_std = np.uint8(np.mean(bool_G_only_non_bgcolor)), np.uint8(np.std(bool_G_only_non_bgcolor))
+    # B_mean, B_std = np.uint8(np.mean(bool_B_only_non_bgcolor)), np.uint8(np.std(bool_B_only_non_bgcolor))
+    # print("R_mean, R_std :", R_mean, ",", R_std)
+    # print("G_mean, G_std :", G_mean, ",", G_std)
+    # print("B_mean, B_std :", B_mean, ",", B_std)
+
+    # bool_R_only_outlier = img_in_RGB[:,:,0] >= (R_mean+2*R_std)
+    # bool_G_only_outlier = img_in_RGB[:,:,1] >= (G_mean+2*G_std)
+    # bool_B_only_outlier = img_in_RGB[:,:,2] >= (B_mean+2*B_std)
+    # img_in_RGB_non_outlier = img_in_RGB.copy()
+    # img_in_RGB_non_outlier[:,:,0] = np.where(bool_R_only_outlier, img_in_RGB[:,:,0]/2.52, img_in_RGB[:,:,0])
+    # img_in_RGB_non_outlier[:,:,1] = np.where(bool_G_only_outlier, img_in_RGB[:,:,1]/2.52, img_in_RGB[:,:,1])
+    # img_in_RGB_non_outlier[:,:,2] = np.where(bool_B_only_outlier, img_in_RGB[:,:,2]/2.52, img_in_RGB[:,:,2])
+    gamma = 2
+    img_in_RGB_non_outlier_f = threshold_pixel_value*(img_in_RGB.copy().astype(float)/threshold_pixel_value)**(1/gamma)
+    img_in_RGB_non_outlier   = img_in_RGB_non_outlier_f.astype(np.uint8)
+
+    # Save image
+    cv2.imwrite("images/non_outlier.bmp", cv2.cvtColor(img_in_RGB_non_outlier, cv2.COLOR_RGB2BGR))
+
+    # Create figure
+    fig = plt.figure(figsize=(8, 6)) # figsize=(width, height)
+    gs  = gridspec.GridSpec(2,2)
+
+    ax1 = fig.add_subplot(gs[0,0])
+    ax1.set_title('Before')
+    ax1.imshow(img_in_RGB)
+    ax1.set_xticks([]), ax1.set_yticks([])
+
+    ax2 = fig.add_subplot(gs[0,1])
+    ax2.set_title('After')
+    ax2.imshow(img_in_RGB_non_outlier)
+    ax2.set_xticks([]), ax2.set_yticks([])
+
+    ax3 = fig.add_subplot(gs[1,0])
+    ax3 = rgbHist(img_in_RGB, ax3, "Before")
+    ax3.axvline(threshold_pixel_value, color='red')
+
+    ax4 = fig.add_subplot(gs[1,1])
+    ax4 = rgbHist(img_in_RGB_non_outlier, ax4, "After")
+    ax4.axvline(threshold_pixel_value, color='red')
+
+    plt.show()
+
+
+
+def gamma_correction(_x, _gamma=2):
+    # y=255*(x/255)^(1/2)
+    return threshold_pixel_value*(_x/threshold_pixel_value)^(1/_gamma)
 
 
 
@@ -645,10 +703,11 @@ if __name__ == "__main__":
     # ideal_std_pixel_value   = threshold_pixel_value/4
     # ideal_mean_pixel_value  = threshold_pixel_value/2
     img_in_RGB_bgcolor, img_in_RGB_non_bgcolor = separateBackgroundColor()
-    robust_scaled_img_in_RGB_f     = robustScalePixelValueDistribution()
-    pre_processed_img_in_RGB       = preProcessPixelValueDistribution(robust_scaled_img_in_RGB_f)
+    # robust_scaled_img_in_RGB_f     = robustScalePixelValueDistribution()
+    # pre_processed_img_in_RGB       = preProcessPixelValueDistribution(robust_scaled_img_in_RGB_f)
+    dealWithOutlierPixelValue()
     # pre_processed_img_in_RGB = transformPixelValueDistributionStatistically()
-    adjusted_img_out_RGB    = BrightnessAdjustment(pre_processed_img_in_RGB)
+    # adjusted_img_out_RGB    = BrightnessAdjustment(pre_processed_img_in_RGB)
     # adjusted_img_out_Gray   = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
 
     # # Save image
