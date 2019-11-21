@@ -46,7 +46,7 @@ if len(args) != 3:
 # Set initial parameter
 p_init          = 1.0
 p_interval      = 0.01
-ref_sec4low     = 0.001 # 1(%)
+ref_sec4low     = 0.01 # 1(%)
 ref_sec4high    = 0.001 # 0.1(%)
 BGColor         = [0, 0, 0] # Background color
 BGColor_Gray    = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
@@ -289,12 +289,12 @@ def decomposeInputImage():
 
     # Apply decomposition and create low and high pixel value images
     low_img_in_RGB, high_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
-    low_img_in_RGB[:,:,0]  = np.where(b_index_low,  img_in_RGB[:,:,0], 0)
-    low_img_in_RGB[:,:,1]  = np.where(b_index_low,  img_in_RGB[:,:,1], 0)
-    low_img_in_RGB[:,:,2]  = np.where(b_index_low,  img_in_RGB[:,:,2], 0)
-    high_img_in_RGB[:,:,0] = np.where(b_index_high, img_in_RGB[:,:,0], 0)
-    high_img_in_RGB[:,:,1] = np.where(b_index_high, img_in_RGB[:,:,1], 0)
-    high_img_in_RGB[:,:,2] = np.where(b_index_high, img_in_RGB[:,:,2], 0)
+    low_img_in_RGB[:,:,0]  = np.where(b_index_low,  img_in_RGB[:,:,0], BGColor[0])
+    low_img_in_RGB[:,:,1]  = np.where(b_index_low,  img_in_RGB[:,:,1], BGColor[1])
+    low_img_in_RGB[:,:,2]  = np.where(b_index_low,  img_in_RGB[:,:,2], BGColor[2])
+    high_img_in_RGB[:,:,0] = np.where(b_index_high, img_in_RGB[:,:,0], BGColor[0])
+    high_img_in_RGB[:,:,1] = np.where(b_index_high, img_in_RGB[:,:,1], BGColor[1])
+    high_img_in_RGB[:,:,2] = np.where(b_index_high, img_in_RGB[:,:,2], BGColor[2])
 
     # Convert RGB image to Grayscale image
     low_img_in_Gray  = cv2.cvtColor(low_img_in_RGB,  cv2.COLOR_RGB2GRAY)
@@ -337,7 +337,7 @@ def decomposeInputImage():
 
     # plt.show()
 
-    return low_img_in_RGB, high_img_in_RGB, mean_pixel_value_low, mean_pixel_value_high
+    return low_img_in_RGB, high_img_in_RGB, N_low, N_high
 
 
 
@@ -402,66 +402,67 @@ def preProcess4L1():
 
 
 
-def determineAdjustParameter(_img_RGB, _img_in_Gray_non_bgcolor_L1, _N_all_non_bgcolor_L1, _max_pixel_value_L1, _ratio_of_ref_section):
+def determineAmplificationFactor(_img_RGB, _target_pixel_value, _pct_of_ref_section, _N_all_non_bgcolor):
     # Initialize
-    tmp_ratio_of_ref_section = 0.0
-    ref_pixel_value_L1       = _max_pixel_value_L1
+    tmp_pct_of_ref_section_L1 = 0.0
+    ref_pixel_value_L1        = _target_pixel_value
 
-    # Determine reference pixel value in the input image(L=1)
-    while tmp_ratio_of_ref_section < _ratio_of_ref_section:
-        # Temporarily calc    
-        sum_of_pixels_in_section  = np.sum( (ref_pixel_value_L1 <= _img_in_Gray_non_bgcolor_L1) )
-        tmp_ratio_of_ref_section  = sum_of_pixels_in_section / _N_all_non_bgcolor_L1
+    # Determine reference pixel value in the input image with L=1
+    img_in_Gray_L1_non_bgcolor   = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
+    while tmp_pct_of_ref_section_L1 < _pct_of_ref_section:
+        # Temporarily calc.
+        tmp_num_of_pixels = (ref_pixel_value_L1 <= img_in_Gray_L1_non_bgcolor) & (img_in_Gray_L1_non_bgcolor <= _target_pixel_value)
+        tmp_pct_of_ref_section_L1 = np.sum( tmp_num_of_pixels ) / N_all_non_bgcolor_L1
 
         # Next pixel value
         ref_pixel_value_L1 -= 1
 
     ref_pixel_value_L1 += 1
-    print("Reference pixel value (L=1)       :", ref_pixel_value_L1, "(pixel value)")
-    print("Reference section (L=1)           :", ref_pixel_value_L1, "~", _max_pixel_value_L1, "(pixel value)")
-    print("Ratio of reference section (L=1)  :", round(tmp_ratio_of_ref_section*100, 2), "(%)")
+    print("Reference pixel value (L=1)         :", ref_pixel_value_L1, "(pixel value)")
+    print("Reference section (L=1)             :", ref_pixel_value_L1, "~", _target_pixel_value, "(pixel value)")
+    print("The pct. of reference section (L=1) :", round(tmp_pct_of_ref_section_L1*100, 2), "(%)")
 
-    # Determine tuning parameter
+    # Determine amplification factor "p"
     p = p_init
-    tmp_ratio = 0.0
-    while tmp_ratio < _ratio_of_ref_section:
+    tmp_pct_of_ref_section = 0.0
+    while tmp_pct_of_ref_section < _pct_of_ref_section:
         # Temporarily, adjust pixel value of the input image with p
-        tmp_img_adjusted_RGB   = adjust_pixel_value(_img_RGB, p)
-        tmp_img_adjusted_Gray  = cv2.cvtColor(tmp_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
+        tmp_adjusted_img_RGB   = adjust_pixel_value(_img_RGB, p)
+        tmp_adjusted_img_Gray  = cv2.cvtColor(tmp_adjusted_img_RGB, cv2.COLOR_RGB2GRAY)
 
         # Exclude background color
-        tmp_adjusted_img_non_bgcolor_Gray = tmp_img_adjusted_Gray[tmp_img_adjusted_Gray != BGColor_Gray]
+        tmp_adjusted_img_Gray_non_bgcolor = tmp_adjusted_img_Gray[tmp_adjusted_img_Gray != BGColor_Gray]
 
-        # Then, calc ratio of max pixel value(L=1)
-        sum_of_pixels_in_ref_section = np.sum(ref_pixel_value_L1 <= tmp_adjusted_img_non_bgcolor_Gray)
-        tmp_ratio = sum_of_pixels_in_ref_section / N_all_non_bgcolor
+        # Calc. percentage of max pixel value
+        # tmp_num_of_pixels = (ref_pixel_value_L1 <= tmp_adjusted_img_Gray_non_bgcolor) & (tmp_adjusted_img_Gray_non_bgcolor <= _target_pixel_value)
+        tmp_num_of_pixels = (ref_pixel_value_L1 <= tmp_adjusted_img_Gray_non_bgcolor)
+        tmp_pct_of_ref_section = np.sum( tmp_num_of_pixels ) / _N_all_non_bgcolor
 
         # Update parameter
         p += p_interval
 
     p_final = round(p, 2)
-    print("p_final                           :", _p_final)
+    print("The pct. of reference section       :", round(tmp_pct_of_ref_section*100, 2), "(%)")
+    print("p_final                             :", p_final)
 
-    return p_final, ref_pixel_value_L1, tmp_ratio_of_ref_section
+    return p_final, ref_pixel_value_L1, tmp_pct_of_ref_section_L1, tmp_pct_of_ref_section
 
 
 
-def adjustPixelValue(_img_RGB, _p_final, _ref_pixel_value_L1, _max_pixel_value_L1):
+def adjustPixelValue(_img_RGB, _p_final, _ref_pixel_value_L1, _target_pixel_value, _N_all_non_bgcolor):
     # Create adjusted image
-    img_adjusted_RGB  = adjust_pixel_value(_img_RGB, _p_final)
-    img_adjusted_Gray = cv2.cvtColor(img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
+    adjusted_img_RGB  = adjust_pixel_value(_img_RGB, _p_final)
+    adjusted_img_Gray = cv2.cvtColor(adjusted_img_RGB, cv2.COLOR_RGB2GRAY)
 
-    # Exclude 
-    img_adjusted_non_bgcolor_Gray = img_adjusted_Gray[img_adjusted_Gray != BGColor_Gray]
+    # Exclude background color
+    adjusted_img_Gray_non_bgcolor = adjusted_img_Gray[adjusted_img_Gray != BGColor_Gray]
 
-    # For the adjusted image, calc ratio of num. of pixels in the reference section
-    sum_of_pixels_in_ref_section = np.sum( (_ref_pixel_value_L1 <= img_adjusted_Gray) & (img_adjusted_Gray <= _max_pixel_value_L1) )
-    ratio_final = sum_of_pixels_in_ref_section / N_all_non_bgcolor
-    print("Ratio of reference section        :", round(ratio_final*100, 2), "(%)")
+    # For the adjusted image, calc. percentage of num. of pixels in the reference section
+    tmp_num_of_pixels = (_ref_pixel_value_L1 <= adjusted_img_Gray_non_bgcolor) & (adjusted_img_Gray_non_bgcolor <= _target_pixel_value)
+    final_pct = np.sum( tmp_num_of_pixels ) / _N_all_non_bgcolor
+    print("Ratio of reference section        :", round(final_pct*100, 2), "(%)")
 
-    #print("Ratio of num. of pixels to 255   :", round(np.sum(img_adjusted_Gray==255) / N_all_non_bgcolor * 100, 2), "(%)")
-
-    return img_adjusted_RGB, ratio_final
+    return adjusted_img_RGB, final_pct
 
 
 
@@ -494,26 +495,18 @@ def execCommand(_fig_name, _input_img_name, _adjusted_img_name):
 
 
 
-def BrightnessAdjustment(_img_RGB, _ref_sec):
-    print("\n\n====================================")
-    print(" STEP1: Get max pixel value (L=1)")  
-    print("====================================")
-    N_all_non_bgcolor = preProcess(_img_RGB)
-    img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1 = preProcess4L1()
-
+def BrightnessAdjustment(_img_RGB, _target_pixel_value, _ref_section, _N_all):
     print("\n\n================================================")
     print(" STEP2: Search for reference pixel value (L=1)")
     print("=================================================")
-    p_final, ref_pixel_value_L1, ratio_of_ref_section_L1 = determineAdjustParameter(_img_RGB, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, _ref_sec)
+    p_final, ref_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section = determineAmplificationFactor(_img_RGB, _target_pixel_value, _ref_section, _N_all)
 
     print("\n\n============================")
     print(" STEP3: Adjust pixel value")
     print("============================")
-    img_adjusted_RGB, ratio_final = adjustPixelValue(_img_RGB, p_final, ref_pixel_value_L1, max_pixel_value_L1)
+    adjusted_img_RGB, final_pct = adjustPixelValue(_img_RGB, p_final, ref_pixel_value_L1, _target_pixel_value, _N_all)
 
-    
-
-    return img_adjusted_RGB
+    return adjusted_img_RGB
 
 
 
@@ -530,51 +523,53 @@ if __name__ == "__main__":
     start_time     = time.time()
 
     N_all_non_bgcolor, mean_pixel_value, std_pixel_value = preProcess(img_in_RGB)
-    bin_number                      = 100
+    img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1 = preProcess4L1()
+    bin_number                      = 50
     threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
-    low_img_in_RGB, high_img_in_RGB, mean_pixel_value_low, mean_pixel_value_high = decomposeInputImage()
-    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB, ref_sec4low)
-    # adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB, ref_sec4high)
-    # adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_low_img_in_RGB, 1.0, adjusted_high_img_in_RGB)
-    # adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    low_img_in_RGB, high_img_in_RGB, N_low, N_high = decomposeInputImage()
+    target_pixel_value_L1 = 158
+    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB, target_pixel_value_L1, ref_sec4low, N_low)
+    adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB, max_pixel_value_L1, ref_sec4high, N_high)
+    adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_low_img_in_RGB, 1.0, adjusted_high_img_in_RGB)
+    adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
     
-    # # Save adjusted image
-    # adjusted_img_out_BGR            = cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR)
-    # cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
+    # Save adjusted image
+    adjusted_img_out_BGR            = cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR)
+    cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
     print ("\nElapsed time                      :", round(time.time() - start_time, 2), "[sec]")
 
-    # # Create figure
-    # fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
-    # gs  = gridspec.GridSpec(2,2)
+    # Create figure
+    fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
+    gs  = gridspec.GridSpec(2,2)
 
-    # # Low image
-    # ax1 = fig.add_subplot(gs[0,0])
-    # ax1.set_title("Adjusted low image")
-    # ax1.imshow(adjusted_low_img_in_RGB)
-    # ax1.set_xticks([]), ax1.set_yticks([])
+    # Low image
+    ax1 = fig.add_subplot(gs[0,0])
+    ax1.set_title("Adjusted low image")
+    ax1.imshow(adjusted_low_img_in_RGB)
+    ax1.set_xticks([]), ax1.set_yticks([])
 
-    # # Histogram(Low image)
-    # ax2 = fig.add_subplot(gs[1,0])
-    # ax2 = rgbHist(adjusted_low_img_in_RGB, ax2, "Adjusted low")
-    # ax2.axvline(threshold_pixel_value, color='red')
-    # ax2.set_xlim([-5, 260])
-    # ax2.set_ylim([0, 20000])
+    # Histogram(Low image)
+    ax2 = fig.add_subplot(gs[1,0])
+    ax2 = rgbHist(adjusted_low_img_in_RGB, ax2, "Adjusted low")
+    ax2.axvline(threshold_pixel_value, color='red')
+    ax2.set_xlim([-5, 260])
+    ax2.set_ylim([0, 20000])
 
-    # # High image
-    # ax3 = fig.add_subplot(gs[0,1])
-    # ax3.set_title("Adjusted high image")
-    # ax3.imshow(adjusted_high_img_in_RGB)
-    # ax3.set_xticks([]), ax3.set_yticks([])
+    # High image
+    ax3 = fig.add_subplot(gs[0,1])
+    ax3.set_title("Adjusted high image")
+    ax3.imshow(adjusted_high_img_in_RGB)
+    ax3.set_xticks([]), ax3.set_yticks([])
 
-    # # Histogram(High image)
-    # ax4 = fig.add_subplot(gs[1,1])
-    # ax4 = rgbHist(adjusted_high_img_in_RGB, ax4, "Adjusted high")
-    # ax4.axvline(threshold_pixel_value, color='red')
-    # ax4.set_xlim([-5, 260])
-    # ax4.set_ylim([0, 20000])
+    # Histogram(High image)
+    ax4 = fig.add_subplot(gs[1,1])
+    ax4 = rgbHist(adjusted_high_img_in_RGB, ax4, "Adjusted high")
+    ax4.axvline(threshold_pixel_value, color='red')
+    ax4.set_xlim([-5, 260])
+    ax4.set_ylim([0, 20000])
 
-    # plt.show()
+    plt.show()
 
 
     # # Create figure
