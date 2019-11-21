@@ -274,7 +274,7 @@ def searchThresholdPixelValue(_img_in_RGB):
 
 
 # Decompose the input image into two images
-def decomposeImage():
+def decomposeInputImage():
     print("\nThreshold pixel value             :", threshold_pixel_value, "(pixel value)")
 
     # ndarray(dtype: bool)
@@ -284,8 +284,8 @@ def decomposeImage():
     N_bgcolor       = np.count_nonzero(b_index_bgcolor)
     N_low           = np.count_nonzero(b_index_low)
     N_high          = np.count_nonzero(b_index_high)
-    print("\nNumber of \"low\" pixel values      :", round(N_low/N_all_non_bgcolor*100), "(%)")
-    print("Number of \"high\" pixel values     :", round(N_high/N_all_non_bgcolor*100), "(%)")
+    print("\nThe pct. of \"low\" pixel values    :", round(N_low/N_all_non_bgcolor*100), "(%)")
+    print("The pct. of \"high\" pixel values   :", round(N_high/N_all_non_bgcolor*100), "(%)")
 
     # Apply decomposition and create low and high pixel value images
     low_img_in_RGB, high_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
@@ -300,6 +300,10 @@ def decomposeImage():
     low_img_in_Gray  = cv2.cvtColor(low_img_in_RGB,  cv2.COLOR_RGB2GRAY)
     high_img_in_Gray = cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2GRAY)
 
+    mean_pixel_value_low   = np.uint8(np.mean(low_img_in_Gray[low_img_in_Gray != BGColor_Gray]))
+    mean_pixel_value_high  = np.uint8(np.mean(high_img_in_Gray[high_img_in_Gray != BGColor_Gray]))
+    print("Mean pixel value (\"low\" image)    :", mean_pixel_value_low, "(pixel value)")
+    print("Mean pixel value (\"high\" image)   :", mean_pixel_value_high, "(pixel value)")
 
     # # Create figure
     # fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
@@ -333,7 +337,7 @@ def decomposeImage():
 
     # plt.show()
 
-    return low_img_in_RGB, high_img_in_RGB
+    return low_img_in_RGB, high_img_in_RGB, mean_pixel_value_low, mean_pixel_value_high
 
 
 
@@ -356,12 +360,12 @@ def preProcess(_img_RGB):
     print("Max pixel value                   :", max_pixel_value, "(pixel value)")
 
     # Calc mean pixel value
-    mean_pixel_value        = np.mean(img_in_Gray_non_bgcolor)
-    print("Mean pixel value                  :", round(mean_pixel_value, 1), "(pixel value)")
+    mean_pixel_value        = np.uint8(np.mean(img_in_Gray_non_bgcolor))
+    print("Mean pixel value                  :", mean_pixel_value, "(pixel value)")
 
     # Calc std pixel value
-    std_pixel_value         = np.std(img_in_Gray_non_bgcolor)
-    print("Std pixel value                   :", round(std_pixel_value, 1), "(pixel value)")
+    std_pixel_value         = np.uint8(np.std(img_in_Gray_non_bgcolor))
+    print("Std pixel value                   :", std_pixel_value, "(pixel value)")
 
     return N_all_non_bgcolor, mean_pixel_value, std_pixel_value
 
@@ -436,14 +440,13 @@ def determineAdjustParameter(_img_RGB, _img_in_Gray_non_bgcolor_L1, _N_all_non_b
         p += p_interval
 
     p_final = round(p, 2)
+    print("p_final                           :", _p_final)
 
     return p_final, ref_pixel_value_L1, tmp_ratio_of_ref_section
 
 
 
 def adjustPixelValue(_img_RGB, _p_final, _ref_pixel_value_L1, _max_pixel_value_L1):
-    print("p_final                           :", _p_final)
-
     # Create adjusted image
     img_adjusted_RGB  = adjust_pixel_value(_img_RGB, _p_final)
     img_adjusted_Gray = cv2.cvtColor(img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
@@ -524,54 +527,54 @@ if __name__ == "__main__":
     img_in_Gray_L1 = cv2.cvtColor(img_in_RGB_L1,  cv2.COLOR_RGB2GRAY)
 
     # Start time count
-    start_time = time.time()
+    start_time     = time.time()
 
     N_all_non_bgcolor, mean_pixel_value, std_pixel_value = preProcess(img_in_RGB)
     bin_number                      = 100
-    threshold_pixel_value           = np.uint8(mean_pixel_value + std_pixel_value*2)
-    low_img_in_RGB, high_img_in_RGB = decomposeImage()
-    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB,  ref_sec4low)
-    adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB, ref_sec4high)
-    adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_low_img_in_RGB, 1.0, adjusted_high_img_in_RGB)
-    adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
+    low_img_in_RGB, high_img_in_RGB, mean_pixel_value_low, mean_pixel_value_high = decomposeInputImage()
+    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB, ref_sec4low)
+    # adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB, ref_sec4high)
+    # adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_low_img_in_RGB, 1.0, adjusted_high_img_in_RGB)
+    # adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
     
-    # Save adjusted image
-    adjusted_img_out_BGR            = cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR)
-    cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
+    # # Save adjusted image
+    # adjusted_img_out_BGR            = cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR)
+    # cv2.imwrite("images/adjusted.bmp", adjusted_img_out_BGR)
 
-    print ("\nElapsed time                      : {0}".format(time.time() - start_time) + "[sec]")
+    print ("\nElapsed time                      :", round(time.time() - start_time, 2), "[sec]")
 
-    # Create figure
-    fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
-    gs  = gridspec.GridSpec(2,2)
+    # # Create figure
+    # fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
+    # gs  = gridspec.GridSpec(2,2)
 
-    # Low image
-    ax1 = fig.add_subplot(gs[0,0])
-    ax1.set_title("Adjusted low image")
-    ax1.imshow(adjusted_low_img_in_RGB)
-    ax1.set_xticks([]), ax1.set_yticks([])
+    # # Low image
+    # ax1 = fig.add_subplot(gs[0,0])
+    # ax1.set_title("Adjusted low image")
+    # ax1.imshow(adjusted_low_img_in_RGB)
+    # ax1.set_xticks([]), ax1.set_yticks([])
 
-    # Histogram(Low image)
-    ax2 = fig.add_subplot(gs[1,0])
-    ax2 = rgbHist(adjusted_low_img_in_RGB, ax2, "Adjusted low")
-    ax2.axvline(threshold_pixel_value, color='red')
-    ax2.set_xlim([-5, 260])
-    ax2.set_ylim([0, 20000])
+    # # Histogram(Low image)
+    # ax2 = fig.add_subplot(gs[1,0])
+    # ax2 = rgbHist(adjusted_low_img_in_RGB, ax2, "Adjusted low")
+    # ax2.axvline(threshold_pixel_value, color='red')
+    # ax2.set_xlim([-5, 260])
+    # ax2.set_ylim([0, 20000])
 
-    # High image
-    ax3 = fig.add_subplot(gs[0,1])
-    ax3.set_title("Adjusted high image")
-    ax3.imshow(adjusted_high_img_in_RGB)
-    ax3.set_xticks([]), ax3.set_yticks([])
+    # # High image
+    # ax3 = fig.add_subplot(gs[0,1])
+    # ax3.set_title("Adjusted high image")
+    # ax3.imshow(adjusted_high_img_in_RGB)
+    # ax3.set_xticks([]), ax3.set_yticks([])
 
-    # Histogram(High image)
-    ax4 = fig.add_subplot(gs[1,1])
-    ax4 = rgbHist(adjusted_high_img_in_RGB, ax4, "Adjusted high")
-    ax4.axvline(threshold_pixel_value, color='red')
-    ax4.set_xlim([-5, 260])
-    ax4.set_ylim([0, 20000])
+    # # Histogram(High image)
+    # ax4 = fig.add_subplot(gs[1,1])
+    # ax4 = rgbHist(adjusted_high_img_in_RGB, ax4, "Adjusted high")
+    # ax4.axvline(threshold_pixel_value, color='red')
+    # ax4.set_xlim([-5, 260])
+    # ax4.set_ylim([0, 20000])
 
-    plt.show()
+    # plt.show()
 
 
     # # Create figure
