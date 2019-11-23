@@ -45,20 +45,20 @@ if len(args) != 3:
     sys.exit()
 
 # Set initial parameter
-p_init          = 1.0
-p_interval      = 0.01
-ref_sec4high    = 0.01 # 0.1(%)
-ref_sec4low     = 0.05 # 1(%)
-BGColor         = [0, 0, 0] # Background color
-BGColor_Gray    = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
-print("Input image data        (args[1])   :", args[1])
-print("Input image data (L=1)  (args[2])   :", args[2])
-# print("p_init                             :", p_init)
-# print("p_interval                         :", p_interval)
-print("The ref. section for high image     :", ref_sec4high*100, "(%)")
-print("The ref. section for low image      :", ref_sec4low*100, "(%)")
-print("Background color                    :", BGColor)
-print("Background color (Grayscale)        :", BGColor_Gray, "(pixel value)")
+p_init              = 1.0
+p_interval          = 0.01
+pct_of_ref_sec4high = 0.01 # 0.1(%)
+pct_of_ref_sec4low  = 0.05 # 1(%)
+BGColor             = [0, 0, 0] # Background color
+BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
+print("Input image data        (args[1])      :", args[1])
+print("Input image data (L=1)  (args[2])      :", args[2])
+print("p_init                                 :", p_init)
+print("p_interval                             :", p_interval)
+print("The pct. of ref. section (high image)  :", pct_of_ref_sec4high*100, "(%)")
+print("The pct. of ref. section (low image)   :", pct_of_ref_sec4low*100, "(%)")
+print("Background color                       :", BGColor)
+print("Background color (Grayscale)           :", BGColor_Gray, "(pixel value)")
 
 
 
@@ -215,30 +215,30 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_valu
 
 
 def calculateStatistics():
-    print("Input image (RGB)                   :", img_in_RGB.shape) # (height, width, channel)
+    print("Input image (RGB)                      :", img_in_RGB.shape) # (height, width, channel)
 
     # Calc all number of pixels of the input image
     N_all = img_in_RGB.shape[0] * img_in_RGB.shape[1]
-    print("N_all                               :", N_all, "(pixels)")
+    print("N_all                                  :", N_all, "(pixels)")
 
     # Exclude background color
     img_in_Gray_non_bgcolor = img_in_Gray[img_in_Gray != BGColor_Gray]
     
     # Calc the number of pixels excluding background color
     N_all_non_bgcolor       = np.sum(img_in_Gray != BGColor_Gray)
-    print("N_all_non_bgcolor                   :", N_all_non_bgcolor, "(pixels)")
+    print("N_all_non_bgcolor                      :", N_all_non_bgcolor, "(pixels)")
 
     # Calc mean pixel value
     max_pixel_value         = np.max(img_in_Gray_non_bgcolor)
-    print("Max pixel value                     :", max_pixel_value, "(pixel value)")
+    print("Max pixel value                        :", max_pixel_value, "(pixel value)")
 
     # Calc mean pixel value
     mean_pixel_value        = np.uint8(np.mean(img_in_Gray_non_bgcolor))
-    print("Mean pixel value                    :", mean_pixel_value, "(pixel value)")
+    print("Mean pixel value                       :", mean_pixel_value, "(pixel value)")
 
     # Calc std pixel value
     std_pixel_value         = np.uint8(np.std(img_in_Gray_non_bgcolor))
-    print("Std pixel value                     :", std_pixel_value, "(pixel value)")
+    print("Std pixel value                        :", std_pixel_value, "(pixel value)")
 
     return N_all_non_bgcolor, mean_pixel_value, std_pixel_value
 # End of calculateStatistics()
@@ -254,23 +254,23 @@ def calculateStatistics4L1():
 
     # Calc max pixel value of the input image (L=1)
     max_pixel_value_L1             = np.max(img_in_Gray_non_bgcolor_L1)
-    print("\nMax pixel value (L=1)               :", max_pixel_value_L1, "(pixel value)")
+    print("\nMax pixel value (L=1)                  :", max_pixel_value_L1, "(pixel value)")
 
     # Calc mean pixel value (L=1)
     mean_pixel_value_L1            = np.uint8(np.mean(img_in_Gray_non_bgcolor_L1))
-    print("Mean pixel value (L=1)              :", round(mean_pixel_value_L1, 1), "(pixel value)")
+    print("Mean pixel value (L=1)                 :", round(mean_pixel_value_L1, 1), "(pixel value)")
 
     # Calc the pct. of the max pixel value (L=1)
     num_max_pixel_value_L1         = np.sum(img_in_Gray_non_bgcolor_L1 == max_pixel_value_L1)
-    print("Num. of max pixel value (L=1)       :", num_max_pixel_value_L1, "(pixels)")
+    print("Num. of max pixel value (L=1)          :", num_max_pixel_value_L1, "(pixels)")
     pct_max_pixel_value_L1       = num_max_pixel_value_L1 / N_all_non_bgcolor_L1
     # pct_max_pixel_value_L1       = round(pct_max_pixel_value_L1, 8)
-    print("The pct. of max pixel value (L=1)   :", round(pct_max_pixel_value_L1*100, 2), "(%)")
+    print("The pct. of max pixel value (L=1)      :", round(pct_max_pixel_value_L1*100, 2), "(%)")
 
     # Calc most frequent pixel value (L=1)
     bincount = np.bincount(img_in_Gray_non_bgcolor_L1)
     most_frequent_pixel_value_L1   = np.argmax( bincount )
-    print("Most frequent pixel value (L=1)     :", most_frequent_pixel_value_L1, "(pixel value)")
+    print("Most frequent pixel value (L=1)        :", most_frequent_pixel_value_L1, "(pixel value)")
 
     return N_all_non_bgcolor_L1, max_pixel_value_L1
 # End of calculateStatistics4L1()
@@ -279,7 +279,7 @@ def calculateStatistics4L1():
 
 # Decompose the input image into two images (high pixel value image and low pixel value image)
 def decomposeInputImage():
-    print("Threshold pixel value               :", threshold_pixel_value, "(pixel value)")
+    print("Threshold pixel value                  :", threshold_pixel_value, "(pixel value)")
 
     # ndarray(dtype: bool)
     b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
@@ -287,8 +287,8 @@ def decomposeInputImage():
     b_index_low     = (img_in_Gray <= threshold_pixel_value) & (~b_index_bgcolor)
     N_bgcolor       = np.count_nonzero(b_index_bgcolor)
     N_high, N_low   = np.count_nonzero(b_index_high), np.count_nonzero(b_index_low)
-    print("The pct. of high pixel values       :", round(N_high/N_all_non_bgcolor*100),   "(%)")
-    print("The pct. of low pixel values        :", round(N_low/N_all_non_bgcolor*100),    "(%)")
+    print("The pct. of high pixel values          :", round(N_high/N_all_non_bgcolor*100),   "(%)")
+    print("The pct. of low pixel values           :", round(N_low/N_all_non_bgcolor*100),    "(%)")
 
     # Apply decomposition and create low and high pixel value images
     high_img_in_RGB, low_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
@@ -306,8 +306,8 @@ def decomposeInputImage():
     # Calulate mean pixel value
     mean_pixel_value_high  = np.uint8(np.mean(high_img_in_Gray[high_img_in_Gray != BGColor_Gray]))
     mean_pixel_value_low   = np.uint8(np.mean(low_img_in_Gray[low_img_in_Gray   != BGColor_Gray]))
-    print("Mean pixel value (high image)       :", mean_pixel_value_high, "(pixel value)")
-    print("Mean pixel value (low image)        :", mean_pixel_value_low,  "(pixel value)")
+    print("Mean pixel value (high image)          :", mean_pixel_value_high, "(pixel value)")
+    print("Mean pixel value (low image)           :", mean_pixel_value_low,  "(pixel value)")
 
     return high_img_in_RGB, low_img_in_RGB, N_high, N_low
 # End of decomposeInputImage()
@@ -332,6 +332,8 @@ def tmp_adjust_pixel_value(_tmp_img_RGB, _img_RGB, _amplification_factor):
 
 
 def determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all_non_bgcolor):
+    print("Theoretical pct. of ref. section (L=1) :", _pct_of_ref_section*100, "(%)")
+
     # Initialize
     tmp_pct_of_ref_section_L1    = 0.0
     tmp_left_edge_pixel_value_L1 = _right_edge_pixel_value
@@ -352,8 +354,8 @@ def determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_
     pct_of_ref_section_L1       = round(tmp_pct_of_ref_section_L1*100, 2)
     # print("Left edge pixel value (L=1)         :", left_edge_pixel_value_L1, "(pixel value)")
     # print("Right edge pixel value (L=1)        :", _right_edge_pixel_value, "(pixel value)")
-    print("Reference section (L=1)             :", "[", left_edge_pixel_value_L1, ",", _right_edge_pixel_value, "]", "(pixel value)")
-    print("The pct. of reference section (L=1) :", pct_of_ref_section_L1, "(%)")
+    print("Reference section (L=1)                :", "[", left_edge_pixel_value_L1, ",", _right_edge_pixel_value, "]", "(pixel value)")
+    print("Actual pct. of ref. section (L=1)      :", pct_of_ref_section_L1, "(%)")
 
 
     # NOTE: For the input image
@@ -380,7 +382,7 @@ def determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_
 
     p_final                     = round((tmp_p - p_interval), 2)
     pct_of_ref_section          = round(tmp_pct_of_ref_section*100, 2)
-    print("\nDetermined amplification factor \"p\" :", p_final)
+    print("\nDetermined amplification factor \"p\"    :", p_final)
 
     return p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section
 # End of determineAmplificationFactor()
@@ -397,23 +399,24 @@ def adjustPixelValue(_img_RGB, _p_final, _left_edge_pixel_value_L1, _right_edge_
     adjusted_img_Gray_non_bgcolor = adjusted_img_Gray[adjusted_img_Gray != BGColor_Gray]
 
     # For the adjusted image, calc. percentage of num. of pixels in the reference section
-    tmp_num_of_pixels = (_left_edge_pixel_value_L1 <= adjusted_img_Gray_non_bgcolor) & (adjusted_img_Gray_non_bgcolor <= _right_edge_pixel_value)
+    # tmp_num_of_pixels = (_left_edge_pixel_value_L1 <= adjusted_img_Gray_non_bgcolor) & (adjusted_img_Gray_non_bgcolor <= _right_edge_pixel_value)
+    tmp_num_of_pixels = _left_edge_pixel_value_L1 <= adjusted_img_Gray_non_bgcolor
     final_pct         = np.sum( tmp_num_of_pixels ) / _N_all_non_bgcolor
-    print("The pct. of reference section       :", round(final_pct*100, 2), "(%)")
+    print("Final pct. of ref. section             :", round(final_pct*100, 2), "(%)")
 
     return adjusted_img_RGB, final_pct
 # End of adjustPixelValue()
 
 
 
-def BrightnessAdjustment(_img_RGB, _right_edge_pixel_value, _ref_section, _N_all):
+def BrightnessAdjustment(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all):
     # Determine amplification factor "p"
-    p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section = determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _ref_section, _N_all)
+    p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section = determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all)
     
     # Adjust brightness of the image
     adjusted_img_RGB, final_pct = adjustPixelValue(_img_RGB, p_final, left_edge_pixel_value_L1, _right_edge_pixel_value, _N_all)
 
-    return adjusted_img_RGB
+    return adjusted_img_RGB, p_final
 # End of BrightnessAdjustment()
 
 
@@ -477,14 +480,14 @@ if __name__ == "__main__":
     print("==============================================================")
     print("   Step2. Adjust brightness of the \"high\" pixel value image")
     print("==============================================================")
-    adjusted_high_img_in_RGB        = BrightnessAdjustment(high_img_in_RGB, max_pixel_value_L1, ref_sec4high, N_high)
+    adjusted_high_img_in_RGB, p_high= BrightnessAdjustment(high_img_in_RGB, max_pixel_value_L1, pct_of_ref_sec4high, N_high)
 
     print("\n")
     print("=============================================================")
     print("   Step3. Adjust brightness of the \"low\" pixel value image")
     print("=============================================================")
     target_pixel_value_L1 = 158
-    adjusted_low_img_in_RGB         = BrightnessAdjustment(low_img_in_RGB, target_pixel_value_L1, ref_sec4low, N_low)
+    adjusted_low_img_in_RGB, p_low  = BrightnessAdjustment(low_img_in_RGB, target_pixel_value_L1, pct_of_ref_sec4low, N_low)
 
     print("\n")
     print("============================================================")
@@ -496,6 +499,9 @@ if __name__ == "__main__":
     # End time count
     print("\n")
     print("Elapsed time                        :", round(time.time() - start_time, 2), "[sec]")
+
+    print("Amplification factor \"p_high\"       :", p_high)
+    print("Amplification factor \"p_low\"        :", p_low)
     
     # Save adjusted image
     cv2.imwrite("images/adjusted.bmp", cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR))
@@ -533,7 +539,7 @@ if __name__ == "__main__":
     ax4.set_xlim([-5, 260])
     ax4.set_ylim([0, 20000])
 
-    # plt.show()
+    plt.show()
 
 
     # # Create figure
