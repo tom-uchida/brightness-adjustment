@@ -39,6 +39,7 @@ print("\n")
 # Check arguments
 args = sys.argv
 if len(args) != 3:
+    print("\n")
     print("USAGE   : $ python adjust_brightness_decompose.py [input_image_data] [input_image_data(L=1)]")
     print("EXAMPLE : $ python adjust_brightness_decompose.py [input_image.bmp] [input_image_L1.bmp]")
     #raise Exception

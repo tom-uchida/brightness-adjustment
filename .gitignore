@@ -2,4 +2,4 @@
 src/IMAGE_DATA/
 src/VIDEO_DATA/
 src/wx_test.py
-src/mean_pixel_value_list.md
+src/*.md
