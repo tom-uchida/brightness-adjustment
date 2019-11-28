@@ -63,17 +63,16 @@ print("Background color (Grayscale)           :", BGColor_Gray, "(pixel value)")
 
 
 
-# Read input image
-def readImage(_img_name):
+def read_image(_img_name):
     img_BGR = cv2.imread(_img_name)
     img_RGB = cv2.cvtColor(img_BGR, cv2.COLOR_BGR2RGB)
 
     return img_RGB
+# End of read_image()
 
 
 
-# Create RGB histogram
-def rgbHist(_img_RGB, _ax, _title):
+def create_RGB_hist(_img_RGB, _ax, _title):
     tmp_b_index_bgcolor = (_img_RGB[:,:,0]==BGColor[0]) & (_img_RGB[:,:,1]==BGColor[1]) & (_img_RGB[:,:,2]==BGColor[2])
     img_R_non_bgcolor = _img_RGB[:,:,0][~tmp_b_index_bgcolor]
     img_G_non_bgcolor = _img_RGB[:,:,1][~tmp_b_index_bgcolor]
@@ -87,11 +86,11 @@ def rgbHist(_img_RGB, _ax, _title):
     _ax.set_xlim([-5, 260])
     
     return _ax
+# End of create_RGB_hist()
 
 
 
-# Create Grayscale histogram
-def grayscaleHist(_img_Gray, _ax, _title):
+def create_Grayscale_hist(_img_Gray, _ax, _title):
     img_Gray_non_bgcolor = _img_Gray[_img_Gray != BGColor_Gray]
     _ax.hist(img_Gray_non_bgcolor.ravel(), bins=bin_number, color='black', alpha=1.0)
 
@@ -99,122 +98,11 @@ def grayscaleHist(_img_Gray, _ax, _title):
     _ax.set_xlim([-5, 260])
     
     return _ax
+# End of create_Grayscale_hist()
 
 
 
-# Create three histograms: input image with L=1, input image and adjusted image
-def comparativeHist(_img_in_RGB_L1, _img_in_RGB, _img_out_RGB, _ax, _y_max):
-    # Convert RGB to Grayscale
-    img_in_Gray_L1             = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_L1_non_bgcolor = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
-    img_in_Gray                = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_in_Gray_non_bgcolor    = img_in_Gray[img_in_Gray != BGColor_Gray]
-    img_out_Gray               = cv2.cvtColor(_img_out_RGB, cv2.COLOR_RGB2GRAY)
-    img_out_Gray_non_bgcolor   = img_out_Gray[img_out_Gray != BGColor_Gray]
-    
-    # input image(L=1)
-    mean_in_L1 = int(np.mean(img_in_Gray_L1_non_bgcolor))
-    _ax.hist(img_in_Gray_L1_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
-    _ax.axvline(mean_in_L1, color='#1F77B4')
-    _ax.text(mean_in_L1+5, _y_max*0.8, "mean:"+str(mean_in_L1), color='#1F77B4', fontsize='14')
-
-    # input image
-    mean_in = int(np.mean(img_in_Gray_non_bgcolor))
-    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Input image", color='#FF7E0F')
-    _ax.axvline(mean_in, color='#FF7E0F')
-    _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='14')
-
-    # adjusted image
-    mean_out = int(np.mean(img_out_Gray_non_bgcolor))
-    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=bin_number, alpha=0.5, label="Adjusted image", color='#2C9F2C')
-    _ax.axvline(mean_out, color='#2C9F2C')
-    _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='14')
-
-    _ax.set_title('Comparative histogram')
-    _ax.set_xlabel("Pixel value")
-    _ax.set_ylabel("Number of pixels")
-    _ax.legend(fontsize='14')
-    
-    return _ax
-
-
-
-# Create Figure
-def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_value_L1, _pct, _max_pixel_value_L1, _pct_of_ref_section_L1):
-    # Convert RGB to Grayscale
-    img_in_Gray_L1     = cv2.cvtColor(_img_in_RGB_L1, cv2.COLOR_RGB2GRAY)
-    img_in_Gray        = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
-    img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
-
-    fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
-    gs  = gridspec.GridSpec(2,3)
-
-    # Input image(L=1)
-    ax1 = fig.add_subplot(gs[0,0])
-    # ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
-    ax1.set_title('Input image ($L=1$)')
-    ax1.imshow(_img_in_RGB_L1)
-    ax1.set_xticks([]), ax1.set_yticks([])
-
-    # Input image
-    ax2 = fig.add_subplot(gs[0,1])
-    ax2.set_title('Input image')
-    ax2.imshow(_img_in_RGB)
-    ax2.set_xticks([]), ax2.set_yticks([])
-
-    # adjusted image
-    ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title('Adjusted image')
-    ax3.imshow(_img_adjusted_RGB)
-    ax3.set_xticks([]), ax3.set_yticks([])
-
-    # Histogram(input image(L=1))
-    ax4 = fig.add_subplot(gs[1,0])
-    # ax4 = grayscaleHist(img_in_Gray_L1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
-    # ax4 = rgbHist(_img_in_RGB_L1, ax4, "Input image ($L_{\mathrm{R}}=1$)")
-    ax4 = rgbHist(_img_in_RGB_L1, ax4, "Input image ($L=1$)")
-    
-    # Histogram(input image)
-    ax5 = fig.add_subplot(gs[1,1])
-    # ax5 = grayscaleHist(img_in_Gray, ax5, "Input image")
-    ax5 = rgbHist(_img_in_RGB, ax5, "Input image")
-
-    # Histogram(output image)
-    ax6 = fig.add_subplot(gs[1,2])
-    # ax6 = grayscaleHist(img_adjusted_Gray, ax6, "Adjusted image")
-    ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image")
-
-    # Unify ylim b/w input image and adjusted image
-    hist_in_L1,    bins_in_L1     = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray],       bin_number)
-    hist_in,       bins_in        = np.histogram(img_in_Gray[img_in_Gray != BGColor_Gray],             bin_number)
-    hist_adjusted, bins_adjusted  = np.histogram(img_adjusted_Gray[img_adjusted_Gray != BGColor_Gray], bin_number)
-    list_max = [max(hist_in_L1), max(hist_in), max(hist_adjusted)]
-    ax4.set_ylim([0, max(list_max)*1.1])
-    ax5.set_ylim([0, max(list_max)*1.1])
-    ax6.set_ylim([0, max(list_max)*1.1])
-
-    # # Histograms(Input(L1), Input, adjusted)
-    # ax7 = fig.add_subplot(gs[2,:])
-    # ax7 = comparativeHist(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, ax7, max(list_max)*1.1)
-    # ax7.set_ylim([0, max(list_max)*1.1])
-
-    # Draw text
-    x       = (_ref_pixel_value_L1+_max_pixel_value_L1)*0.5 - 100
-    text    = "["+str(_ref_pixel_value_L1)+", "+str(_max_pixel_value_L1)+"]\n→ "+str(round(_pcy_of_ref_section_L1*100, 2))+"(%)"
-    ax4.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='14')
-    text    = "["+str(_ref_pixel_value_L1)+", "+str(_max_pixel_value_L1)+"]\n→ "+str(round(_pct*100, 2))+"(%)"
-    ax6.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='14')
-
-    # Draw reference section
-    rect = plt.Rectangle((_ref_pixel_value_L1, 0), _max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
-    ax4.add_patch(rect)
-    rect = plt.Rectangle((_ref_pixel_value_L1, 0), _max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
-    ax6.add_patch(rect)
-# End of createFigure()
-
-
-
-def createFigure4HighAndLowPixelValueImages():
+def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Create figure
     fig = plt.figure(figsize=(20, 8)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,5)
@@ -227,56 +115,58 @@ def createFigure4HighAndLowPixelValueImages():
 
     # Histogram of the input image with L=1
     ax_L1_hist = fig.add_subplot(gs[1,0])
-    ax_L1_hist = rgbHist(img_in_RGB_L1, ax_L1_hist, "Input image with $L=1$")
+    ax_L1_hist = create_RGB_hist(img_in_RGB_L1, ax_L1_hist, "Input image with $L=1$")
     ax_L1_hist.set_xlim([-5, 260])
 
-    # Low pixel value image (Before)
-    ax1 = fig.add_subplot(gs[0,1])
-    ax1.set_title("Original low", fontsize='14')
-    ax1.imshow(low_img_in_RGB)
-    ax1.set_xticks([]), ax1.set_yticks([])
+    # Low pixel value image (Original)
+    ax_ori_low_img = fig.add_subplot(gs[0,1])
+    ax_ori_low_img.set_title("Original low", fontsize='14')
+    ax_ori_low_img.imshow(low_img_in_RGB)
+    ax_ori_low_img.set_xticks([]), ax_ori_low_img.set_yticks([])
 
-    # Histogram of the low pixel value image (Before)
-    ax2 = fig.add_subplot(gs[1,1])
-    ax2 = rgbHist(low_img_in_RGB, ax2, "Original low")
-    ax2.axvline(threshold_pixel_value, color='black')
-    ax2.set_xlim([-5, 260])
+    # Histogram of the low pixel value image (Original)
+    ax_ori_low_hist = fig.add_subplot(gs[1,1])
+    ax_ori_low_hist = create_RGB_hist(low_img_in_RGB, ax_ori_low_hist, "Original low")
+    ax_ori_low_hist.axvline(threshold_pixel_value, color='black')
+    ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow')
+    ax_ori_low_hist.set_xlim([-5, 260])
 
-    # Low pixel value image (After)
-    ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title("Adjusted low", fontsize='14')
-    ax3.imshow(adjusted_low_img_in_RGB)
-    ax3.set_xticks([]), ax3.set_yticks([])
+    # Low pixel value image (Adjusted)
+    ax_adj_low_img = fig.add_subplot(gs[0,2])
+    ax_adj_low_img.set_title("Adjusted low ($p_{\mathrm{low}}=$"+str(p_low)+")", fontsize='14')
+    ax_adj_low_img.imshow(adjusted_low_img_in_RGB)
+    ax_adj_low_img.set_xticks([]), ax_adj_low_img.set_yticks([])
 
-    # Histogram of the low pixel value image (After)
-    ax4 = fig.add_subplot(gs[1,2])
-    ax4 = rgbHist(adjusted_low_img_in_RGB, ax4, "Adjusted low")
-    ax4.axvline(threshold_pixel_value, color='black')
-    ax4.set_xlim([-5, 260])
+    # Histogram of the low pixel value image (Adjusted)
+    ax_adj_low_hist = fig.add_subplot(gs[1,2])
+    ax_adj_low_hist = create_RGB_hist(adjusted_low_img_in_RGB, ax_adj_low_hist, "Adjusted low ($p_{\mathrm{low}}=$"+str(p_low)+")")
+    ax_adj_low_hist.axvline(threshold_pixel_value, color='black')
+    ax_adj_low_hist.set_xlim([-5, 260])
 
-    # High pixel value image (Before)
-    ax5 = fig.add_subplot(gs[0,3])
-    ax5.set_title("Original high", fontsize='14')
-    ax5.imshow(high_img_in_RGB)
-    ax5.set_xticks([]), ax5.set_yticks([])
+    # High pixel value image (Original)
+    ax_ori_high_img = fig.add_subplot(gs[0,3])
+    ax_ori_high_img.set_title("Original high", fontsize='14')
+    ax_ori_high_img.imshow(high_img_in_RGB)
+    ax_ori_high_img.set_xticks([]), ax_ori_high_img.set_yticks([])
 
-    # Histogram of the high pixel value image (Before)
-    ax6 = fig.add_subplot(gs[1,3])
-    ax6 = rgbHist(high_img_in_RGB, ax6, "Original high")
-    ax6.axvline(threshold_pixel_value, color='black')
-    ax6.set_xlim([-5, 260])
+    # Histogram of the high pixel value image (Original)
+    ax_ori_high_hist = fig.add_subplot(gs[1,3])
+    ax_ori_high_hist = create_RGB_hist(high_img_in_RGB, ax_ori_high_hist, "Original high")
+    ax_ori_high_hist.axvline(threshold_pixel_value, color='black')
+    ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow')
+    ax_ori_high_hist.set_xlim([-5, 260])
 
-    # High pixel value image (After)
-    ax7 = fig.add_subplot(gs[0,4])
-    ax7.set_title("Adjusted high", fontsize='14')
-    ax7.imshow(adjusted_high_img_in_RGB)
-    ax7.set_xticks([]), ax7.set_yticks([])
+    # High pixel value image (Adjusted)
+    ax_adj_high_img = fig.add_subplot(gs[0,4])
+    ax_adj_high_img.set_title("Adjusted high ($p_{\mathrm{high}}=$"+str(p_high)+")", fontsize='14')
+    ax_adj_high_img.imshow(adjusted_high_img_in_RGB)
+    ax_adj_high_img.set_xticks([]), ax_adj_high_img.set_yticks([])
 
-    # Histogram of the high pixel value image (After)
-    ax8 = fig.add_subplot(gs[1,4])
-    ax8 = rgbHist(adjusted_high_img_in_RGB, ax8, "Adjusted high")
-    ax8.axvline(threshold_pixel_value, color='black')
-    ax8.set_xlim([-5, 260])
+    # Histogram of the high pixel value image (Adjusted)
+    ax_adj_high_hist = fig.add_subplot(gs[1,4])
+    ax_adj_high_hist = create_RGB_hist(adjusted_high_img_in_RGB, ax_adj_high_hist, "Adjusted high ($p_{\mathrm{high}}=$"+str(p_high)+")")
+    ax_adj_high_hist.axvline(threshold_pixel_value, color='black')
+    ax_adj_high_hist.set_xlim([-5, 260])
 
     # Unify value of y-axis
     tmp_b_index_bgcolor = (low_img_in_RGB[:,:,0]==BGColor[0]) & (low_img_in_RGB[:,:,1]==BGColor[1]) & (low_img_in_RGB[:,:,2]==BGColor[2])
@@ -298,41 +188,117 @@ def createFigure4HighAndLowPixelValueImages():
     hist_max                        = max(list_hist_max)
     list_bins_asj_low               = [max(adj_low_R), max(adj_low_G), max(adj_low_B)]
     bins_max                        = max(list_bins_asj_low)
+    # print("hist_max: ", hist_max)
+    # print("bins_max: ", bins_max)
+    ax_ori_low_hist.set_ylim([0, hist_max*1.1])
+    ax_adj_low_hist.set_ylim([0, hist_max*1.1])
+    ax_ori_high_hist.set_ylim([0, hist_max*1.1])
+    ax_adj_high_hist.set_ylim([0, hist_max*1.1])
 
+    # Draw text
     text_L1_low     = str(pct_of_ref_section_L1_low)+"(%)"
     text_L1_high    = str(pct_of_ref_section_L1_high)+"(%)"
     ax_L1_hist.text(left_edge_pixel_value_low-20, hist_max*0.5, text_L1_low, color='black', fontsize='14')
     ax_L1_hist.text(left_edge_pixel_value_high-50, hist_max*0.5, text_L1_high, color='black', fontsize='14')
     text_adj_low    = str(pct_of_ref_section_low)+"(%)"
     text_adj_high   = str(pct_of_ref_section_high)+"(%)"
-    ax4.text(left_edge_pixel_value_low+(bins_max-left_edge_pixel_value_low)*0.4, hist_max*0.5, text_adj_low, color='black', fontsize='14')
-    ax8.text(left_edge_pixel_value_high-50, hist_max*0.5, text_adj_high, color='black', fontsize='14')
+    ax_adj_low_hist.text(left_edge_pixel_value_low+(bins_max-left_edge_pixel_value_low)*0.4, hist_max*0.5, text_adj_low, color='black', fontsize='14')
+    ax_adj_high_hist.text(left_edge_pixel_value_high-50, hist_max*0.5, text_adj_high, color='black', fontsize='14')
     ax_L1_hist.set_ylim([0, hist_max*1.1])
-    ax2.set_ylim([0, hist_max*1.1]), ax4.set_ylim([0, hist_max*1.1]), ax6.set_ylim([0, hist_max*1.1])
-    ax8.set_ylim([0, hist_max*1.1])
-    # print("hist_max: ", hist_max)
-    # print("bins_max: ", bins_max)
 
     # Draw reference section
-    rect_L1_low   = plt.Rectangle((right_edge_pixel_value_low, 0), 
+    rect_L1_low     = plt.Rectangle((left_edge_pixel_value_low, 0), 
     right_edge_pixel_value_low-left_edge_pixel_value_low, hist_max*1.1, fc='black', alpha=0.3)
-    rect_L1_high  = plt.Rectangle((right_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
-    rect_ori_low  = plt.Rectangle((right_edge_pixel_value_low, 0), 
+    rect_L1_high    = plt.Rectangle((left_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
+    rect_ori_low    = plt.Rectangle((left_edge_pixel_value_low, 0), 
     right_edge_pixel_value_low-left_edge_pixel_value_low, hist_max*1.1, fc='black', alpha=0.3)
-    rect_adj_low  = plt.Rectangle((right_edge_pixel_value_low, 0), 
+    rect_adj_low    = plt.Rectangle((left_edge_pixel_value_low, 0), 
     bins_max-left_edge_pixel_value_low, hist_max*1.1, fc='black', alpha=0.3)
-    rect_ori_high = plt.Rectangle((right_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
-    rect_adj_high = plt.Rectangle((right_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
+    rect_ori_high   = plt.Rectangle((left_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
+    rect_adj_high   = plt.Rectangle((left_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
     ax_L1_hist.add_patch(rect_L1_low), ax_L1_hist.add_patch(rect_L1_high)
-    ax2.add_patch(rect_ori_low), ax4.add_patch(rect_adj_low), ax6.add_patch(rect_ori_high)
-    ax8.add_patch(rect_adj_high)
+    ax_ori_low_hist.add_patch(rect_ori_low)
+    ax_adj_low_hist.add_patch(rect_adj_low)
+    ax_ori_high_hist.add_patch(rect_ori_high)
+    ax_adj_high_hist.add_patch(rect_adj_high)
 
-    plt.savefig("images/figure_high_and_low_images.png")
-# End of createFigure4HighAndLowPixelValueImages()
+    plt.savefig(_fig_name)
+# End of create_figure_for_high_and_low_pixel_value_images()
 
 
 
-def calculateStatistics():
+def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
+    # Create figure
+    fig = plt.figure(figsize=(12, 8)) # figsize=(width, height)
+    gs  = gridspec.GridSpec(2,3)
+
+    # Input image with L=1
+    ax_img_in_L1    = fig.add_subplot(gs[0,0])
+    ax_img_in_L1.set_title("Input image with $L=1$", fontsize='14')
+    ax_img_in_L1.imshow(img_in_RGB_L1)
+    ax_img_in_L1.set_xticks([]), ax_img_in_L1.set_yticks([])
+
+    # Histogram of the input image with L=1
+    ax_hist_in_L1   = fig.add_subplot(gs[1,0])
+    ax_hist_in_L1   = create_RGB_hist(img_in_RGB_L1, ax_hist_in_L1, "Input image with $L=1$")
+    ax_hist_in_L1.set_xlim([-5, 260])
+
+    # Input image
+    ax_img_in       = fig.add_subplot(gs[0,1])
+    ax_img_in.set_title("Input image", fontsize='14')
+    ax_img_in.imshow(img_in_RGB)
+    ax_img_in.set_xticks([]), ax_img_in.set_yticks([])
+
+    # Histogram of the input image
+    ax_hist_in      = fig.add_subplot(gs[1,1])
+    ax_hist_in      = create_RGB_hist(img_in_RGB, ax_hist_in, "Input image")
+    ax_hist_in.axvline(threshold_pixel_value, color='black')
+    ax_hist_in.axvline(mean_pixel_value, color='yellow')
+    ax_hist_in.set_xlim([-5, 260])
+
+    # Adjust image
+    ax_img_out      = fig.add_subplot(gs[0,2])
+    ax_img_out.set_title("Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")", fontsize='14')
+    ax_img_out.imshow(adjusted_img_out_RGB)
+    ax_img_out.set_xticks([]), ax_img_out.set_yticks([])
+
+    # Histogram of the adjusted image
+    ax_hist_out     = fig.add_subplot(gs[1,2])
+    ax_hist_out     = create_RGB_hist(adjusted_img_out_RGB, ax_hist_out, "Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")")
+    ax_hist_out.axvline(threshold_pixel_value, color='black')
+    ax_hist_out.set_xlim([-5, 260])
+
+    # Unify value of y-axis
+    tmp_b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])
+    in_R                  = img_in_RGB[:,:,0][~tmp_b_index_bgcolor]
+    in_G                  = img_in_RGB[:,:,1][~tmp_b_index_bgcolor]
+    in_B                  = img_in_RGB[:,:,2][~tmp_b_index_bgcolor]
+    hist_in_R, bins_in_R  = np.histogram(in_R, bin_number)
+    hist_in_G, bins_in_G  = np.histogram(in_G, bin_number)
+    hist_in_B, bins_in_B  = np.histogram(in_B, bin_number)
+    list_hist_in          = [max(hist_in_R), max(hist_in_G), max(hist_in_B)]
+    hist_max              = max(list_hist_in)
+    ax_hist_in_L1.set_ylim([0, hist_max*1.1])
+    ax_hist_in.set_ylim([0, hist_max*1.1])
+    ax_hist_out.set_ylim([0, hist_max*1.1])
+
+    # Draw text
+    text_in_L1_low     = str(pct_of_ref_section_L1_low)+"(%)"
+    text_in_L1_high    = str(pct_of_ref_section_L1_high)+"(%)"
+    ax_hist_in_L1.text(left_edge_pixel_value_low-20, hist_max*0.5, text_in_L1_low, color='black', fontsize='14')
+    ax_hist_in_L1.text(left_edge_pixel_value_high-50, hist_max*0.5, text_in_L1_high, color='black', fontsize='14')
+
+    # Draw reference section
+    rect_in_L1_low        = plt.Rectangle((left_edge_pixel_value_low, 0), 
+    right_edge_pixel_value_low-left_edge_pixel_value_low, hist_max*1.1, fc='black', alpha=0.3)
+    rect_in_L1_high       = plt.Rectangle((left_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
+    ax_hist_in_L1.add_patch(rect_in_L1_low), ax_hist_in_L1.add_patch(rect_in_L1_high)
+
+    plt.savefig(_fig_name)
+# End of create_figure_for_inputL1_and_input_and_output_images()
+
+
+def calculate_statistics_for_input_image():
     print("Input image (RGB)                      :", img_in_RGB.shape) # (height, width, channel)
 
     # Calc all number of pixels of the input image
@@ -359,11 +325,11 @@ def calculateStatistics():
     print("Std pixel value                        :", std_pixel_value, "(pixel value)")
 
     return N_all_non_bgcolor, mean_pixel_value, std_pixel_value
-# End of calculateStatistics()
+# End of calculate_statistics_for_input_image()
 
 
 
-def calculateStatistics4L1():
+def calculate_statistics_for_input_image_L1():
     # Exclude background color
     img_in_Gray_non_bgcolor_L1     = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
 
@@ -391,12 +357,12 @@ def calculateStatistics4L1():
     print("Most frequent pixel value (L=1)        :", most_frequent_pixel_value_L1, "(pixel value)")
 
     return N_all_non_bgcolor_L1, max_pixel_value_L1
-# End of calculateStatistics4L1()
+# End of calculate_statistics_for_input_image_L1()
 
 
 
 # Decompose the input image into two images (high pixel value image and low pixel value image)
-def decomposeInputImage(_threshold_pixel_value):
+def decompose_input_image(_threshold_pixel_value):
     print("Threshold pixel value                  :", _threshold_pixel_value, "(pixel value)")
 
     # ndarray(dtype: bool)
@@ -427,8 +393,8 @@ def decomposeInputImage(_threshold_pixel_value):
     print("Mean pixel value (high image)          :", mean_pixel_value_high, "(pixel value)")
     print("Mean pixel value (low image)           :", mean_pixel_value_low,  "(pixel value)")
 
-    return high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high
-# End of decomposeInputImage()
+    return high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low
+# End of decompose_input_image()
 
 
 
@@ -449,7 +415,7 @@ def tmp_adjust_pixel_value(_tmp_img_RGB, _img_RGB, _amplification_factor):
 
 
 
-def determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all_non_bgcolor):
+def determine_amplification_factor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all_non_bgcolor):
     print("Theoretical pct. of ref. section (L=1) :", _pct_of_ref_section*100, "(%)")
 
     # Initialize
@@ -503,11 +469,11 @@ def determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_
     print("\nDetermined amplification factor \"p\"    :", p_final)
 
     return p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section
-# End of determineAmplificationFactor()
+# End of determine_amplification_factor()
 
 
 
-def adjustPixelValue(_img_RGB, _p_final, _left_edge_pixel_value_L1, _right_edge_pixel_value, _N_all_non_bgcolor):
+def adjust_pixel_value(_img_RGB, _p_final, _left_edge_pixel_value_L1, _right_edge_pixel_value, _N_all_non_bgcolor):
     # Create adjusted image
     tmp_img_RGB       = np.empty((img_in_RGB.shape[0], img_in_RGB.shape[1], 3), dtype=np.uint8)
     adjusted_img_RGB  = tmp_adjust_pixel_value(tmp_img_RGB, _img_RGB, _p_final)
@@ -524,57 +490,57 @@ def adjustPixelValue(_img_RGB, _p_final, _left_edge_pixel_value_L1, _right_edge_
     print("Final pct. of ref. section             :", round(final_pct_of_ref_section*100, 1), "(%)")
 
     return adjusted_img_RGB
-# End of adjustPixelValue()
+# End of adjust_pixel_value()
 
 
 
-def BrightnessAdjustment(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all):
+def brightness_adjustment(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all):
     # Determine amplification factor "p"
-    p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section = determineAmplificationFactor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all)
+    p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section = determine_amplification_factor(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section, _N_all)
     
     # Adjust brightness of the image
-    adjusted_img_RGB = adjustPixelValue(_img_RGB, p_final, left_edge_pixel_value_L1, _right_edge_pixel_value, _N_all)
+    adjusted_img_RGB = adjust_pixel_value(_img_RGB, p_final, left_edge_pixel_value_L1, _right_edge_pixel_value, _N_all)
 
     return adjusted_img_RGB, p_final, left_edge_pixel_value_L1, pct_of_ref_section_L1, pct_of_ref_section
-# End of BrightnessAdjustment()
+# End of brightness_adjustment()
 
 
 
 # Save figure and images
-def saveFigureAndImages(_p_final, _img_in_RGB, _img_adjusted_RGB):
-    fig_name = "images/figure_"+str(_p_final)+".png"
+def save_figure_and_images(_p_final, _img_in_RGB, _img_adjusted_RGB):
+    fig_name = "IMAGE_DATA/figure_"+str(_p_final)+".png"
     plt.savefig(fig_name)
     # plt.show()
 
     # convert color RGB to BGR
     img_in_BGR          = cv2.cvtColor(_img_in_RGB,       cv2.COLOR_RGB2BGR)
     img_out_BGR         = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2BGR)
-    input_img_name      = "images/input.bmp"
-    adjusted_img_name   = "images/adjusted_"+str(_p_final)+".bmp"
+    input_img_name      = "IMAGE_DATA/input.bmp"
+    adjusted_img_name   = "IMAGE_DATA/adjusted_"+str(_p_final)+".bmp"
     cv2.imwrite(input_img_name, img_in_BGR)
     cv2.imwrite(adjusted_img_name, img_out_BGR)
 
-    #execCommand(fig_name, input_img_name, adjusted_img_name)
-# End of saveFigureAndImages()
+    # exec_open_command(fig_name, input_img_name, adjusted_img_name)
+# End of save_figure_and_images()
 
 
 
-# Exec. command
-def execCommand(_fig_name, _input_img_name, _adjusted_img_name):
+# Exec. open command
+def exec_open_command(_fig_name, _input_img_name, _adjusted_img_name):
     preview_command = ['open', _fig_name, _input_img_name, _adjusted_img_name]
     try:
         res = subprocess.check_call(preview_command)
 
     except:
         print("ERROR")
-# End of execCommand()
+# End of exec_open_command()
 
 
 
 if __name__ == "__main__":
     # Read two input images
-    img_in_RGB     = readImage(args[1])
-    img_in_RGB_L1  = readImage(args[2])
+    img_in_RGB     = read_image(args[1])
+    img_in_RGB_L1  = read_image(args[2])
 
     # Convert RGB image to Grayscale image
     img_in_Gray    = cv2.cvtColor(img_in_RGB,     cv2.COLOR_RGB2GRAY)
@@ -587,8 +553,8 @@ if __name__ == "__main__":
     start_time     = time.time()
 
     # Calculate statistics for two input images
-    N_all_non_bgcolor, mean_pixel_value, std_pixel_value = calculateStatistics()
-    N_all_non_bgcolor_L1, max_pixel_value_L1             = calculateStatistics4L1()
+    N_all_non_bgcolor, mean_pixel_value, std_pixel_value = calculate_statistics_for_input_image()
+    N_all_non_bgcolor_L1, max_pixel_value_L1             = calculate_statistics_for_input_image_L1()
 
     print("\n")
     print("=============================================================================")
@@ -596,21 +562,21 @@ if __name__ == "__main__":
     print("=============================================================================")
     bin_number                      = 50
     threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
-    high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high = decomposeInputImage(threshold_pixel_value)
+    high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
     print("\n")
     print("==============================================================")
     print("   Step2. Adjust brightness of the \"high\" pixel value image")
     print("==============================================================")
     right_edge_pixel_value_high     = max_pixel_value_L1
-    adjusted_high_img_in_RGB, p_high, left_edge_pixel_value_high, pct_of_ref_section_L1_high, pct_of_ref_section_high         = BrightnessAdjustment(high_img_in_RGB, right_edge_pixel_value_high, pct_of_ref_sec4high, N_high)
+    adjusted_high_img_in_RGB, p_high, left_edge_pixel_value_high, pct_of_ref_section_L1_high, pct_of_ref_section_high         = brightness_adjustment(high_img_in_RGB, right_edge_pixel_value_high, pct_of_ref_sec4high, N_high)
 
     print("\n")
     print("=============================================================")
     print("   Step3. Adjust brightness of the \"low\" pixel value image")
     print("=============================================================")
     right_edge_pixel_value_low      = mean_pixel_value_high
-    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low                                 = BrightnessAdjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
+    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low                                 = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
     print("============================================================")
@@ -620,14 +586,11 @@ if __name__ == "__main__":
     adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
 
     # End time count
-    end_time                        = round(time.time() - start_time, 2)
+    end_time                        = round(time.time()-start_time, 2)
 
     # Create figure
-    createFigure4HighAndLowPixelValueImages()
-    # createThreeHistogramsOfInputAndAdjustedImages()
-
-    # # Create figure
-    # createFigure(img_in_RGB_L1, _img_RGB, img_adjusted_RGB, ref_pixel_value_L1, pct_final, max_pixel_value_L1, pct_of_ref_section_L1)
+    create_figure_for_high_and_low_pixel_value_images("IMAGE_DATA/fig_high_low_images.png")
+    create_figure_for_inputL1_and_input_and_output_images("IMAGE_DATA/fig_inputL1_input_adjusted_images.png")
 
     # # Save figure and images
     # saveFigureAndImages(p_final, _img_RGB, img_adjusted_RGB)
@@ -638,4 +601,4 @@ if __name__ == "__main__":
     print("Processing time                        :",   end_time, "[sec]")
     
     # Save adjusted image
-    cv2.imwrite("images/adjusted.bmp", cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR))
+    cv2.imwrite("IMAGE_DATA/adjusted.bmp", cv2.cvtColor(adjusted_img_out_RGB,  cv2.COLOR_RGB2BGR))
