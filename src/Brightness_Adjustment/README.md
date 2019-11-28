@@ -62,14 +62,10 @@ Ratio of reference section      : 1.11 (%)
 
 ### Result
 
-#### Input image
-![sample1](resources/sample/ookabuto/input.bmp)
+#### Images
+|Input image ($L=1$)|Input image|Adjusted image|
+|:-:|:-:|:-:|
+|![](resources/sample/ookabuto/LR1.bmp)|![](resources/sample/ookabuto/input.bmp)|![](resources/sample/ookabuto/adjusted_2.39.bmp)|
 
-#### Input image ($L=1$)
-![sample2](resources/sample/ookabuto/LR1.bmp)
-
-#### Adjusted image
-![sample3](resources/sample/ookabuto/adjusted_2.39.bmp)
-
-#### Figure
-![sample4](resources/sample/ookabuto/figure_2.39.png)
+#### Histogram
+![](resources/sample/ookabuto/figure_2.39.png)
