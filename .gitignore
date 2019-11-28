@@ -1,8 +1,5 @@
-images/
-IMAGE_DATA/
-videos/
-VIDEO_DATA/
-mean_pixel_value_list.md
 .vscode/
-tone_curve_copy.py
-wx_test.py
+src/IMAGE_DATA/
+src/VIDEO_DATA/
+src/wx_test.py
+src/mean_pixel_value_list.md
