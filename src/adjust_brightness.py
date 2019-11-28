@@ -26,11 +26,11 @@ plt.rcParams["mathtext.fontset"] = "stix"
 plt.rcParams["mathtext.rm"] = "Times New Roman"
 
 # Message
-print("===============================")
-print("     Brightness Adjustment")
-print("       Tomomasa Uchida")
-print("         2019/02/28")
-print("===============================")
+print("===================================================")
+print("              Brightness Adjustment")
+print("                 Tomomasa Uchida")
+print("                   2019/02/28")
+print("===================================================")
 
 # Check arguments
 args = sys.argv
@@ -49,7 +49,7 @@ ratio_of_reference_section = 0.01 # 1(%)
 bgcolor     = 0 # Background color : Black(0, 0, 0)
 print("\n")
 print("Input image data        (args[1]) :", args[1])
-print("Input image data (L=1) (args[2]) :", args[2])
+print("Input image data (L=1)  (args[2]) :", args[2])
 # print("p_init                           :", p_init)
 # print("p_interval                       :", p_interval)
 # print("Ratio of reference section       :", ratio_of_reference_section*100, "(%)")
@@ -353,15 +353,15 @@ def adjustPixelValue(_p_final, _reference_pixel_value_L1):
 
 # Save figure and images
 def saveFigureAndImages(_p_final, _img_in_RGB, _img_adjusted_RGB):
-    fig_name = "images/figure_"+str(_p_final)+".png"
+    fig_name = "IMAGE_DATA/figure_"+str(_p_final)+".png"
     plt.savefig(fig_name)
     # plt.show()
 
     # convert color RGB to BGR
     img_in_BGR          = cv2.cvtColor(_img_in_RGB,         cv2.COLOR_RGB2BGR)
     img_out_BGR         = cv2.cvtColor(_img_adjusted_RGB,  cv2.COLOR_RGB2BGR)
-    input_img_name      = "images/input.bmp"
-    adjusted_img_name   = "images/adjusted_"+str(_p_final)+".bmp"
+    input_img_name      = "IMAGE_DATA/input.bmp"
+    adjusted_img_name   = "IMAGE_DATA/adjusted_"+str(_p_final)+".bmp"
     cv2.imwrite(input_img_name, img_in_BGR)
     cv2.imwrite(adjusted_img_name, img_out_BGR)
 
@@ -386,24 +386,27 @@ if __name__ == "__main__":
     img_in_RGB_L1  = readImage(args[2])
 
     start = time.time()
-    print("\n\n====================================")
-    print(" STEP1: Get max pixel value (L=1)")  
-    print("====================================")
+    print("\n")
+    print("===================================================")
+    print("   Step1. Get max pixel value (L=1)")  
+    print("===================================================")
     N_all_non_bgcolor = preProcess()
     img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1 = preProcess4L1()
 
-    print("\n\n================================================")
-    print(" STEP2: Search for reference pixel value (L=1)")
-    print("=================================================")
+    print("\n")
+    print("===================================================")
+    print("   Step2. Search for reference pixel value (L=1)")
+    print("===================================================")
     p_final, reference_pixel_value_L1, ratio_of_reference_section_L1 = determineAdjustParameter(ratio_of_reference_section)
 
-    print("\n\n============================")
-    print(" STEP3: Adjust pixel value")
-    print("============================")
+    print("\n")
+    print("===================================================")
+    print("   Step3. Adjust pixel value")
+    print("===================================================")
     img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_L1)
 
     elapsed_time = time.time() - start
-    print ("\nElapsed time                     : {0}".format(elapsed_time) + "[sec]")
+    print ("\nProcessing time                     : {0}".format(elapsed_time) + "[sec]")
 
     # Save figure and images
     saveFigureAndImages(p_final, img_in_RGB, img_adjusted_RGB)
