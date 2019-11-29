@@ -48,7 +48,7 @@ if len(args) != 3:
 p_init              = 1.0
 p_interval          = 0.01
 pct_of_ref_sec4high = 0.01 # 0.1(%)
-pct_of_ref_sec4low  = 0.05 # 1(%)
+pct_of_ref_sec4low  = 0.1 # 1(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
 print("Input image data        (args[1])      :", args[1])
@@ -198,7 +198,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     text_L1_low     = str(pct_of_ref_section_L1_low)+"(%)"
     text_L1_high    = str(pct_of_ref_section_L1_high)+"(%)"
     ax_L1_hist.text(left_edge_pixel_value_low-20, hist_max*0.5, text_L1_low, color='black', fontsize='14')
-    ax_L1_hist.text(left_edge_pixel_value_high-50, hist_max*0.5, text_L1_high, color='black', fontsize='14')
+    ax_L1_hist.text(left_edge_pixel_value_high-20, hist_max*0.5, text_L1_high, color='black', fontsize='14')
     text_adj_low    = str(pct_of_ref_section_low)+"(%)"
     text_adj_high   = str(pct_of_ref_section_high)+"(%)"
     ax_adj_low_hist.text(left_edge_pixel_value_low+(bins_max-left_edge_pixel_value_low)*0.4, hist_max*0.5, text_adj_low, color='black', fontsize='14')
@@ -285,7 +285,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     text_in_L1_low     = str(pct_of_ref_section_L1_low)+"(%)"
     text_in_L1_high    = str(pct_of_ref_section_L1_high)+"(%)"
     ax_hist_in_L1.text(left_edge_pixel_value_low-20, hist_max*0.5, text_in_L1_low, color='black', fontsize='14')
-    ax_hist_in_L1.text(left_edge_pixel_value_high-50, hist_max*0.5, text_in_L1_high, color='black', fontsize='14')
+    ax_hist_in_L1.text(left_edge_pixel_value_high-20, hist_max*0.5, text_in_L1_high, color='black', fontsize='14')
 
     # Draw reference section
     rect_in_L1_low        = plt.Rectangle((left_edge_pixel_value_low, 0), 
@@ -558,7 +558,7 @@ if __name__ == "__main__":
     print("   Step1. Decompose the input image to \"high\" and \"low\" pixel value images")
     print("=============================================================================")
     bin_number                      = 50
-    threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
+    threshold_pixel_value           = np.uint8(mean_pixel_value + 1*std_pixel_value)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
     print("\n")
@@ -573,7 +573,7 @@ if __name__ == "__main__":
     print("   Step3. Adjust brightness of the \"low\" pixel value image")
     print("=============================================================================")
     right_edge_pixel_value_low      = mean_pixel_value_high
-    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low                                 = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
+    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low          = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
     print("=============================================================================")
