@@ -47,8 +47,8 @@ if len(args) != 3:
 # Set initial parameter
 p_init              = 1.0
 p_interval          = 0.01
-pct_of_ref_sec4high = 0.01 # 0.1(%)
-pct_of_ref_sec4low  = 0.1 # 1(%)
+pct_of_ref_sec4high = 0.01  #  1(%)
+pct_of_ref_sec4low  = 0.1   # 10(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
 print("Input image data        (args[1])      :", args[1])
@@ -265,6 +265,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_out     = fig.add_subplot(gs[1,2])
     ax_hist_out     = create_RGB_hist(adjusted_img_out_RGB, ax_hist_out, "Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")")
     ax_hist_out.axvline(threshold_pixel_value, color='black')
+    ax_hist_out.axvline(mean_pixel_value_adjusted, color='yellow')
     ax_hist_out.set_xlim([-5, 260])
 
     # Unify value of y-axis
@@ -558,7 +559,9 @@ if __name__ == "__main__":
     print("   Step1. Decompose the input image to \"high\" and \"low\" pixel value images")
     print("=============================================================================")
     bin_number                      = 50
-    threshold_pixel_value           = np.uint8(mean_pixel_value + 1*std_pixel_value)
+    threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
+    # threshold_pixel_value           = np.uint8(mean_pixel_value + 1*std_pixel_value)
+    # threshold_pixel_value           = np.uint8(mean_pixel_value)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
     print("\n")
@@ -580,7 +583,8 @@ if __name__ == "__main__":
     print("   Step4. Resynthesis \"high\" and \"low\" pixel value images")
     print("=============================================================================")
     adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_high_img_in_RGB, 1.0, adjusted_low_img_in_RGB)
-    # adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
+    mean_pixel_value_adjusted       = np.mean(adjusted_img_out_Gray[adjusted_img_out_Gray != BGColor_Gray])
 
     # End time count
     end_time                        = round(time.time()-start_time, 2)
