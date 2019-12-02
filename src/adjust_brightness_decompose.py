@@ -559,8 +559,8 @@ if __name__ == "__main__":
     print("   Step1. Decompose the input image to \"high\" and \"low\" pixel value images")
     print("=============================================================================")
     bin_number                      = 50
-    threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
-    # threshold_pixel_value           = np.uint8(mean_pixel_value + 1*std_pixel_value)
+    # threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
+    threshold_pixel_value           = np.uint8(mean_pixel_value + 1*std_pixel_value)
     # threshold_pixel_value           = np.uint8(mean_pixel_value)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 

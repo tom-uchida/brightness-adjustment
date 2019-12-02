@@ -19,7 +19,7 @@ import time
 # plt.style.use('seaborn-white')
 plt.style.use('bmh')
 colors = cycler('color', ['#EE6666', '#3388BB', '#9988DD', '#EECC55', '#88BB44', '#FFBBBB'])
-# plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
+plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
 # plt.rc('grid', color='w', linestyle='solid')
 # plt.rc('patch', edgecolor='#E6E6E6')
 # plt.rc('lines', linewidth=2)
@@ -79,7 +79,7 @@ def rgbHist(_img_rgb, _ax, _title):
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
     _ax.legend()
 
-    _ax.set_title('Histogram ('+_title+')')
+    _ax.set_title(_title)
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -91,7 +91,7 @@ def grayscaleHist(_img_gray, _ax, _title):
     img_Gray_nonzero = _img_gray[_img_gray != bgcolor]
     _ax.hist(img_Gray_nonzero.ravel(), bins=50, color='black', alpha=1.0)
 
-    _ax.set_title('Histogram ('+_title+')')
+    _ax.set_title(_title)
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -142,7 +142,7 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_valu
     img_in_Gray        = cv2.cvtColor(_img_in_RGB, cv2.COLOR_RGB2GRAY)
     img_adjusted_Gray  = cv2.cvtColor(_img_adjusted_RGB, cv2.COLOR_RGB2GRAY)
 
-    fig = plt.figure(figsize=(10, 6)) # figsize=(width, height)
+    fig = plt.figure(figsize=(12, 8)) # figsize=(width, height)
     gs  = gridspec.GridSpec(2,3)
 
     # Input image(L=1)
@@ -160,7 +160,7 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_valu
 
     # adjusted image
     ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title('Adjusted image')
+    ax3.set_title('Adjusted image ($p=$'+str(p_final)+')')
     ax3.imshow(_img_adjusted_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
@@ -178,7 +178,7 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_valu
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
     # ax6 = grayscaleHist(img_adjusted_Gray, ax6, "adjusted image")
-    ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image")
+    ax6 = rgbHist(_img_adjusted_RGB, ax6, "Adjusted image ($p=$"+str(p_final)+")")
 
     # Unify ylim b/w input image and adjusted image
     hist_in_L1,    bins_in_L1     = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],      50)
@@ -197,9 +197,9 @@ def createFigure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_valu
     # Draw text
     x       = (_ref_pixel_value_L1+max_pixel_value_L1)*0.5 - 100
     text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(ratio_of_reference_section_L1*100, 2))+"(%)"
-    ax4.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
+    ax4.text(x, max(list_max)*1.1*0.5, text, color='black', fontsize='12')
     text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(_ratio*100, 2))+"(%)"
-    ax6.text(x, max(list_max)*1.1*0.8, text, color='black', fontsize='12')
+    ax6.text(x, max(list_max)*1.1*0.5, text, color='black', fontsize='12')
 
     # Draw reference section
     rect = plt.Rectangle((_ref_pixel_value_L1, 0), max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)
