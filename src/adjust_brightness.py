@@ -16,13 +16,14 @@ import statistics
 import time
 
 # Graph settings
-plt.style.use('seaborn-white')
+# plt.style.use('seaborn-white')
+plt.style.use('bmh')
 colors = cycler('color', ['#EE6666', '#3388BB', '#9988DD', '#EECC55', '#88BB44', '#FFBBBB'])
-plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
-plt.rc('grid', color='w', linestyle='solid')
-plt.rc('patch', edgecolor='#E6E6E6')
-plt.rc('lines', linewidth=2)
-plt.rcParams["mathtext.fontset"] = "stix"
+# plt.rc('axes', facecolor='#E6E6E6', edgecolor='none', axisbelow=True, grid=False, prop_cycle=colors)
+# plt.rc('grid', color='w', linestyle='solid')
+# plt.rc('patch', edgecolor='#E6E6E6')
+# plt.rc('lines', linewidth=2)
+plt.rcParams["mathtext.fontset"] = "cm"
 plt.rcParams["mathtext.rm"] = "Times New Roman"
 
 # Message
@@ -262,23 +263,23 @@ def preProcess4L1():
 
     # Calc max pixel value of the input image (L=1)
     max_pixel_value_L1             = np.max(img_in_Gray_non_bgcolor_L1)
-    print("\nMax pixel value (L=1)           :", max_pixel_value_L1, "(pixel value)")
+    print("\nMax pixel value (L=1)            :", max_pixel_value_L1, "(pixel value)")
 
     # Calc mean pixel value (L=1)
     mean_pixel_value_L1            = np.mean(img_in_Gray_non_bgcolor_L1)
-    print("Mean pixel value (L=1)          :", round(mean_pixel_value_L1, 1), "(pixel value)")
+    print("Mean pixel value (L=1)           :", round(mean_pixel_value_L1, 1), "(pixel value)")
 
     # Calc ratio of the max pixel value (L=1)
     num_max_pixel_value_L1         = np.sum(img_in_Gray_non_bgcolor_L1 == max_pixel_value_L1)
-    print("Num. of max pixel value (L=1)   :", num_max_pixel_value_L1, "(pixels)")
+    print("Num. of max pixel value (L=1)    :", num_max_pixel_value_L1, "(pixels)")
     ratio_max_pixel_value_L1       = num_max_pixel_value_L1 / N_all_non_bgcolor_L1
     # ratio_max_pixel_value_L1       = round(ratio_max_pixel_value_L1, 8)
-    print("Ratio of max pixel value (L=1)  :", round(ratio_max_pixel_value_L1*100, 2), "(%)")
+    print("Ratio of max pixel value (L=1)   :", round(ratio_max_pixel_value_L1*100, 2), "(%)")
 
     # Calc most frequent pixel value (L=1)
     bincount = np.bincount(img_in_Gray_non_bgcolor_L1)
     most_frequent_pixel_value_L1   = np.argmax( bincount )
-    print("Most frequent pixel value (L=1) :", most_frequent_pixel_value_L1, "(pixel value)")
+    print("Most frequent pixel value (L=1)  :", most_frequent_pixel_value_L1, "(pixel value)")
 
     return img_in_Gray_L1, img_in_Gray_non_bgcolor_L1, N_all_non_bgcolor_L1, max_pixel_value_L1, ratio_max_pixel_value_L1, 
 
@@ -299,9 +300,9 @@ def determineAdjustParameter(_ratio_of_reference_section):
         reference_pixel_value_L1 -= 1
 
     reference_pixel_value_L1 += 1
-    print("Reference pixel value (L=1)     :", reference_pixel_value_L1, "(pixel value)")
-    print("Reference section (L=1)         :", reference_pixel_value_L1, "~", max_pixel_value_L1, "(pixel value)")
-    print("Ratio of reference section (L=1):", round(tmp_ratio_of_reference_section*100, 2), "(%)")
+    print("Reference pixel value (L=1)      :", reference_pixel_value_L1, "(pixel value)")
+    print("Reference section (L=1)          :", reference_pixel_value_L1, "~", max_pixel_value_L1, "(pixel value)")
+    print("Ratio of reference section (L=1) :", round(tmp_ratio_of_reference_section*100, 2), "(%)")
 
     # Determine tuning parameter
     p = p_init
@@ -405,8 +406,7 @@ if __name__ == "__main__":
     print("===================================================")
     img_adjusted_RGB = adjustPixelValue(p_final, reference_pixel_value_L1)
 
-    elapsed_time = time.time() - start
-    print ("\nProcessing time                     : {0}".format(elapsed_time) + "[sec]")
+    print ("\nProcessing time                  :", round(time.time() - start, 2),"[sec]")
 
     # Save figure and images
     saveFigureAndImages(p_final, img_in_RGB, img_adjusted_RGB)
