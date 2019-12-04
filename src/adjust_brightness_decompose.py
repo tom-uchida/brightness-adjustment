@@ -575,7 +575,8 @@ if __name__ == "__main__":
     print("=============================================================================")
     print("   Step3. Adjust brightness of the \"low\" pixel value image")
     print("=============================================================================")
-    right_edge_pixel_value_low      = mean_pixel_value_high
+    # right_edge_pixel_value_low      = mean_pixel_value_high
+    right_edge_pixel_value_low      = mean_pixel_value + 3*std_pixel_value
     adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low          = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
