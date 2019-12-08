@@ -171,11 +171,13 @@ def create_figure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_val
     ax5 = fig.add_subplot(gs[1,1])
     # ax5 = create_Grayscale_histogram(img_in_Gray, ax5, "Input image")
     ax5 = create_RGB_histogram(_img_in_RGB, ax5, "Input image")
+    ax5.set_yticks([])
 
     # Histogram(output image)
     ax6 = fig.add_subplot(gs[1,2])
     # ax6 = create_Grayscale_histogram(img_adjusted_Gray, ax6, "adjusted image")
     ax6 = create_RGB_histogram(_img_adjusted_RGB, ax6, "Adjusted image ($p=$"+str(p_final)+")")
+    ax6.set_yticks([])
 
     # Unify ylim b/w input image and adjusted image
     hist_in_L1,    bins_in_L1     = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],      50)

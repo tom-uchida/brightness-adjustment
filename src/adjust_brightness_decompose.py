@@ -116,6 +116,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_L1_hist = fig.add_subplot(gs[1,0])
     ax_L1_hist = create_RGB_hist(img_in_RGB_L1, ax_L1_hist, "Input image with $L=1$")
     ax_L1_hist.set_xlim([-5, 260])
+    plt.legend(fontsize='12')
 
     # Low pixel value image (Original)
     ax_ori_low_img = fig.add_subplot(gs[0,1])
@@ -126,9 +127,11 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the low pixel value image (Original)
     ax_ori_low_hist = fig.add_subplot(gs[1,1])
     ax_ori_low_hist = create_RGB_hist(low_img_in_RGB, ax_ori_low_hist, "Original low")
-    ax_ori_low_hist.axvline(threshold_pixel_value, color='black')
-    ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow')
+    ax_ori_low_hist.axvline(threshold_pixel_value, color='black', label="threshold")
+    ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow', label="mean")
     ax_ori_low_hist.set_xlim([-5, 260])
+    ax_ori_low_hist.set_yticks([])
+    plt.legend(fontsize='12')
 
     # Low pixel value image (Adjusted)
     ax_adj_low_img = fig.add_subplot(gs[0,2])
@@ -139,8 +142,10 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the low pixel value image (Adjusted)
     ax_adj_low_hist = fig.add_subplot(gs[1,2])
     ax_adj_low_hist = create_RGB_hist(adjusted_low_img_in_RGB, ax_adj_low_hist, "Adjusted low ($p_{\mathrm{low}}=$"+str(p_low)+")")
-    ax_adj_low_hist.axvline(threshold_pixel_value, color='black')
+    ax_adj_low_hist.axvline(threshold_pixel_value, color='black', label="threshold")
     ax_adj_low_hist.set_xlim([-5, 260])
+    ax_adj_low_hist.set_yticks([])
+    plt.legend(fontsize='12')
 
     # High pixel value image (Original)
     ax_ori_high_img = fig.add_subplot(gs[0,3])
@@ -151,9 +156,11 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the high pixel value image (Original)
     ax_ori_high_hist = fig.add_subplot(gs[1,3])
     ax_ori_high_hist = create_RGB_hist(high_img_in_RGB, ax_ori_high_hist, "Original high")
-    ax_ori_high_hist.axvline(threshold_pixel_value, color='black')
-    ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow')
+    ax_ori_high_hist.axvline(threshold_pixel_value, color='black', label="threshold")
+    ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow', label="mean")
     ax_ori_high_hist.set_xlim([-5, 260])
+    ax_ori_high_hist.set_yticks([])
+    plt.legend(fontsize='12')
 
     # High pixel value image (Adjusted)
     ax_adj_high_img = fig.add_subplot(gs[0,4])
@@ -164,8 +171,10 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the high pixel value image (Adjusted)
     ax_adj_high_hist = fig.add_subplot(gs[1,4])
     ax_adj_high_hist = create_RGB_hist(adjusted_high_img_in_RGB, ax_adj_high_hist, "Adjusted high ($p_{\mathrm{high}}=$"+str(p_high)+")")
-    ax_adj_high_hist.axvline(threshold_pixel_value, color='black')
+    ax_adj_high_hist.axvline(threshold_pixel_value, color='black', label="threshold")
     ax_adj_high_hist.set_xlim([-5, 260])
+    ax_adj_high_hist.set_yticks([])
+    plt.legend(fontsize='12')
 
     # Unify value of y-axis
     tmp_b_index_bgcolor = (low_img_in_RGB[:,:,0]==BGColor[0]) & (low_img_in_RGB[:,:,1]==BGColor[1]) & (low_img_in_RGB[:,:,2]==BGColor[2])
@@ -241,6 +250,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_in_L1   = fig.add_subplot(gs[1,0])
     ax_hist_in_L1   = create_RGB_hist(img_in_RGB_L1, ax_hist_in_L1, "Input image with $L=1$")
     ax_hist_in_L1.set_xlim([-5, 260])
+    plt.legend(fontsize='12')
 
     # Input image
     ax_img_in       = fig.add_subplot(gs[0,1])
@@ -251,9 +261,11 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     # Histogram of the input image
     ax_hist_in      = fig.add_subplot(gs[1,1])
     ax_hist_in      = create_RGB_hist(img_in_RGB, ax_hist_in, "Input image")
-    ax_hist_in.axvline(threshold_pixel_value, color='black')
-    ax_hist_in.axvline(mean_pixel_value, color='yellow')
+    ax_hist_in.axvline(threshold_pixel_value, color='black', label="threshold")
+    ax_hist_in.axvline(mean_pixel_value, color='yellow', label="mean")
     ax_hist_in.set_xlim([-5, 260])
+    ax_hist_in.set_yticks([])
+    plt.legend(fontsize='12')
 
     # Adjust image
     ax_img_out      = fig.add_subplot(gs[0,2])
@@ -264,9 +276,11 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     # Histogram of the adjusted image
     ax_hist_out     = fig.add_subplot(gs[1,2])
     ax_hist_out     = create_RGB_hist(adjusted_img_out_RGB, ax_hist_out, "Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")")
-    ax_hist_out.axvline(threshold_pixel_value, color='black')
-    ax_hist_out.axvline(mean_pixel_value_adjusted, color='yellow')
+    ax_hist_out.axvline(threshold_pixel_value, color='black', label="threshold")
+    ax_hist_out.axvline(mean_pixel_value_adjusted, color='yellow', label="mean")
     ax_hist_out.set_xlim([-5, 260])
+    ax_hist_out.set_yticks([])
+    plt.legend(fontsize='12')
 
     # Unify value of y-axis
     tmp_b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])
@@ -293,7 +307,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     right_edge_pixel_value_low-left_edge_pixel_value_low, hist_max*1.1, fc='black', alpha=0.3)
     rect_in_L1_high       = plt.Rectangle((left_edge_pixel_value_high, 0), right_edge_pixel_value_high-left_edge_pixel_value_high, hist_max*1.1, fc='black', alpha=0.3)
     ax_hist_in_L1.add_patch(rect_in_L1_low), ax_hist_in_L1.add_patch(rect_in_L1_high)
-
+    
     plt.savefig(_fig_name)
 # End of create_figure_for_inputL1_and_input_and_output_images()
 
@@ -575,8 +589,8 @@ if __name__ == "__main__":
     print("=============================================================================")
     print("   Step3. Adjust brightness of the \"low\" pixel value image")
     print("=============================================================================")
-    # right_edge_pixel_value_low      = mean_pixel_value_high
-    right_edge_pixel_value_low      = mean_pixel_value + 3*std_pixel_value
+    right_edge_pixel_value_low      = mean_pixel_value_high
+    # right_edge_pixel_value_low      = mean_pixel_value + 3*std_pixel_value
     adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low          = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
