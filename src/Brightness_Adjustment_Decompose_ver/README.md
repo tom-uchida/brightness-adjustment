@@ -99,7 +99,7 @@ Processing time                        : 0.59 [sec]
 
 |Input image ($L=1$)|Input image|Adjusted image|
 |:-:|:-:|:-:|
-|![](resources/borobu/bad_LR1.bmp)|![](resources/borobu/input.bmp)|![](resources/borobu/adjusted_phigh1.17_plow1.57.bmp)|
+|![](resources/borobu/bad_LR1.bmp)|![](resources/borobu/input.bmp)|![](resources/borobu/adjusted_phigh1.23_plow1.88.bmp)|
 
 #### Histogram
 ![](resources/funehoko/fig_high_low_images.png)
