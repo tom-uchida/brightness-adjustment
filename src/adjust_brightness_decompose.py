@@ -76,10 +76,10 @@ def create_RGB_hist(_img_RGB, _ax, _title):
     img_R_non_bgcolor = _img_RGB[:,:,0][~tmp_b_index_bgcolor]
     img_G_non_bgcolor = _img_RGB[:,:,1][~tmp_b_index_bgcolor]
     img_B_non_bgcolor = _img_RGB[:,:,2][~tmp_b_index_bgcolor]
-    _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5, label="R")
-    _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5, label="G")
-    _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
-    _ax.legend()
+    _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5)
+    _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5)
+    _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5)
+    # _ax.legend()
 
     _ax.set_title(_title, fontsize='14')
     _ax.set_xlim([-5, 260])
@@ -615,4 +615,4 @@ if __name__ == "__main__":
 
     print("Amplification factor \"p_high\"          :", p_high)
     print("Amplification factor \"p_low\"           :", p_low)
-    print("\nProcessing time                        :",   end_time, "[sec]")
+    print("\nProcessing time                        :", end_time, "[sec]")
