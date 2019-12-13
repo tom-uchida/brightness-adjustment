@@ -520,10 +520,14 @@ def brightness_adjustment(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section
 
 
 
-def save_adjusted_image(_adjusted_img_out_RGB, _p_high, _p_low):
+def save_images(_adjusted_img_out_RGB, _p_high, _p_low):
     # Save input image
     input_img_name      = "IMAGE_DATA/input.bmp"
     cv2.imwrite(input_img_name,     cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR))
+
+    # # Save decomposed high/low images
+    # cv2.imwrite("IMAGE_DATA/high.bmp",  cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2BGR))
+    # cv2.imwrite("IMAGE_DATA/low.bmp",   cv2.cvtColor(low_img_in_RGB, cv2.COLOR_RGB2BGR))
 
     # Save adjusted image
     adjusted_img_name   = "IMAGE_DATA/adjusted_phigh"+str(_p_high)+"_plow"+str(_p_low)+".bmp"
@@ -532,7 +536,7 @@ def save_adjusted_image(_adjusted_img_out_RGB, _p_high, _p_low):
     # NOTE: macOS only
     # Exec. "open" command
     exec_open_command(fig_name_1, fig_name_2, input_img_name, adjusted_img_name)
-# End of save_adjusted_image()
+# End of save_images()
 
 
 
@@ -611,7 +615,7 @@ if __name__ == "__main__":
     create_figure_for_inputL1_and_input_and_output_images(fig_name_2)
 
     # Save images
-    save_adjusted_image(adjusted_img_out_RGB, p_high, p_low)
+    save_images(adjusted_img_out_RGB, p_high, p_low)
 
     print("Amplification factor \"p_high\"          :", p_high)
     print("Amplification factor \"p_low\"           :", p_low)
