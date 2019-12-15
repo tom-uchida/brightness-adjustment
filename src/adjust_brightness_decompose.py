@@ -446,6 +446,7 @@ def determine_amplification_factor(_img_RGB, _right_edge_pixel_value, _pct_of_re
 
         # Next pixel value
         tmp_left_edge_pixel_value_L1 -= 1
+        # tmp_left_edge_pixel_value_L1 += 1
     # end while
 
     left_edge_pixel_value_L1    = tmp_left_edge_pixel_value_L1 - 1
@@ -528,6 +529,10 @@ def save_images(_adjusted_img_out_RGB, _p_high, _p_low):
     # # Save decomposed high/low images
     # cv2.imwrite("IMAGE_DATA/high.bmp",  cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2BGR))
     # cv2.imwrite("IMAGE_DATA/low.bmp",   cv2.cvtColor(low_img_in_RGB, cv2.COLOR_RGB2BGR))
+
+    # # Save adjusted high/low images
+    # cv2.imwrite("IMAGE_DATA/adjusted_high.bmp",  cv2.cvtColor(adjusted_high_img_in_RGB, cv2.COLOR_RGB2BGR))
+    # cv2.imwrite("IMAGE_DATA/adjusted_low.bmp",   cv2.cvtColor(adjusted_low_img_in_RGB, cv2.COLOR_RGB2BGR))
 
     # Save adjusted image
     adjusted_img_name   = "IMAGE_DATA/adjusted_phigh"+str(_p_high)+"_plow"+str(_p_low)+".bmp"

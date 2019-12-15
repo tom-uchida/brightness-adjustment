@@ -110,7 +110,7 @@ ax[2].hist(img_B_non_bgcolor_1.ravel(), bins=50, color='b', alpha=0.5, label="B"
 ax[2].legend()
 ax[2].set_title("Conventional", fontsize='14')
 ax[2].set_xlim([-5, 260])
-ax[2].set_ylim([0, 60000])
+# ax[2].set_ylim([0, 60000])
 
 img_R_non_bgcolor_2 = img_2[:,:,0][~b_index_bgcolor]
 img_G_non_bgcolor_2 = img_2[:,:,1][~b_index_bgcolor]
@@ -119,9 +119,9 @@ ax[3].hist(img_R_non_bgcolor_2.ravel(), bins=50, color='r', alpha=0.5, label="R"
 ax[3].hist(img_G_non_bgcolor_2.ravel(), bins=50, color='g', alpha=0.5, label="G")
 ax[3].hist(img_B_non_bgcolor_2.ravel(), bins=50, color='b', alpha=0.5, label="B")
 ax[3].legend()
-ax[3].set_title("Decompostion", fontsize='14')
+ax[3].set_title("Decomposition", fontsize='14')
 ax[3].set_xlim([-5, 260])
-ax[3].set_ylim([0, 60000])
+# ax[3].set_ylim([0, 60000])
 ax[3].set_yticks([])
 
 # Draw line
