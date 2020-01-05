@@ -15,8 +15,6 @@ def read_image(_img_name):
     return img_RGB
 # End of read_image()
 
-
-
 if __name__ == "__main__":
     # Read an input image
     img_in_RGB = read_image(args[1])
