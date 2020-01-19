@@ -19,13 +19,15 @@ def tone_curve(_x, _p):
     return y
 
 def create_figure():
-    fig = plt.figure(figsize=(9, 9)) # figsize=(width, height)
+    fig = plt.figure(figsize=(10, 8)) # figsize=(width, height)
     gs  = gridspec.GridSpec(1,1)
 
     ax = fig.add_subplot(gs[0,0])
     # ax.set_title('Tone Curve')
-    ax.set_xlabel('Input pixel value', fontsize=28)
-    ax.set_ylabel('Output pixel value', fontsize=28)
+    # ax.set_xlabel('Input pixel value', fontsize=28)
+    # ax.set_ylabel('Output pixel value', fontsize=28)
+    ax.set_xlabel('', fontsize=28)
+    ax.set_ylabel('', fontsize=28)
     ax.set_aspect('equal')
     ax.tick_params(labelsize=20)
     # ax.set_xlim([-1, 256])
