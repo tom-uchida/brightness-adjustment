@@ -75,7 +75,7 @@ def create_RGB_histogram(_img_rgb, _ax, _title):
     _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
     _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
     _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
-    _ax.legend()
+    # _ax.legend()
 
     _ax.set_title(_title)
     _ax.set_xlim([-5,260])
