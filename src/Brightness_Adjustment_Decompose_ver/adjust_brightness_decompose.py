@@ -4,16 +4,16 @@
 #   @date   2019/11/23
 ###############################################
 
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import cycler
-import matplotlib.gridspec as gridspec
-import matplotlib.patches as pat
 import cv2
-import subprocess
 import sys
-import statistics
 import time
+import subprocess
+import statistics
+import numpy as np
+from matplotlib import cycler
+import matplotlib.patches as pat
+from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 
 # Graph settings
 # plt.style.use('seaborn-white')
@@ -130,6 +130,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_ori_low_hist.axvline(threshold_pixel_value, color='black')
     ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow')
     ax_ori_low_hist.set_xlim([-5, 260])
+    ax_ori_low_hist.set_yticks([])
 
     # Low pixel value image (Adjusted)
     ax_adj_low_img = fig.add_subplot(gs[0,2])
@@ -142,6 +143,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_adj_low_hist = create_RGB_hist(adjusted_low_img_in_RGB, ax_adj_low_hist, "Adjusted low ($p_{\mathrm{low}}=$"+str(p_low)+")")
     ax_adj_low_hist.axvline(threshold_pixel_value, color='black')
     ax_adj_low_hist.set_xlim([-5, 260])
+    ax_adj_low_hist.set_yticks([])
 
     # High pixel value image (Original)
     ax_ori_high_img = fig.add_subplot(gs[0,3])
@@ -155,6 +157,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_ori_high_hist.axvline(threshold_pixel_value, color='black')
     ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow')
     ax_ori_high_hist.set_xlim([-5, 260])
+    ax_ori_high_hist.set_yticks([])
 
     # High pixel value image (Adjusted)
     ax_adj_high_img = fig.add_subplot(gs[0,4])
@@ -167,6 +170,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_adj_high_hist = create_RGB_hist(adjusted_high_img_in_RGB, ax_adj_high_hist, "Adjusted high ($p_{\mathrm{high}}=$"+str(p_high)+")")
     ax_adj_high_hist.axvline(threshold_pixel_value, color='black')
     ax_adj_high_hist.set_xlim([-5, 260])
+    ax_adj_high_hist.set_yticks([])
 
     # Unify value of y-axis
     tmp_b_index_bgcolor = (low_img_in_RGB[:,:,0]==BGColor[0]) & (low_img_in_RGB[:,:,1]==BGColor[1]) & (low_img_in_RGB[:,:,2]==BGColor[2])
@@ -255,6 +259,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_in.axvline(threshold_pixel_value, color='black')
     ax_hist_in.axvline(mean_pixel_value, color='yellow')
     ax_hist_in.set_xlim([-5, 260])
+    ax_hist_in.set_yticks([])
 
     # Adjust image
     ax_img_out      = fig.add_subplot(gs[0,2])
@@ -267,6 +272,7 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_out     = create_RGB_hist(adjusted_img_out_RGB, ax_hist_out, "Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")")
     ax_hist_out.axvline(threshold_pixel_value, color='black')
     ax_hist_out.set_xlim([-5, 260])
+    ax_hist_out.set_yticks([])
 
     # Unify value of y-axis
     tmp_b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])
