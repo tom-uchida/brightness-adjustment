@@ -73,10 +73,10 @@ def read_image(_img_name):
 
 
 def create_RGB_hist(_img_RGB, _ax, _title):
-    tmp_b_index_bgcolor = (_img_RGB[:,:,0]==BGColor[0]) & (_img_RGB[:,:,1]==BGColor[1]) & (_img_RGB[:,:,2]==BGColor[2])
-    img_R_non_bgcolor = _img_RGB[:,:,0][~tmp_b_index_bgcolor]
-    img_G_non_bgcolor = _img_RGB[:,:,1][~tmp_b_index_bgcolor]
-    img_B_non_bgcolor = _img_RGB[:,:,2][~tmp_b_index_bgcolor]
+    tmp_b_idx_bgcolor = (_img_RGB[:,:,0]==BGColor[0]) & (_img_RGB[:,:,1]==BGColor[1]) & (_img_RGB[:,:,2]==BGColor[2])
+    img_R_non_bgcolor = _img_RGB[:,:,0][~tmp_b_idx_bgcolor]
+    img_G_non_bgcolor = _img_RGB[:,:,1][~tmp_b_idx_bgcolor]
+    img_B_non_bgcolor = _img_RGB[:,:,2][~tmp_b_idx_bgcolor]
     _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5, label="R")
     _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5, label="G")
     _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
@@ -173,13 +173,13 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     ax_adj_high_hist.set_yticks([])
 
     # Unify value of y-axis
-    tmp_b_index_bgcolor = (low_img_in_RGB[:,:,0]==BGColor[0]) & (low_img_in_RGB[:,:,1]==BGColor[1]) & (low_img_in_RGB[:,:,2]==BGColor[2])
-    ori_low_R                       = low_img_in_RGB[:,:,0][~tmp_b_index_bgcolor]
-    ori_low_G                       = low_img_in_RGB[:,:,1][~tmp_b_index_bgcolor]
-    ori_low_B                       = low_img_in_RGB[:,:,2][~tmp_b_index_bgcolor]
-    adj_low_R                       = adjusted_low_img_in_RGB[:,:,0][~tmp_b_index_bgcolor]
-    adj_low_G                       = adjusted_low_img_in_RGB[:,:,1][~tmp_b_index_bgcolor]
-    adj_low_B                       = adjusted_low_img_in_RGB[:,:,2][~tmp_b_index_bgcolor]
+    tmp_b_idx_bgcolor = (low_img_in_RGB[:,:,0]==BGColor[0]) & (low_img_in_RGB[:,:,1]==BGColor[1]) & (low_img_in_RGB[:,:,2]==BGColor[2])
+    ori_low_R                       = low_img_in_RGB[:,:,0][~tmp_b_idx_bgcolor]
+    ori_low_G                       = low_img_in_RGB[:,:,1][~tmp_b_idx_bgcolor]
+    ori_low_B                       = low_img_in_RGB[:,:,2][~tmp_b_idx_bgcolor]
+    adj_low_R                       = adjusted_low_img_in_RGB[:,:,0][~tmp_b_idx_bgcolor]
+    adj_low_G                       = adjusted_low_img_in_RGB[:,:,1][~tmp_b_idx_bgcolor]
+    adj_low_B                       = adjusted_low_img_in_RGB[:,:,2][~tmp_b_idx_bgcolor]
     hist_ori_low_R, bins_ori_low_R  = np.histogram(ori_low_R, bin_number)
     hist_ori_low_G, bins_ori_low_G  = np.histogram(ori_low_G, bin_number)
     hist_ori_low_B, bins_ori_low_B  = np.histogram(ori_low_B, bin_number)
@@ -275,10 +275,10 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_out.set_yticks([])
 
     # Unify value of y-axis
-    tmp_b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])
-    in_R                  = img_in_RGB[:,:,0][~tmp_b_index_bgcolor]
-    in_G                  = img_in_RGB[:,:,1][~tmp_b_index_bgcolor]
-    in_B                  = img_in_RGB[:,:,2][~tmp_b_index_bgcolor]
+    tmp_b_idx_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])
+    in_R                  = img_in_RGB[:,:,0][~tmp_b_idx_bgcolor]
+    in_G                  = img_in_RGB[:,:,1][~tmp_b_idx_bgcolor]
+    in_B                  = img_in_RGB[:,:,2][~tmp_b_idx_bgcolor]
     hist_in_R, bins_in_R  = np.histogram(in_R, bin_number)
     hist_in_G, bins_in_G  = np.histogram(in_G, bin_number)
     hist_in_B, bins_in_B  = np.histogram(in_B, bin_number)
@@ -372,10 +372,10 @@ def decompose_input_image(_threshold_pixel_value):
     print("Threshold pixel value                  :", _threshold_pixel_value, "(pixel value)")
 
     # ndarray(dtype: bool)
-    # b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
-    b_index_high    = (img_in_Gray  > _threshold_pixel_value) & (~b_index_bgcolor)
-    b_index_low     = (img_in_Gray <= _threshold_pixel_value) & (~b_index_bgcolor)
-    N_bgcolor       = np.count_nonzero(b_index_bgcolor)
+    # b_idx_bgcolor = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
+    b_index_high    = (img_in_Gray  > _threshold_pixel_value) & (~b_idx_bgcolor)
+    b_index_low     = (img_in_Gray <= _threshold_pixel_value) & (~b_idx_bgcolor)
+    N_bgcolor       = np.count_nonzero(b_idx_bgcolor)
     N_high, N_low   = np.count_nonzero(b_index_high), np.count_nonzero(b_index_low)
     print("The pct. of high pixel values          :", round(N_high/N_all_non_bgcolor*100),   "(%)")
     print("The pct. of low pixel values           :", round(N_low/N_all_non_bgcolor*100),    "(%)")
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     img_in_Gray_L1 = cv2.cvtColor(img_in_RGB_L1,  cv2.COLOR_RGB2GRAY)
 
     # Get indexes of background color pixel
-    b_index_bgcolor = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
+    b_idx_bgcolor  = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
 
     # Start time count
     start_time     = time.time()
@@ -564,7 +564,7 @@ if __name__ == "__main__":
     print("=============================================================================")
     print("   Step1. Decompose the input image to \"high\" and \"low\" pixel value images")
     print("=============================================================================")
-    bin_number                      = 50
+    bin_number                      = 100
     threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 

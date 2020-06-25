@@ -3,3 +3,6 @@ src/IMAGE_DATA/
 src/VIDEO_DATA/
 src/wx_test.py
 src/*.md
+
+src/Brightness_Adjustment/IMAGE_DATA/
+src/Brightness_Adjustment_Decompose_ver/IMAGE_DATA/
