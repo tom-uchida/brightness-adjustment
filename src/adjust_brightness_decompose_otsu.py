@@ -32,7 +32,7 @@ plt.rcParams["mathtext.rm"] = "Times New Roman"
 print("=============================================================================")
 print("                  Brightness Adjustment: Decompose ver.")
 print("                            Tomomasa Uchida")
-print("                              2019/11/28")
+print("                              2020/06/27")
 print("=============================================================================")
 print("\n")
 
@@ -40,8 +40,8 @@ print("\n")
 args = sys.argv
 if len(args) != 3:
     print("\n")
-    print("USAGE   : $ python adjust_brightness_decompose.py [input_image_data] [input_image_data(L=1)]")
-    print("EXAMPLE : $ python adjust_brightness_decompose.py [input_image.bmp] [input_image_L1.bmp]")
+    print("USAGE   : $ python adjust_brightness_decompose_otsu.py [input_image_data] [input_image_data(L=1)]")
+    print("EXAMPLE : $ python adjust_brightness_decompose_otsu.py [input_image.bmp] [input_image_L1.bmp]")
     #raise Exception
     sys.exit()
 
@@ -52,6 +52,7 @@ pct_of_ref_sec4high = 0.01 # 0.1(%)
 pct_of_ref_sec4low  = 0.05 # 1(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
+bin_number          = 100
 print("Input image data        (args[1])      :", args[1])
 print("Input image data (L=1)  (args[2])      :", args[2])
 print("p_init                                 :", p_init)
@@ -60,6 +61,7 @@ print("The pct. of ref. section (high image)  :", pct_of_ref_sec4high*100, "(%)"
 print("The pct. of ref. section (low image)   :", pct_of_ref_sec4low*100, "(%)")
 print("Background color                       :", BGColor)
 print("Background color (Grayscale)           :", BGColor_Gray, "(pixel value)")
+print("Number of bin                          :", bin_number)
 
 
 
@@ -367,27 +369,26 @@ def calculate_statistics_for_input_image_L1():
 
 
 
-# Decompose the input image into two images (high pixel value image and low pixel value image)
+# Decompose the input image into two images (High-pixel-value image and Low-pixel-value image)
 def decompose_input_image(_threshold_pixel_value):
     print("Threshold pixel value                  :", _threshold_pixel_value, "(pixel value)")
 
-    # ndarray(dtype: bool)
-    # b_idx_bgcolor = (img_in_RGB[:,:,0]==BGColor[0]) & (img_in_RGB[:,:,1]==BGColor[1]) & (img_in_RGB[:,:,2]==BGColor[2])
-    b_index_high    = (img_in_Gray  > _threshold_pixel_value) & (~b_idx_bgcolor)
-    b_index_low     = (img_in_Gray <= _threshold_pixel_value) & (~b_idx_bgcolor)
-    N_bgcolor       = np.count_nonzero(b_idx_bgcolor)
-    N_high, N_low   = np.count_nonzero(b_index_high), np.count_nonzero(b_index_low)
-    print("The pct. of high pixel values          :", round(N_high/N_all_non_bgcolor*100),   "(%)")
-    print("The pct. of low pixel values           :", round(N_low/N_all_non_bgcolor*100),    "(%)")
+    # Divide indexes
+    b_idx_high    = (img_in_Gray >= _threshold_pixel_value) & (~b_idx_bgcolor)
+    b_idx_low     = (img_in_Gray  < _threshold_pixel_value) & (~b_idx_bgcolor)
+    N_bgcolor     = np.count_nonzero(b_idx_bgcolor)
+    N_high, N_low = np.count_nonzero(b_idx_high), np.count_nonzero(b_idx_low)
+    print("Percentage of high pixel values          :", round(N_high/N_all_non_bgcolor*100),   "(%)")
+    print("Percentage of low pixel values           :", round(N_low/N_all_non_bgcolor*100),    "(%)")
 
-    # Apply decomposition and create low and high pixel value images
+    # Apply decomposition and create High/Low-pixel-value images
     high_img_in_RGB, low_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
-    high_img_in_RGB[:,:,0] = np.where(b_index_high, img_in_RGB[:,:,0], BGColor[0])
-    high_img_in_RGB[:,:,1] = np.where(b_index_high, img_in_RGB[:,:,1], BGColor[1])
-    high_img_in_RGB[:,:,2] = np.where(b_index_high, img_in_RGB[:,:,2], BGColor[2])
-    low_img_in_RGB[:,:,0]  = np.where(b_index_low,  img_in_RGB[:,:,0], BGColor[0])
-    low_img_in_RGB[:,:,1]  = np.where(b_index_low,  img_in_RGB[:,:,1], BGColor[1])
-    low_img_in_RGB[:,:,2]  = np.where(b_index_low,  img_in_RGB[:,:,2], BGColor[2])
+    high_img_in_RGB[:,:,0] = np.where(b_idx_high, img_in_RGB[:,:,0], BGColor[0])
+    high_img_in_RGB[:,:,1] = np.where(b_idx_high, img_in_RGB[:,:,1], BGColor[1])
+    high_img_in_RGB[:,:,2] = np.where(b_idx_high, img_in_RGB[:,:,2], BGColor[2])
+    low_img_in_RGB[:,:,0]  = np.where(b_idx_low,  img_in_RGB[:,:,0], BGColor[0])
+    low_img_in_RGB[:,:,1]  = np.where(b_idx_low,  img_in_RGB[:,:,1], BGColor[1])
+    low_img_in_RGB[:,:,2]  = np.where(b_idx_low,  img_in_RGB[:,:,2], BGColor[2])
 
     # Convert RGB image to Grayscale image
     high_img_in_Gray = cv2.cvtColor(high_img_in_RGB, cv2.COLOR_RGB2GRAY)
@@ -396,8 +397,8 @@ def decompose_input_image(_threshold_pixel_value):
     # Calulate mean pixel value
     mean_pixel_value_high  = np.uint8(np.mean(high_img_in_Gray[high_img_in_Gray != BGColor_Gray]))
     mean_pixel_value_low   = np.uint8(np.mean(low_img_in_Gray[low_img_in_Gray   != BGColor_Gray]))
-    print("Mean pixel value (high image)          :", mean_pixel_value_high, "(pixel value)")
-    print("Mean pixel value (low image)           :", mean_pixel_value_low,  "(pixel value)")
+    print("Mean pixel value (High image)          :", mean_pixel_value_high, "(pixel value)")
+    print("Mean pixel value (Low image)           :", mean_pixel_value_low,  "(pixel value)")
 
     return high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low
 # End of decompose_input_image()
@@ -562,29 +563,28 @@ if __name__ == "__main__":
 
     print("\n")
     print("=============================================================================")
-    print("   Step1. Decompose the input image to \"high\" and \"low\" pixel value images")
+    print("   Step1. Decompose the input image to \"High\"/\"Low\"-pixel-value images")
     print("=============================================================================")
-    bin_number                      = 100
     threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
     print("\n")
     print("=============================================================================")
-    print("   Step2. Adjust brightness of the \"high\" pixel value image")
+    print("   Step2. Adjust brightness of the \"High\"-pixel-value image")
     print("=============================================================================")
     right_edge_pixel_value_high     = max_pixel_value_L1
     adjusted_high_img_in_RGB, p_high, left_edge_pixel_value_high, pct_of_ref_section_L1_high, pct_of_ref_section_high         = brightness_adjustment(high_img_in_RGB, right_edge_pixel_value_high, pct_of_ref_sec4high, N_high)
 
     print("\n")
     print("=============================================================================")
-    print("   Step3. Adjust brightness of the \"low\" pixel value image")
+    print("   Step3. Adjust brightness of the \"Low\"-pixel-value image")
     print("=============================================================================")
     right_edge_pixel_value_low      = mean_pixel_value_high
-    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low                                 = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
+    adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low          = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
     print("=============================================================================")
-    print("   Step4. Resynthesis \"high\" and \"low\" pixel value images")
+    print("   Step4. Resynthesis \"High\"/\"Low\"-pixel-value images")
     print("=============================================================================")
     adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_high_img_in_RGB, 1.0, adjusted_low_img_in_RGB)
     # adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
