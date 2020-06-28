@@ -48,8 +48,8 @@ if len(args) != 3:
 # Set initial parameter
 p_init              = 1.0
 p_interval          = 0.01
-pct_of_ref_sec4high = 0.01 # 0.1(%)
-pct_of_ref_sec4low  = 0.05 # 1(%)
+pct_of_ref_sec4high = 0.01 # 1(%)
+pct_of_ref_sec4low  = 0.05 # 5(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
 bin_number          = 100
@@ -426,28 +426,31 @@ def determine_amplification_factor(_img_RGB, _right_edge_pixel_value, _pct_of_re
     print("Theoretical pct. of ref. section (L=1) :", _pct_of_ref_section*100, "(%)")
 
     # Initialize
-    tmp_pct_of_ref_section_L1    = 0.0
-    tmp_left_edge_pixel_value_L1 = _right_edge_pixel_value
+    tmp_pct_of_ref_section_L1     = 0.0
+    tmp_left_edge_pixel_value_L1  = _right_edge_pixel_value
 
     # NOTE: For the input image with L=1
     # Determine left edge pixel value in the input image with L=1
-    img_in_Gray_L1_non_bgcolor   = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
+    tmp_img_in_Gray_L1_non_bgcolor    = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
     while tmp_pct_of_ref_section_L1 <= _pct_of_ref_section:
-        # Temporarily, calculate the percentage of pixels in the reference section
-        tmp_num_of_pixels         = (tmp_left_edge_pixel_value_L1 <= img_in_Gray_L1_non_bgcolor) & (img_in_Gray_L1_non_bgcolor <= _right_edge_pixel_value)
+        # Get the number of pixels that exist in the current section
+        tmp_num_of_pixels         = (tmp_left_edge_pixel_value_L1 <= tmp_img_in_Gray_L1_non_bgcolor) & (tmp_img_in_Gray_L1_non_bgcolor <= _right_edge_pixel_value)
+
+        # Temporarily, calculate the percentage of pixels that exist in the reference section
         tmp_pct_of_ref_section_L1 = np.sum( tmp_num_of_pixels ) / N_all_non_bgcolor_L1
 
         # Next pixel value
         tmp_left_edge_pixel_value_L1 -= 1
     # end while
 
-    left_edge_pixel_value_L1    = tmp_left_edge_pixel_value_L1 - 1
-    pct_of_ref_section_L1       = round(tmp_pct_of_ref_section_L1*100, 1)
-    # print("Left edge pixel value (L=1)         :", left_edge_pixel_value_L1, "(pixel value)")
-    # print("Right edge pixel value (L=1)        :", _right_edge_pixel_value, "(pixel value)")
+    left_edge_pixel_value_L1      = tmp_left_edge_pixel_value_L1 - 1
+    pct_of_ref_section_L1         = round(tmp_pct_of_ref_section_L1*100, 1)
     print("Reference section (L=1)                :", "[", left_edge_pixel_value_L1, ",", _right_edge_pixel_value, "]", "(pixel value)")
     print("Actual pct. of ref. section (L=1)      :", pct_of_ref_section_L1, "(%)")
 
+    #
+    # Up to this time, the reference section has been confirmed!
+    #
 
     # NOTE: For the input image
     # Determine amplification factor "p" in the input image
