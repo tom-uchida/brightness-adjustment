@@ -79,9 +79,9 @@ def create_RGB_hist(_img_RGB, _ax, _title):
     img_R_non_bgcolor = _img_RGB[:,:,0][~tmp_b_idx_bgcolor]
     img_G_non_bgcolor = _img_RGB[:,:,1][~tmp_b_idx_bgcolor]
     img_B_non_bgcolor = _img_RGB[:,:,2][~tmp_b_idx_bgcolor]
-    _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5, label="R")
-    _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5, label="G")
-    _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
+    _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5)
+    _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5)
+    _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5)
     # _ax.legend()
 
     _ax.set_title(_title, fontsize='14')
@@ -129,10 +129,11 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the low pixel value image (Original)
     ax_ori_low_hist = fig.add_subplot(gs[1,1])
     ax_ori_low_hist = create_RGB_hist(low_img_in_RGB, ax_ori_low_hist, "Original low")
-    ax_ori_low_hist.axvline(threshold_pixel_value, color='black')
-    ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow')
+    ax_ori_low_hist.axvline(threshold_pixel_value, color='black', label='threshold pixel value')
+    ax_ori_low_hist.axvline(mean_pixel_value_low, color='yellow', label='mean pixel value')
     ax_ori_low_hist.set_xlim([-5, 260])
     ax_ori_low_hist.set_yticks([])
+    ax_ori_low_hist.legend()
 
     # Low pixel value image (Adjusted)
     ax_adj_low_img = fig.add_subplot(gs[0,2])
@@ -156,10 +157,11 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the high pixel value image (Original)
     ax_ori_high_hist = fig.add_subplot(gs[1,3])
     ax_ori_high_hist = create_RGB_hist(high_img_in_RGB, ax_ori_high_hist, "Original high")
-    ax_ori_high_hist.axvline(threshold_pixel_value, color='black')
-    ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow')
+    ax_ori_high_hist.axvline(threshold_pixel_value, color='black', label='threshold pixel value')
+    ax_ori_high_hist.axvline(mean_pixel_value_high, color='yellow', label='mean pixel value')
     ax_ori_high_hist.set_xlim([-5, 260])
     ax_ori_high_hist.set_yticks([])
+    ax_ori_high_hist.legend()
 
     # High pixel value image (Adjusted)
     ax_adj_high_img = fig.add_subplot(gs[0,4])
@@ -258,10 +260,11 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     # Histogram of the input image
     ax_hist_in      = fig.add_subplot(gs[1,1])
     ax_hist_in      = create_RGB_hist(img_in_RGB, ax_hist_in, "Input image")
-    ax_hist_in.axvline(threshold_pixel_value, color='black')
-    ax_hist_in.axvline(mean_pixel_value, color='yellow')
+    ax_hist_in.axvline(threshold_pixel_value, color='black', label='threshold pixel value')
+    ax_hist_in.axvline(mean_pixel_value, color='yellow', label='mean pixel value')
     ax_hist_in.set_xlim([-5, 260])
     ax_hist_in.set_yticks([])
+    ax_hist_in.legend()
 
     # Adjust image
     ax_img_out      = fig.add_subplot(gs[0,2])
