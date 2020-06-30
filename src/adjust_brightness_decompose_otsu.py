@@ -57,8 +57,8 @@ print("Input image data        (args[1])      :", args[1])
 print("Input image data (L=1)  (args[2])      :", args[2])
 print("p_init                                 :", p_init)
 print("p_interval                             :", p_interval)
-print("The pct. of ref. section (high image)  :", pct_of_ref_sec4high*100, "(%)")
-print("The pct. of ref. section (low image)   :", pct_of_ref_sec4low*100, "(%)")
+print("Percentage of ref. section (High image):", pct_of_ref_sec4high*100, "(%)")
+print("Percentage of ref. section (Low image) :", pct_of_ref_sec4low*100, "(%)")
 print("Background color                       :", BGColor)
 print("Background color (Grayscale)           :", BGColor_Gray, "(pixel value)")
 print("Number of bin                          :", bin_number)
@@ -82,7 +82,7 @@ def create_RGB_hist(_img_RGB, _ax, _title):
     _ax.hist(img_R_non_bgcolor.ravel(), bins=bin_number, color='r', alpha=0.5, label="R")
     _ax.hist(img_G_non_bgcolor.ravel(), bins=bin_number, color='g', alpha=0.5, label="G")
     _ax.hist(img_B_non_bgcolor.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
-    _ax.legend()
+    # _ax.legend()
 
     _ax.set_title(_title, fontsize='14')
     _ax.set_xlim([-5, 260])
@@ -306,8 +306,8 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
 # End of create_figure_for_inputL1_and_input_and_output_images()
 
 
-def calculate_statistics_for_input_image():
-    print("Input image (RGB)                      :", img_in_RGB.shape) # (height, width, channel)
+def calculate_statistics_of_input_image():
+    print("\nInput image (RGB)                      :", img_in_RGB.shape) # (height, width, channel)
 
     # Calc all number of pixels of the input image
     N_all = img_in_RGB.shape[0] * img_in_RGB.shape[1]
@@ -337,7 +337,7 @@ def calculate_statistics_for_input_image():
 
 
 
-def calculate_statistics_for_input_image_L1():
+def calculate_statistics_of_input_image_L1():
     # Exclude background color
     img_in_Gray_non_bgcolor_L1     = img_in_Gray_L1[img_in_Gray_L1 != BGColor_Gray]
 
@@ -354,10 +354,10 @@ def calculate_statistics_for_input_image_L1():
 
     # Calc the pct. of the max pixel value (L=1)
     num_max_pixel_value_L1         = np.sum(img_in_Gray_non_bgcolor_L1 == max_pixel_value_L1)
-    print("Num. of max pixel value (L=1)          :", num_max_pixel_value_L1, "(pixels)")
+    print("Num. of max pixel values (L=1)         :", num_max_pixel_value_L1, "(pixels)")
     pct_max_pixel_value_L1       = num_max_pixel_value_L1 / N_all_non_bgcolor_L1
     # pct_max_pixel_value_L1       = round(pct_max_pixel_value_L1, 8)
-    print("The pct. of max pixel value (L=1)      :", round(pct_max_pixel_value_L1*100, 2), "(%)")
+    print("Percentage of max pixel value (L=1)    :", round(pct_max_pixel_value_L1*100, 2), "(%)")
 
     # Calc most frequent pixel value (L=1)
     bincount = np.bincount(img_in_Gray_non_bgcolor_L1)
@@ -378,8 +378,8 @@ def decompose_input_image(_threshold_pixel_value):
     b_idx_low     = (img_in_Gray  < _threshold_pixel_value) & (~b_idx_bgcolor)
     N_bgcolor     = np.count_nonzero(b_idx_bgcolor)
     N_high, N_low = np.count_nonzero(b_idx_high), np.count_nonzero(b_idx_low)
-    print("Percentage of high pixel values          :", round(N_high/N_all_non_bgcolor*100),   "(%)")
-    print("Percentage of low pixel values           :", round(N_low/N_all_non_bgcolor*100),    "(%)")
+    print("Percentage of high pixel values        :", round(N_high/N_all_non_bgcolor*100), "(%)")
+    print("Percentage of low pixel values         :", round(N_low/N_all_non_bgcolor*100),  "(%)")
 
     # Apply decomposition and create High/Low-pixel-value images
     high_img_in_RGB, low_img_in_RGB = img_in_RGB.copy(), img_in_RGB.copy()
@@ -518,11 +518,11 @@ def brightness_adjustment(_img_RGB, _right_edge_pixel_value, _pct_of_ref_section
 
 def save_adjusted_image(_adjusted_img_out_RGB, _p_high, _p_low):
     # Save input image
-    input_img_name      = "IMAGE_DATA/input.bmp"
+    input_img_name      = "IMAGE_DATA/tmp/input.bmp"
     cv2.imwrite(input_img_name,     cv2.cvtColor(img_in_RGB, cv2.COLOR_RGB2BGR))
 
     # Save adjusted image
-    adjusted_img_name   = "IMAGE_DATA/adjusted_phigh"+str(_p_high)+"_plow"+str(_p_low)+".bmp"
+    adjusted_img_name   = "IMAGE_DATA/tmp/adjusted_phigh"+str(_p_high)+"_plow"+str(_p_low)+".bmp"
     cv2.imwrite(adjusted_img_name,  cv2.cvtColor(_adjusted_img_out_RGB, cv2.COLOR_RGB2BGR))
 
     # NOTE: macOS only
@@ -561,34 +561,34 @@ if __name__ == "__main__":
     start_time     = time.time()
 
     # Calculate statistics for two input images
-    N_all_non_bgcolor, mean_pixel_value, std_pixel_value = calculate_statistics_for_input_image()
-    N_all_non_bgcolor_L1, max_pixel_value_L1             = calculate_statistics_for_input_image_L1()
+    N_all_non_bgcolor, mean_pixel_value, std_pixel_value = calculate_statistics_of_input_image()
+    N_all_non_bgcolor_L1, max_pixel_value_L1             = calculate_statistics_of_input_image_L1()
 
     print("\n")
-    print("=============================================================================")
-    print("   Step1. Decompose the input image to \"High\"/\"Low\"-pixel-value images")
-    print("=============================================================================")
-    threshold_pixel_value           = np.uint8(mean_pixel_value + 2*std_pixel_value)
+    print("======================================================================")
+    print("   Step1. Decompose the input image to High/Low-pixel-value images.")
+    print("======================================================================")
+    threshold_pixel_value, img_out_Gray_otsu = cv2.threshold(img_in_Gray, 0, 255, cv2.THRESH_OTSU)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
     print("\n")
-    print("=============================================================================")
-    print("   Step2. Adjust brightness of the \"High\"-pixel-value image")
-    print("=============================================================================")
+    print("======================================================================")
+    print("   Step2. Adjust brightness of the High-pixel-value image.")
+    print("======================================================================")
     right_edge_pixel_value_high     = max_pixel_value_L1
     adjusted_high_img_in_RGB, p_high, left_edge_pixel_value_high, pct_of_ref_section_L1_high, pct_of_ref_section_high         = brightness_adjustment(high_img_in_RGB, right_edge_pixel_value_high, pct_of_ref_sec4high, N_high)
 
     print("\n")
-    print("=============================================================================")
-    print("   Step3. Adjust brightness of the \"Low\"-pixel-value image")
-    print("=============================================================================")
+    print("======================================================================")
+    print("   Step3. Adjust brightness of the Low-pixel-value image.")
+    print("======================================================================")
     right_edge_pixel_value_low      = mean_pixel_value_high
     adjusted_low_img_in_RGB, p_low, left_edge_pixel_value_low, pct_of_ref_section_L1_low, pct_of_ref_section_low          = brightness_adjustment(low_img_in_RGB, right_edge_pixel_value_low, pct_of_ref_sec4low, N_low)
 
     print("\n")
-    print("=============================================================================")
-    print("   Step4. Resynthesis \"High\"/\"Low\"-pixel-value images")
-    print("=============================================================================")
+    print("======================================================================")
+    print("   Step4. Resynthesis the High/Low-pixel-value images.")
+    print("======================================================================")
     adjusted_img_out_RGB            = cv2.scaleAdd(adjusted_high_img_in_RGB, 1.0, adjusted_low_img_in_RGB)
     # adjusted_img_out_Gray           = cv2.cvtColor(adjusted_img_out_RGB, cv2.COLOR_RGB2GRAY)
 
@@ -596,8 +596,8 @@ if __name__ == "__main__":
     end_time                        = round(time.time()-start_time, 2)
 
     # Create and save two figures
-    fig_name_1 = "IMAGE_DATA/fig_high_low_images.png"
-    fig_name_2 = "IMAGE_DATA/fig_inputL1_input_adjusted_images.png"
+    fig_name_1 = "IMAGE_DATA/tmp/fig_high_low_images.png"
+    fig_name_2 = "IMAGE_DATA/tmp/fig_inputL1_input_adjusted_images.png"
     create_figure_for_high_and_low_pixel_value_images(fig_name_1)
     create_figure_for_inputL1_and_input_and_output_images(fig_name_2)
 
@@ -606,4 +606,4 @@ if __name__ == "__main__":
 
     print("Amplification factor \"p_high\"          :", p_high)
     print("Amplification factor \"p_low\"           :", p_low)
-    print("\nProcessing time                        :",   end_time, "[sec]")
+    print("\nProcessing time                        :", end_time, "[sec]")
