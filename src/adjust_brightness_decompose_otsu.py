@@ -52,7 +52,7 @@ pct_of_ref_sec4high = 0.01 # 1(%)
 pct_of_ref_sec4low  = 0.05 # 5(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
-bin_number          = 100
+bin_number          = 50
 print("Input image data        (args[1])      :", args[1])
 print("Input image data (L=1)  (args[2])      :", args[2])
 print("p_init                                 :", p_init)
@@ -144,7 +144,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the low pixel value image (Adjusted)
     ax_adj_low_hist = fig.add_subplot(gs[1,2])
     ax_adj_low_hist = create_RGB_hist(adjusted_low_img_in_RGB, ax_adj_low_hist, "Adjusted low ($p_{\mathrm{low}}=$"+str(p_low)+")")
-    ax_adj_low_hist.axvline(threshold_pixel_value, color='black')
+    # ax_adj_low_hist.axvline(threshold_pixel_value, color='black')
     ax_adj_low_hist.set_xlim([-5, 260])
     ax_adj_low_hist.set_yticks([])
 
@@ -172,7 +172,7 @@ def create_figure_for_high_and_low_pixel_value_images(_fig_name):
     # Histogram of the high pixel value image (Adjusted)
     ax_adj_high_hist = fig.add_subplot(gs[1,4])
     ax_adj_high_hist = create_RGB_hist(adjusted_high_img_in_RGB, ax_adj_high_hist, "Adjusted high ($p_{\mathrm{high}}=$"+str(p_high)+")")
-    ax_adj_high_hist.axvline(threshold_pixel_value, color='black')
+    # ax_adj_high_hist.axvline(threshold_pixel_value, color='black')
     ax_adj_high_hist.set_xlim([-5, 260])
     ax_adj_high_hist.set_yticks([])
 
@@ -261,7 +261,6 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     ax_hist_in      = fig.add_subplot(gs[1,1])
     ax_hist_in      = create_RGB_hist(img_in_RGB, ax_hist_in, "Input image")
     ax_hist_in.axvline(threshold_pixel_value, color='black', label='threshold pixel value')
-    ax_hist_in.axvline(mean_pixel_value, color='yellow', label='mean pixel value')
     ax_hist_in.set_xlim([-5, 260])
     ax_hist_in.set_yticks([])
     ax_hist_in.legend()
@@ -275,9 +274,10 @@ def create_figure_for_inputL1_and_input_and_output_images(_fig_name):
     # Histogram of the adjusted image
     ax_hist_out     = fig.add_subplot(gs[1,2])
     ax_hist_out     = create_RGB_hist(adjusted_img_out_RGB, ax_hist_out, "Adjusted image\n($p_{\mathrm{high}}=$"+str(p_high)+", $p_{\mathrm{low}}=$"+str(p_low)+")")
-    ax_hist_out.axvline(threshold_pixel_value, color='black')
+    ax_hist_out.axvline(threshold_pixel_value, color='black', label='threshold pixel value')
     ax_hist_out.set_xlim([-5, 260])
     ax_hist_out.set_yticks([])
+    ax_hist_out.legend()
 
     # Unify value of y-axis
     tmp_b_idx_bgcolor = (img_in_RGB[:,:,0]==BGColor[0])&(img_in_RGB[:,:,1]==BGColor[1])&(img_in_RGB[:,:,2]==BGColor[2])

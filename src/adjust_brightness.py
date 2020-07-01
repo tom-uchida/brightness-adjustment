@@ -72,9 +72,9 @@ def create_RGB_histogram(_img_rgb, _ax, _title):
     R_nonzero = _img_rgb[:,:,0][_img_rgb[:,:,0] != bgcolor]
     G_nonzero = _img_rgb[:,:,1][_img_rgb[:,:,1] != bgcolor]
     B_nonzero = _img_rgb[:,:,2][_img_rgb[:,:,2] != bgcolor]
-    _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5, label="R")
-    _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5, label="G")
-    _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5, label="B")
+    _ax.hist(R_nonzero.ravel(), bins=50, color='r', alpha=0.5)
+    _ax.hist(G_nonzero.ravel(), bins=50, color='g', alpha=0.5)
+    _ax.hist(B_nonzero.ravel(), bins=50, color='b', alpha=0.5)
     _ax.legend()
 
     _ax.set_title(_title)
@@ -107,19 +107,19 @@ def create_comparative_histogram(_img_in_rgb_L1, _img_in_rgb, _img_out_rgb, _ax,
     
     # input image(L=1)
     mean_in_L1 = int(np.mean(img_in_Gray_L1_non_bgcolor))
-    _ax.hist(img_in_Gray_L1_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
+    _ax.hist(img_in_Gray_L1_non_bgcolor.ravel(), bins=50, alpha=0.3, label="Input image ($L_{\mathrm{R}}=1$)", color='#1F77B4')
     _ax.axvline(mean_in_L1, color='#1F77B4')
     _ax.text(mean_in_L1+5, _y_max*0.8, "mean:"+str(mean_in_L1), color='#1F77B4', fontsize='12')
 
     # input image
     mean_in = int(np.mean(img_in_Gray_non_bgcolor))
-    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Input image", color='#FF7E0F')
+    _ax.hist(img_in_Gray_non_bgcolor.ravel(), bins=50, alpha=0.3, label="Input image", color='#FF7E0F')
     _ax.axvline(mean_in, color='#FF7E0F')
     _ax.text(mean_in+5, _y_max*0.6, "mean:"+str(mean_in), color='#FF7E0F', fontsize='12')
 
     # adjusted image
     mean_out = int(np.mean(img_out_Gray_non_bgcolor))
-    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.5, label="Adjusted image", color='#2C9F2C')
+    _ax.hist(img_out_Gray_non_bgcolor.ravel(), bins=50, alpha=0.3, label="Adjusted image", color='#2C9F2C')
     _ax.axvline(mean_out, color='#2C9F2C')
     _ax.text(mean_out+5, _y_max*0.7, "mean:"+str(mean_out), color='#2C9F2C', fontsize='12')
 
