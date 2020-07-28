@@ -49,10 +49,10 @@ if len(args) != 3:
 p_init              = 1.0
 p_interval          = 0.01
 pct_of_ref_sec4high = 0.01 # 1(%)
-pct_of_ref_sec4low  = 0.05 # 5(%)
+pct_of_ref_sec4low  = 0.01 # 5(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
-bin_number          = 50
+bin_number          = 50 # 50 or 100 or 255
 print("Input image data        (args[1])      :", args[1])
 print("Input image data (L=1)  (args[2])      :", args[2])
 print("p_init                                 :", p_init)
@@ -571,6 +571,7 @@ if __name__ == "__main__":
     print("======================================================================")
     print("   Step1. Decompose the input image to High/Low-pixel-value images.")
     print("======================================================================")
+    # threshold_pixel_value = np.uint8(mean_pixel_value + 2*std_pixel_value)
     threshold_pixel_value, img_out_Gray_otsu = cv2.threshold(img_in_Gray, 0, 255, cv2.THRESH_OTSU)
     high_img_in_RGB, low_img_in_RGB, N_high, N_low, mean_pixel_value_high, mean_pixel_value_low = decompose_input_image(threshold_pixel_value)
 
