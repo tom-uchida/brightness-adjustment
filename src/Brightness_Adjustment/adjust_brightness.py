@@ -78,7 +78,7 @@ def create_RGB_histogram(_img_rgb, _ax, _title):
     _ax.hist(B_nonzero.ravel(), bins=bin_number, color='b', alpha=0.5, label="B")
     # _ax.legend()
 
-    _ax.set_title(_title)
+    _ax.set_title(_title, fontsize=18)
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -89,7 +89,7 @@ def create_Grayscale_histogram(_img_gray, _ax, _title):
     img_Gray_nonzero = _img_gray[_img_gray != bgcolor]
     _ax.hist(img_Gray_nonzero.ravel(), bins=bin_number, color='black', alpha=1.0)
 
-    _ax.set_title(_title)
+    _ax.set_title(_title, fontsize=18)
     _ax.set_xlim([-5,260])
     
     return _ax
@@ -146,19 +146,19 @@ def create_figure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_val
     # Input image(L=1)
     ax1 = fig.add_subplot(gs[0,0])
     # ax1.set_title('Input image ($L_{\mathrm{R}}=1$)')
-    ax1.set_title('Input image with $L=1$')
+    ax1.set_title('Input image with $L=1$', fontsize=18)
     ax1.imshow(_img_in_RGB_L1)
     ax1.set_xticks([]), ax1.set_yticks([])
 
     # Input image
     ax2 = fig.add_subplot(gs[0,1])
-    ax2.set_title('Input image')
+    ax2.set_title('Input image', fontsize=18)
     ax2.imshow(_img_in_RGB)
     ax2.set_xticks([]), ax2.set_yticks([])
 
     # adjusted image
     ax3 = fig.add_subplot(gs[0,2])
-    ax3.set_title('Adjusted image ($p=$'+str(p_final)+')')
+    ax3.set_title('Adjusted image ($p=$'+str(p_final)+')', fontsize=18)
     ax3.imshow(_img_adjusted_RGB)
     ax3.set_xticks([]), ax3.set_yticks([])
 
@@ -181,9 +181,9 @@ def create_figure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_val
     ax6.set_yticks([])
 
     # Unify ylim b/w input image and adjusted image
-    hist_in_L1,    bins_in_L1    = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],      50)
-    hist_in,       bins_in       = np.histogram(img_in_Gray[img_in_Gray != bgcolor],            50)
-    hist_adjusted, bins_adjusted = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor],50)
+    hist_in_L1,    bins_in_L1    = np.histogram(img_in_Gray_L1[img_in_Gray_L1 != bgcolor],       bin_number)
+    hist_in,       bins_in       = np.histogram(img_in_Gray[img_in_Gray != bgcolor],             bin_number)
+    hist_adjusted, bins_adjusted = np.histogram(img_adjusted_Gray[img_adjusted_Gray != bgcolor], bin_number)
     list_max = [max(hist_in_L1), max(hist_in), max(hist_adjusted)]
     ax4.set_ylim([0, max(list_max)*1.1])
     ax5.set_ylim([0, max(list_max)*1.1])
@@ -195,11 +195,11 @@ def create_figure(_img_in_RGB_L1, _img_in_RGB, _img_adjusted_RGB, _ref_pixel_val
     # ax7.set_ylim([0, max(list_max)*1.1])
 
     # Draw text
-    x       = (_ref_pixel_value_L1+max_pixel_value_L1)*0.5 - 100
+    x       = (_ref_pixel_value_L1+max_pixel_value_L1)*0.5 - (255*0.45)
     text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(pct_of_reference_section_L1*100, 2))+"(%)"
-    ax4.text(x, max(list_max)*1.1*0.5, text, color='black', fontsize='12')
+    ax4.text(x, max(list_max)*0.5, text, color='black', fontsize=14)
     text    = "["+str(_ref_pixel_value_L1)+", "+str(max_pixel_value_L1)+"]\n→ "+str(round(_pct*100, 2))+"(%)"
-    ax6.text(x, max(list_max)*1.1*0.5, text, color='black', fontsize='12')
+    ax6.text(x, max(list_max)*0.5, text, color='black', fontsize=14)
 
     # Draw reference section
     rect = plt.Rectangle((_ref_pixel_value_L1, 0), max_pixel_value_L1-_ref_pixel_value_L1, max(list_max)*1.1, fc='black', alpha=0.3)

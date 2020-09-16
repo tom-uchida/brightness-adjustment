@@ -48,8 +48,8 @@ if len(args) != 3:
 # Set initial parameter
 p_init              = 1.0
 p_interval          = 0.01
-pct_of_ref_sec4high = 0.01 # 0.1(%)
-pct_of_ref_sec4low  = 0.05 # 1(%)
+pct_of_ref_sec4high = 0.01 # 1(%)
+pct_of_ref_sec4low  = 0.1 # 10(%)
 BGColor             = [0, 0, 0] # Background color
 BGColor_Gray        = np.uint8(0.299*BGColor[0]+0.587*BGColor[1]+0.114*BGColor[2])
 print("Input image data        (args[1])      :", args[1])
