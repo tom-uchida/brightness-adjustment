@@ -3,21 +3,28 @@ import numpy as np
 import sys
 args = sys.argv
 
-def main():
-    # Read image
-    image_name = args[1]
-    img = cv2.imread( image_name )
+# Check arguments
+import sys
+args = sys.argv
+if len(args) != 3:
+    print( "\nUSAGE   : $ python {} [input_image_name] [output_image_name]".format ( args[0] ) )
+    print( "EXAMPLE : $ python {}\n".format( args[0] ) )
+    sys.exit()
 
-    # Get height and width of inout image
+def main():
+    # Read the input image
+    img = cv2.imread( args[1] )
+
+    # Get height and width
     height, width = img.shape[0], img.shape[1]
 
     # User input
-    print('クロッピングの開始位置を入力してください')
-    start_x = input('x座標(0 <= x <= ' + str(width)  + ') >>')
-    start_y = input('y座標(0 <= y <= ' + str(height) + ') >>')
-    print('\nクロッピングする幅・高さを入力してください')
-    w = input('幅　 >>')
-    h = input('高さ >>')
+    print('Please input start point for cropping:')
+    start_x = input('start_x(0 <= x <= ' + str(width)  + '): ')
+    start_y = input('start_y(0 <= y <= ' + str(height) + '): ')
+    print('\nPlease input height and width for cropping:')
+    w = input('width : ')
+    h = input('height: ')
 
     # 画像のクロッピング
     crop_image = img[int(start_y):int(start_y)+int(h), int(start_x):int(start_x)+int(w)]
