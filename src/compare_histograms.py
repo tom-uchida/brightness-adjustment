@@ -72,9 +72,10 @@ print("\n")
 # Get statistical data of pixel value
 def get_data_of_pixel_value(_pixel_values):
     print("===== Statistical Data of Pixel Values =====")
-    print("> Max    : ", np.max(_pixel_values))
-    print("> Min    : ", np.min(_pixel_values))
-    print("> Mean   : ", np.mean(_pixel_values))
+    print("> Max     : ", np.max(_pixel_values))
+    print("> Min     : ", np.min(_pixel_values))
+    print("> Mean    : ", np.mean(_pixel_values))
+    print("> Variance: ", np.var(_pixel_values))
     #print("> Median : ", np.median(_pixel_values))
     print("\n")
 
@@ -112,6 +113,7 @@ ax[2].set_title("Conventional", fontsize='14')
 ax[2].set_xlim([-5, 260])
 # ax[2].set_ylim([0, 60000])
 
+b_index_bgcolor = (img_2[:,:,0]==0) & (img_2[:,:,1]==0) & (img_2[:,:,2]==0)
 img_R_non_bgcolor_2 = img_2[:,:,0][~b_index_bgcolor]
 img_G_non_bgcolor_2 = img_2[:,:,1][~b_index_bgcolor]
 img_B_non_bgcolor_2 = img_2[:,:,2][~b_index_bgcolor]
@@ -124,25 +126,4 @@ ax[3].set_xlim([-5, 260])
 # ax[3].set_ylim([0, 60000])
 ax[3].set_yticks([])
 
-# Draw line
-# mean_1 = round(np.mean(img_1_gray_nonzero), 1)
-# mean_2 = round(np.mean(img_2_gray_nonzero), 1)
-# ax[2].axvline(np.mean(img_1_gray_nonzero), color='r')
-# ax[2].text(mean_1/265, 0.7, "mean:"+str(mean_1), transform=ax[2].transAxes, color='r')
-# ax[2].axvline(np.mean(img_2_gray_nonzero), color='b')
-# ax[2].text(mean_2/265, 0.7, "mean:"+str(mean_2), transform=ax[2].transAxes, color='b')
-
-# # Draw rectangle
-# x_section = 254/265 + (5/265)
-# #ax[2].axvline(254, color='black')
-# ax[2].text(x_section, 0.7, str(254) + " ~ " + str(np.max(img_1_gray_nonzero)), transform=ax[2].transAxes, color='black')
-# ax[2].text(x_section, 0.6, "→ " + str(0.01*100) + " (%)", transform=ax[2].transAxes, color='black')
-# rect = plt.Rectangle((x_section, 0.0), 1.0-x_section-(5/265), 1.0, transform=ax[2].transAxes, fc='black', alpha=0.3)
-# ax[2].add_patch(rect)
-
-
-#plt.grid()
-# ax[2].legend()
-
-#fig.show()
 plt.show()
